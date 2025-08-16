@@ -24,7 +24,7 @@ Privakit provides enterprise-grade tools for **detecting**, **validating**, **ma
 [//]:  ### Installation
 
 [//]:  ```bash
-[//]:  npm install privakit# oryarn add privakit# orpnpm add privakit
+[//]:  npm install privakit # or yarn add privakit # or pnpm add privakit
 [//]:  ```
 
 ### Basic Usage
