@@ -308,7 +308,7 @@ MIT License - see [LICENSE](./LICENSE) file for details.
 
 ## 🔒 Security
 
-For security issues, please email security@privakit.dev instead of using the public issue tracker.
+For security issues, please report them privately via the [GitHub security tab](https://github.com/yourusername/privakit/security/advisories).
 
 ## 🌟 Sponsors
 

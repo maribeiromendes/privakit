@@ -17,21 +17,10 @@ Welcome to the comprehensive documentation for **Privakit** - a TypeScript/JavaS
 - [Redaction](./redaction.md) - Secure removal for logging
 - [Policy Engine](./policy-engine.md) - GDPR/CCPA compliance
 
-### Advanced Topics
-- [Integration Patterns](./integration-patterns.md)
-- [Security Best Practices](./security.md)
-- [Performance Optimization](./performance.md)
-- [Compliance Guide](./compliance.md)
-
 ### Regional Compliance
 - 🇧🇷 [LGPD Guide (Brazil)](./lgpd-brazil.md) - Lei Geral de Proteção de Dados
 - 🇪🇺 [GDPR Support](./policy-engine.md#gdpr-policy-engine) - European compliance
 - 🇺🇸 [CCPA Support](./policy-engine.md#ccpa-policy-engine) - California privacy rights
-
-### Examples
-- [Common Use Cases](./examples/use-cases.md)
-- [Framework Integration](./examples/frameworks.md)
-- [Real-world Scenarios](./examples/scenarios.md)
 
 ## 🔗 Quick Navigation
 

@@ -2,9 +2,9 @@
  * Masking module for display-safe PII masking
  */
 
-import { MaskingOptions, MaskingResult, PIIType } from '../core/types.js';
+import { type MaskingOptions, type MaskingResult, PIIType } from '../core/types.js';
 import { PIIMaskingError, ErrorCodes } from '../core/errors.js';
-import { parsePhoneNumber, CountryCode } from 'libphonenumber-js';
+import { parsePhoneNumber, type CountryCode } from 'libphonenumber-js';
 
 export interface EmailMaskingOptions extends MaskingOptions {
   maskDomain?: boolean;
