@@ -1,0 +1,111 @@
+{
+  "name": "privakit",
+  "version": "0.1.0",
+  "description": "TypeScript/JavaScript library for handling Personally Identifiable Information (PII) with validation, normalization, masking, redaction, and anonymization capabilities",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "docs"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:privacy": "node test-privacy.js",
+    "test:simple": "node test-simple.js",
+    "lint": "eslint src --ext .ts,.tsx --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "format": "prettier --write src/**/*.ts docs/**/*.md *.md",
+    "format:check": "prettier --check src/**/*.ts docs/**/*.md *.md",
+    "typecheck": "tsc --noEmit",
+    "verify-package": "node scripts/verify-package.js",
+    "prepack": "npm run build",
+    "prepublishOnly": "npm run test:run && npm run verify-package && npm audit --audit-level=moderate"
+  },
+  "keywords": [
+    "pii",
+    "privacy",
+    "gdpr",
+    "ccpa",
+    "lgpd",
+    "validation",
+    "anonymization",
+    "redaction",
+    "masking",
+    "typescript",
+    "security",
+    "data-protection",
+    "react",
+    "vue",
+    "angular",
+    "svelte",
+    "nextjs",
+    "nuxt",
+    "nodejs",
+    "brazil",
+    "compliance"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/privakit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/privakit/issues"
+  },
+  "homepage": "https://github.com/yourusername/privakit#readme",
+  "dependencies": {
+    "compromise": "^14.14.4",
+    "libphonenumber-js": "^1.11.19",
+    "validator": "^13.12.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.17",
+    "@types/validator": "^13.11.9",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.56.0",
+    "tsup": "^8.0.2",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.2",
+    "@vitest/coverage-v8": "^1.2.2"
+  },
+  "peerDependencies": {
+    "zod": "^3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "zod": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./locales/*": {
+      "import": "./dist/locales/*.esm.js",
+      "require": "./dist/locales/*.js",
+      "types": "./dist/locales/*.d.ts"
+    },
+    "./adapters/*": {
+      "import": "./dist/adapters/*.esm.js",
+      "require": "./dist/adapters/*.js",
+      "types": "./dist/adapters/*.d.ts"
+    }
+  }
+}

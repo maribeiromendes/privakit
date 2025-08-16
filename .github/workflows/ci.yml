@@ -1,0 +1,612 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  release:
+    types: [ published ]
+
+jobs:
+  # Security and dependency audit
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        run: npm audit --audit-level=moderate
+
+      - name: Check for known vulnerabilities
+        run: npx audit-ci --moderate
+
+  # Code quality and linting
+  quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint --if-present
+
+      - name: Run Prettier check
+        run: npm run format:check --if-present
+
+      - name: TypeScript compilation check
+        run: npm run typecheck --if-present
+
+  # Test matrix across Node.js versions
+  test:
+    name: Test Suite
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: [16, 18, 20]
+        include:
+          - os: ubuntu-latest
+            node-version: 21 # Latest Node.js
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm test
+
+      - name: Run privacy compliance tests
+        run: node test-privacy.js
+
+      - name: Run integration tests
+        run: node test-simple.js
+
+      - name: Generate coverage report
+        run: npm run test:coverage --if-present
+
+      - name: Upload coverage to Codecov
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '18'
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+          fail_ci_if_error: false
+
+  # Build and package verification
+  build:
+    name: Build & Package Test
+    runs-on: ubuntu-latest
+    needs: [security, quality, test]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build package
+        run: npm run build
+
+      - name: Verify build output
+        run: |
+          echo "Checking dist directory..."
+          ls -la dist/
+          echo "Checking package.json exports..."
+          node -e "console.log(Object.keys(require('./package.json')))"
+
+      - name: Create package tarball
+        run: npm pack
+
+      - name: Test package installation
+        run: |
+          # Get the package name and version
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          TARBALL_NAME="${PACKAGE_NAME}-${PACKAGE_VERSION}.tgz"
+          echo "Testing package: $TARBALL_NAME"
+          
+          # Install package globally from tarball
+          npm install -g "./$TARBALL_NAME"
+          
+          # Test basic functionality
+          node -e "
+            const privakit = require('$PACKAGE_NAME');
+            console.log('✅ Package imported successfully');
+            console.log('Available exports:', Object.keys(privakit));
+            
+            // Test basic functionality
+            try {
+              if (privakit.detectPII) {
+                const result = privakit.detectPII('test@example.com');
+                console.log('✅ detectPII works:', result.hasPII);
+              }
+              
+              if (privakit.validateEmail) {
+                const result = privakit.validateEmail('test@example.com');
+                console.log('✅ validateEmail works:', result.isValid);
+              }
+              
+              if (privakit.maskPII) {
+                const result = privakit.maskPII('test@example.com', 'email');
+                console.log('✅ maskPII works:', result.masked);
+              }
+              
+              console.log('🎉 All basic functions working!');
+            } catch (error) {
+              console.error('❌ Function test failed:', error.message);
+              process.exit(1);
+            }
+          "
+
+      - name: Test package in isolated environment
+        run: |
+          # Create temporary test directory
+          mkdir -p /tmp/package-test
+          cd /tmp/package-test
+          
+          # Initialize new project
+          npm init -y
+          
+          # Install our package from tarball
+          PACKAGE_NAME=$(node -p "require('$GITHUB_WORKSPACE/package.json').name")
+          PACKAGE_VERSION=$(node -p "require('$GITHUB_WORKSPACE/package.json').version")
+          npm install "$GITHUB_WORKSPACE/${PACKAGE_NAME}-${PACKAGE_VERSION}.tgz"
+          
+          # Test ESM import
+          echo "Testing ESM import..."
+          node --input-type=module -e "
+            import pkg from '$PACKAGE_NAME';
+            console.log('✅ ESM import successful');
+            console.log('Package exports:', Object.keys(pkg));
+          "
+          
+          # Test CommonJS require
+          echo "Testing CommonJS require..."
+          node -e "
+            const pkg = require('$PACKAGE_NAME');
+            console.log('✅ CommonJS require successful');
+            console.log('Package exports:', Object.keys(pkg));
+          "
+          
+          echo "🎉 Package works in isolated environment!"
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: npm-package
+          path: "*.tgz"
+          retention-days: 30
+
+  # Framework compatibility tests
+  framework-compatibility:
+    name: Framework Compatibility
+    runs-on: ubuntu-latest
+    needs: [build]
+    strategy:
+      matrix:
+        framework: [react, vue, angular, svelte, next, nuxt]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Download package artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: npm-package
+
+      - name: Test ${{ matrix.framework }} compatibility
+        run: |
+          # Create test directory
+          mkdir -p /tmp/framework-test-${{ matrix.framework }}
+          cd /tmp/framework-test-${{ matrix.framework }}
+          
+          # Get package info
+          PACKAGE_NAME=$(node -p "require('$GITHUB_WORKSPACE/package.json').name")
+          PACKAGE_VERSION=$(node -p "require('$GITHUB_WORKSPACE/package.json').version")
+          TARBALL_PATH="$GITHUB_WORKSPACE/${PACKAGE_NAME}-${PACKAGE_VERSION}.tgz"
+          
+          case "${{ matrix.framework }}" in
+            "react")
+              npx create-react-app test-app --template typescript
+              cd test-app
+              npm install "$TARBALL_PATH"
+              
+              # Create test component
+              cat > src/TestPrivakit.tsx << 'EOF'
+          import React, { useState } from 'react';
+          import { detectPII, maskPII, validateEmail } from 'privakit';
+          
+          function TestPrivakit() {
+            const [email, setEmail] = useState('test@example.com');
+            const [result, setResult] = useState<any>(null);
+            
+            const testPII = () => {
+              const detection = detectPII(email);
+              const masked = maskPII(email, 'email');
+              const validation = validateEmail(email);
+              
+              setResult({
+                detected: detection.hasPII,
+                masked: masked.masked,
+                valid: validation.isValid
+              });
+            };
+            
+            return (
+              <div>
+                <h1>Privakit React Test</h1>
+                <input value={email} onChange={(e) => setEmail(e.target.value)} />
+                <button onClick={testPII}>Test PII</button>
+                {result && (
+                  <div>
+                    <p>Detected: {result.detected ? 'Yes' : 'No'}</p>
+                    <p>Masked: {result.masked}</p>
+                    <p>Valid: {result.valid ? 'Yes' : 'No'}</p>
+                  </div>
+                )}
+              </div>
+            );
+          }
+          
+          export default TestPrivakit;
+          EOF
+              
+              # Update App.tsx to use our component
+              cat > src/App.tsx << 'EOF'
+          import React from 'react';
+          import TestPrivakit from './TestPrivakit';
+          
+          function App() {
+            return (
+              <div className="App">
+                <TestPrivakit />
+              </div>
+            );
+          }
+          
+          export default App;
+          EOF
+              
+              # Build the app
+              npm run build
+              echo "✅ React compatibility verified"
+              ;;
+              
+            "vue")
+              npm create vue@latest test-app -- --typescript --yes
+              cd test-app
+              npm install "$TARBALL_PATH"
+              
+              # Create test component
+              cat > src/components/TestPrivakit.vue << 'EOF'
+          <template>
+            <div>
+              <h1>Privakit Vue Test</h1>
+              <input v-model="email" />
+              <button @click="testPII">Test PII</button>
+              <div v-if="result">
+                <p>Detected: {{ result.detected ? 'Yes' : 'No' }}</p>
+                <p>Masked: {{ result.masked }}</p>
+                <p>Valid: {{ result.valid ? 'Yes' : 'No' }}</p>
+              </div>
+            </div>
+          </template>
+          
+          <script setup lang="ts">
+          import { ref } from 'vue'
+          import { detectPII, maskPII, validateEmail } from 'privakit'
+          
+          const email = ref('test@example.com')
+          const result = ref<any>(null)
+          
+          const testPII = () => {
+            const detection = detectPII(email.value)
+            const masked = maskPII(email.value, 'email')
+            const validation = validateEmail(email.value)
+            
+            result.value = {
+              detected: detection.hasPII,
+              masked: masked.masked,
+              valid: validation.isValid
+            }
+          }
+          </script>
+          EOF
+              
+              # Build the app
+              npm run build
+              echo "✅ Vue compatibility verified"
+              ;;
+              
+            "angular")
+              npx -p @angular/cli ng new test-app --routing=false --style=css --skip-git=true --package-manager=npm
+              cd test-app
+              npm install "$TARBALL_PATH"
+              
+              # Test import in app component
+              cat > src/app/app.component.ts << 'EOF'
+          import { Component } from '@angular/core';
+          import { detectPII, maskPII, validateEmail } from 'privakit';
+          
+          @Component({
+            selector: 'app-root',
+            template: `
+              <h1>Privakit Angular Test</h1>
+              <input [(ngModel)]="email" />
+              <button (click)="testPII()">Test PII</button>
+              <div *ngIf="result">
+                <p>Detected: {{ result.detected ? 'Yes' : 'No' }}</p>
+                <p>Masked: {{ result.masked }}</p>
+                <p>Valid: {{ result.valid ? 'Yes' : 'No' }}</p>
+              </div>
+            `,
+          })
+          export class AppComponent {
+            email = 'test@example.com';
+            result: any = null;
+            
+            testPII() {
+              const detection = detectPII(this.email);
+              const masked = maskPII(this.email, 'email');
+              const validation = validateEmail(this.email);
+              
+              this.result = {
+                detected: detection.hasPII,
+                masked: masked.masked,
+                valid: validation.isValid
+              };
+            }
+          }
+          EOF
+              
+              # Add FormsModule
+              cat > src/app/app.module.ts << 'EOF'
+          import { NgModule } from '@angular/core';
+          import { BrowserModule } from '@angular/platform-browser';
+          import { FormsModule } from '@angular/forms';
+          
+          import { AppComponent } from './app.component';
+          
+          @NgModule({
+            declarations: [AppComponent],
+            imports: [BrowserModule, FormsModule],
+            providers: [],
+            bootstrap: [AppComponent]
+          })
+          export class AppModule { }
+          EOF
+              
+              # Build the app
+              npm run build
+              echo "✅ Angular compatibility verified"
+              ;;
+              
+            "svelte")
+              npx create-svelte@latest test-app
+              cd test-app
+              npm install
+              npm install "$TARBALL_PATH"
+              
+              # Create test component
+              cat > src/routes/+page.svelte << 'EOF'
+          <script lang="ts">
+            import { detectPII, maskPII, validateEmail } from 'privakit';
+            
+            let email = 'test@example.com';
+            let result: any = null;
+            
+            function testPII() {
+              const detection = detectPII(email);
+              const masked = maskPII(email, 'email');
+              const validation = validateEmail(email);
+              
+              result = {
+                detected: detection.hasPII,
+                masked: masked.masked,
+                valid: validation.isValid
+              };
+            }
+          </script>
+          
+          <h1>Privakit Svelte Test</h1>
+          <input bind:value={email} />
+          <button on:click={testPII}>Test PII</button>
+          
+          {#if result}
+            <div>
+              <p>Detected: {result.detected ? 'Yes' : 'No'}</p>
+              <p>Masked: {result.masked}</p>
+              <p>Valid: {result.valid ? 'Yes' : 'No'}</p>
+            </div>
+          {/if}
+          EOF
+              
+              # Build the app
+              npm run build
+              echo "✅ Svelte compatibility verified"
+              ;;
+              
+            "next")
+              npx create-next-app@latest test-app --typescript --tailwind --eslint --app --src-dir --import-alias "@/*"
+              cd test-app
+              npm install "$TARBALL_PATH"
+              
+              # Create test page
+              cat > src/app/page.tsx << 'EOF'
+          'use client'
+          import { useState } from 'react'
+          import { detectPII, maskPII, validateEmail } from 'privakit'
+          
+          export default function Home() {
+            const [email, setEmail] = useState('test@example.com')
+            const [result, setResult] = useState<any>(null)
+            
+            const testPII = () => {
+              const detection = detectPII(email)
+              const masked = maskPII(email, 'email')
+              const validation = validateEmail(email)
+              
+              setResult({
+                detected: detection.hasPII,
+                masked: masked.masked,
+                valid: validation.isValid
+              })
+            }
+            
+            return (
+              <main className="p-4">
+                <h1 className="text-2xl mb-4">Privakit Next.js Test</h1>
+                <input 
+                  value={email} 
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="border p-2 mr-2"
+                />
+                <button onClick={testPII} className="bg-blue-500 text-white p-2">
+                  Test PII
+                </button>
+                {result && (
+                  <div className="mt-4">
+                    <p>Detected: {result.detected ? 'Yes' : 'No'}</p>
+                    <p>Masked: {result.masked}</p>
+                    <p>Valid: {result.valid ? 'Yes' : 'No'}</p>
+                  </div>
+                )}
+              </main>
+            )
+          }
+          EOF
+              
+              # Build the app
+              npm run build
+              echo "✅ Next.js compatibility verified"
+              ;;
+              
+            "nuxt")
+              npx nuxi@latest init test-app
+              cd test-app
+              npm install "$TARBALL_PATH"
+              
+              # Create test page
+              cat > pages/index.vue << 'EOF'
+          <template>
+            <div class="p-4">
+              <h1 class="text-2xl mb-4">Privakit Nuxt Test</h1>
+              <input v-model="email" class="border p-2 mr-2" />
+              <button @click="testPII" class="bg-blue-500 text-white p-2">
+                Test PII
+              </button>
+              <div v-if="result" class="mt-4">
+                <p>Detected: {{ result.detected ? 'Yes' : 'No' }}</p>
+                <p>Masked: {{ result.masked }}</p>
+                <p>Valid: {{ result.valid ? 'Yes' : 'No' }}</p>
+              </div>
+            </div>
+          </template>
+          
+          <script setup>
+          import { detectPII, maskPII, validateEmail } from 'privakit'
+          
+          const email = ref('test@example.com')
+          const result = ref(null)
+          
+          const testPII = () => {
+            const detection = detectPII(email.value)
+            const masked = maskPII(email.value, 'email')
+            const validation = validateEmail(email.value)
+            
+            result.value = {
+              detected: detection.hasPII,
+              masked: masked.masked,
+              valid: validation.isValid
+            }
+          }
+          </script>
+          EOF
+              
+              # Build the app
+              npm run build
+              echo "✅ Nuxt compatibility verified"
+              ;;
+          esac
+
+  # Publish to npm (only on release)
+  publish:
+    name: Publish to NPM
+    runs-on: ubuntu-latest
+    needs: [security, quality, test, build, framework-compatibility]
+    if: github.event_name == 'release' && github.event.action == 'published'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build package
+        run: npm run build
+
+      - name: Publish to npm
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub release assets
+        run: |
+          npm pack
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          gh release upload ${{ github.event.release.tag_name }} "${PACKAGE_NAME}-${PACKAGE_VERSION}.tgz"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
