@@ -12,6 +12,13 @@
 				"$eslint-stylish"
 			],
 			"group": "build"
+		},
+		{
+			"label": "Install Husky and Lint-Staged",
+			"type": "shell",
+			"command": "npm install --save-dev husky lint-staged",
+			"args": [],
+			"isBackground": false
 		}
 	]
 }
