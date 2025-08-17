@@ -85,7 +85,7 @@ export function validateEmail(
     };
   }
 
-  if (trimmedEmail.length > 320) { // RFC 5321 limit
+  if (trimmedEmail.length > 254) { // RFC 5321 practical limit
     errors.push(createValidationError(
       ErrorCodes.FIELD_TOO_LONG,
       'Email address exceeds maximum length of 320 characters',
@@ -187,7 +187,13 @@ export function normalizeEmail(email: string): string {
     return email;
   }
 
-  // Use validator.js normalize function
+  // Check if it's a valid email format first
+  if (!validator.isEmail(email.trim())) {
+    // For invalid emails, return as-is (don't try to normalize)
+    return email;
+  }
+
+  // Use validator.js normalize function for valid emails
   try {
     return validator.normalizeEmail(email, {
       gmail_lowercase: true,

@@ -15,6 +15,7 @@ export interface RedactionOptions {
   includeSpanInfo?: boolean;
   strictMode?: boolean;
   customPatterns?: RedactionPattern[];
+  maskChar?: string;
 }
 
 export interface RedactionPattern {
@@ -214,7 +215,8 @@ export function redactFromDetection(
     if (options.includeType) {
       redactedText = `[${span.type.toUpperCase()}]`;
     } else if (options.preserveLength) {
-      redactedText = '*'.repeat(originalText.length);
+      const maskChar = options.maskChar || '*';
+      redactedText = maskChar.repeat(originalText.length);
     } else if (options.preserveFormat) {
       redactedText = preserveFormatRedaction(originalText);
     } else {

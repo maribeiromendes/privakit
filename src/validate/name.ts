@@ -80,6 +80,17 @@ export function validateName(
   name: string,
   options: NameValidationOptions = {}
 ): NameValidationResult {
+  // Set defaults
+  const opts = {
+    allowMiddleName: true,
+    allowSuffix: true,
+    allowPrefix: true,
+    allowSingleName: true,
+    allowNonLatin: true,
+    minLength: 1,
+    maxLength: 100,
+    ...options
+  };
   const errors: any[] = [];
   
   // Basic input validation
@@ -120,8 +131,8 @@ export function validateName(
   }
 
   // Length validation
-  const minLength = options.minLength ?? 2;
-  const maxLength = options.maxLength ?? 100;
+  const minLength = opts.minLength ?? 2;
+  const maxLength = opts.maxLength ?? 100;
   
   if (trimmedName.length < minLength) {
     errors.push(createValidationError(
@@ -143,7 +154,7 @@ export function validateName(
 
   // Check for blacklisted names
   const lowerName = trimmedName.toLowerCase();
-  if (NON_NAMES.has(lowerName) || options.blacklistedNames?.includes(lowerName)) {
+  if (NON_NAMES.has(lowerName) || opts.blacklistedNames?.includes(lowerName)) {
     errors.push(createValidationError(
       ErrorCodes.INVALID_FORMAT,
       'Name appears to be a placeholder or invalid value',
@@ -195,7 +206,7 @@ export function validateName(
   }
 
   // Basic character set validation
-  if (!options.allowNonLatin && !NAME_PATTERNS.latinName.test(trimmedName)) {
+  if (!opts.allowNonLatin && !NAME_PATTERNS.latinName.test(trimmedName)) {
     errors.push(createValidationError(
       ErrorCodes.INVALID_FORMAT,
       'Name contains non-Latin characters',
@@ -205,7 +216,7 @@ export function validateName(
   }
 
   // Title case validation
-  if (options.requireTitleCase && !NAME_PATTERNS.titleCase.test(trimmedName)) {
+  if (opts.requireTitleCase && !NAME_PATTERNS.titleCase.test(trimmedName)) {
     errors.push(createValidationError(
       ErrorCodes.INVALID_FORMAT,
       'Name must be in title case',
@@ -238,7 +249,7 @@ export function validateName(
       const nameWords = trimmedName.split(/\s+/);
       
       if (nameWords.length === 1) {
-        if (!options.allowSingleName) {
+        if (!opts.allowSingleName) {
           errors.push(createValidationError(
             ErrorCodes.INVALID_FORMAT,
             'Single names are not allowed',
@@ -255,7 +266,7 @@ export function validateName(
         
         // Check for prefix
         if (NAME_PREFIXES.has(nameWords[0].toLowerCase().replace('.', ''))) {
-          if (options.allowPrefix) {
+          if (opts.allowPrefix) {
             prefix = nameWords[0];
             startIndex = 1;
           } else {
@@ -270,7 +281,7 @@ export function validateName(
         
         // Check for suffix
         if (NAME_SUFFIXES.has(nameWords[endIndex].toLowerCase().replace('.', ''))) {
-          if (options.allowSuffix) {
+          if (opts.allowSuffix) {
             suffix = nameWords[endIndex];
             endIndex -= 1;
           } else {
@@ -292,7 +303,7 @@ export function validateName(
             
             // Middle name(s)
             if (startIndex + 1 < endIndex) {
-              if (options.allowMiddleName) {
+              if (opts.allowMiddleName) {
                 middleName = nameWords.slice(startIndex + 1, endIndex).join(' ');
               } else {
                 errors.push(createValidationError(
@@ -330,8 +341,8 @@ export function validateName(
   }
 
   // Custom pattern validation
-  if (options.customPatterns) {
-    for (const pattern of options.customPatterns) {
+  if (opts.customPatterns) {
+    for (const pattern of opts.customPatterns) {
       if (!pattern.test(trimmedName)) {
         errors.push(createValidationError(
           ErrorCodes.INVALID_FORMAT,

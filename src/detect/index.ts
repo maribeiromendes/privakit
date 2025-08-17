@@ -194,7 +194,7 @@ export function detectPII(
         case PIIType.Email:
           const emailValidation = validateEmail(matchedText, { allowDisplayName: false });
           additionalValidation = emailValidation.isValid;
-          confidence = emailValidation.isValid ? ConfidenceLevel.High : ConfidenceLevel.Low;
+          confidence = emailValidation.isValid ? ConfidenceLevel.VeryHigh : ConfidenceLevel.Low;
           break;
         
         case PIIType.Phone:

@@ -94,9 +94,7 @@ export function maskEmail(
     if (dotIndex > 0 && options.preserveTLD) {
       const domainName = domain.substring(0, dotIndex);
       const tld = domain.substring(dotIndex);
-      const maskedDomainName = domainName.length > 2 
-        ? domainName.substring(0, 1) + maskChar.repeat(domainName.length - 1)
-        : maskChar.repeat(domainName.length);
+      const maskedDomainName = maskChar.repeat(domainName.length);
       maskedDomain = maskedDomainName + tld;
     } else {
       maskedDomain = maskChar.repeat(domain.length);

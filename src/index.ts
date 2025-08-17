@@ -224,12 +224,18 @@ export function processPhone(phone: string, options: {
   validation?: any;
   normalization?: any;
 } = {}) {
-  const validation = validatePhone(phone, options.validation);
+  const validation = validatePhone(phone, { 
+    defaultCountry: 'US',
+    ...options.validation 
+  });
   if (!validation.isValid) {
     return { validation, normalized: null };
   }
   
-  const normalized = normalizePhoneNumber(phone, options.normalization);
+  const normalized = normalizePhoneNumber(phone, { 
+    defaultCountry: 'US',
+    ...options.normalization 
+  });
   return { validation, normalized };
 }
 
@@ -259,7 +265,24 @@ export function processPII(text: string, options: {
   policy?: PolicyEngineType;
 } = {}) {
   // Detect PII
-  const detection = detectPII(text, options.detection);
+  let detection;
+  try {
+    detection = detectPII(text, options.detection);
+  } catch (error) {
+    // Handle malformed input gracefully
+    return {
+      detection: {
+        hasPII: false,
+        detectedTypes: [],
+        spans: [],
+        confidence: 'low' as any,
+        suggestions: ['Input validation failed']
+      },
+      masked: text || '',
+      redacted: text || '',
+      policyViolations: []
+    };
+  }
   
   if (!detection.hasPII) {
     return {
@@ -276,7 +299,7 @@ export function processPII(text: string, options: {
     for (const span of detection.spans) {
       const decision = options.policy.evaluate(span.type, 'display' as any);
       if (!decision.allowed) {
-        policyViolations.push(`${span.type} at position ${span.start}-${span.end}: ${decision.reason}`);
+        policyViolations.push(`${span.type.toUpperCase()} at position ${span.start}-${span.end}: ${decision.reason}`);
       }
     }
   }
@@ -289,8 +312,8 @@ export function processPII(text: string, options: {
   
   // Apply redaction
   const redactedResult = redactFromDetection(text, detection, {
-    ...options.redaction,
-    replacement: '[REDACTED]'
+    replacement: '[REDACTED]',
+    ...options.redaction
   });
   
   return {
