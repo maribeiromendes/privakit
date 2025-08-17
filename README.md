@@ -267,8 +267,36 @@ We welcome contributions! Please see our [Contributing Guide](./CONTRIBUTING.md)
 ### Development
 
 ```bash
-git clone https://github.com/yourusername/privakit.gitcd privakitnpm installnpm run dev     # Start development modenpm test        # Run test suitenpm run build   # Build for production
+git clone https://github.com/yourusername/privakit.git
+cd privakit
+npm install
+npm run dev     # Start development mode
+npm test        # Run test suite
+npm run build   # Build for production
 ```
+
+### Development Scripts
+
+The `dev-scripts/` folder contains organized development and testing utilities:
+
+- **`dev-scripts/debug/`** - Component-specific debugging scripts
+- **`dev-scripts/validation/`** - Privacy compliance and dependency testing
+- **`dev-scripts/research/`** - Pattern research and improvement scripts  
+- **`dev-scripts/utils/`** - Build validation and utility scripts
+
+**Quick validation commands:**
+```bash
+# Verify privacy compliance (CRITICAL before any release)
+node dev-scripts/validation/test-privacy.js
+
+# Test basic functionality
+node dev-scripts/validation/test-simple.js
+
+# Debug specific components
+node dev-scripts/debug/test-phone-debug.js
+```
+
+See [`dev-scripts/README.md`](./dev-scripts/README.md) for detailed documentation on all available scripts.
 
 ## 📝 License
 

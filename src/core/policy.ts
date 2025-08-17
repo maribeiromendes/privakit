@@ -2,14 +2,8 @@
  * Policy engine for PII handling rules and compliance
  */
 
-import { 
-  PIIType, 
-  RiskLevel, 
-  PolicyRule, 
-  PolicyOperation, 
-  PolicyDecision, 
-  PolicyEngine as IPolicyEngine 
-} from './types.js';
+import type { PolicyRule, PolicyDecision, IPolicyEngine } from './types.js';
+import { PIIType, RiskLevel, PolicyOperation } from './types.js';
 import { PIIPolicyError, ErrorCodes } from './errors.js';
 
 // Default policy rules based on common compliance requirements

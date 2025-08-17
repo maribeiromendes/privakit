@@ -3,7 +3,8 @@
  */
 
 import validator from 'validator';
-import { ValidationResult, PIIType } from '../core/types.js';
+import type { ValidationResult } from '../core/types.js';
+import { PIIType } from '../core/types.js';
 import { PIIValidationError, createValidationError, ErrorCodes } from '../core/errors.js';
 
 export interface EmailValidationOptions {

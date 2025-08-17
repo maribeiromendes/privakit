@@ -19,7 +19,7 @@ import { PIIType, PolicyOperation } from '../core/types.js';
 describe('Integration Tests', () => {
   describe('processPII', () => {
     it('should provide complete PII processing pipeline', () => {
-      const text = 'Contact John Doe at john.doe@company.com or call (555) 123-4567. SSN: 123-45-6789';
+      const text = 'Contact John Doe at john.doe@company.com or call (555) 123-4567. SSN: 555-55-5555';
       
       const result = processPII(text);
       
@@ -53,7 +53,7 @@ describe('Integration Tests', () => {
     });
 
     it('should respect policy engine rules', () => {
-      const text = 'SSN: 123-45-6789';
+      const text = 'SSN: 555-55-5555';
       const policyEngine = createPolicyEngine('strict');
       
       const result = processPII(text, {
@@ -212,7 +212,7 @@ describe('Integration Tests', () => {
     });
 
     it('should work between detection and redaction', () => {
-      const text = 'Sensitive data: SSN 123-45-6789, Card 4111111111111111';
+      const text = 'Sensitive data: SSN 555-55-5555, Card 4111111111111111';
       
       const detection = detectPII(text);
       const redacted = redactText(text);

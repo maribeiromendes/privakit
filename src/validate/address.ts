@@ -2,7 +2,8 @@
  * Address validation with pattern matching and format detection
  */
 
-import { ValidationResult, PIIType, LocaleContext, ConfidenceLevel } from '../core/types.js';
+import type { ValidationResult, LocaleContext } from '../core/types.js';
+import { PIIType, ConfidenceLevel } from '../core/types.js';
 import { PIIValidationError, createValidationError, ErrorCodes } from '../core/errors.js';
 
 export interface AddressValidationOptions {

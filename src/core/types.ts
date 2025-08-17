@@ -129,7 +129,7 @@ export enum PolicyOperation {
 }
 
 // Policy engine interface
-export interface PolicyEngine {
+export interface IPolicyEngine {
   evaluate(type: PIIType, operation: PolicyOperation): PolicyDecision;
   addRule(rule: PolicyRule): void;
   removeRule(type: PIIType): void;
@@ -205,4 +205,177 @@ export interface DetectionConfig {
   maxTextLength: number;
   enableSpanExtraction: boolean;
   locale?: LocaleContext;
+}
+
+// Validation-specific types
+export interface EmailValidationOptions {
+  allowDisplayName?: boolean;
+  requireTld?: boolean;
+  allowUtf8LocalPart?: boolean;
+  allowIpDomain?: boolean;
+  domainSpecificValidation?: boolean;
+  blacklistedDomains?: string[];
+  whitelistedDomains?: string[];
+}
+
+export interface EmailValidationResult extends ValidationResult<string> {
+  domain?: string;
+  localPart?: string;
+  isDisposable?: boolean;
+  isCorporate?: boolean;
+}
+
+export interface PhoneValidationOptions {
+  defaultCountry?: string;
+  strictMode?: boolean;
+  validateLength?: boolean;
+  validateType?: boolean;
+}
+
+export interface PhoneValidationResult extends ValidationResult<string> {
+  country?: string;
+  type?: string;
+  isPossible?: boolean;
+  e164?: string;
+  national?: string;
+  international?: string;
+}
+
+export interface NameValidationOptions {
+  allowSingleName?: boolean;
+  requireLastName?: boolean;
+  maxLength?: number;
+  minLength?: number;
+}
+
+export interface NameValidationResult extends ValidationResult<string> {
+  firstName?: string;
+  lastName?: string;
+  middleNames?: string[];
+  nameType?: 'person' | 'organization' | 'unknown';
+  isLikelyName?: boolean;
+  confidence?: ConfidenceLevel;
+}
+
+export interface AddressValidationOptions {
+  requireStreet?: boolean;
+  requireCity?: boolean;
+  requirePostalCode?: boolean;
+  requireCountry?: boolean;
+  country?: string;
+}
+
+export interface AddressValidationResult extends ValidationResult<string> {
+  components?: AddressComponent[];
+  addressType?: 'residential' | 'business' | 'po_box' | 'unknown';
+  confidence?: ConfidenceLevel;
+}
+
+export interface AddressComponent {
+  type: 'street' | 'city' | 'state' | 'postal_code' | 'country';
+  value: string;
+  confidence: ConfidenceLevel;
+}
+
+// Normalization-specific types
+export interface EmailNormalizationOptions extends NormalizationOptions {
+  lowercase?: boolean;
+  removeDots?: boolean;
+  removeSubaddress?: boolean;
+  provider?: 'gmail' | 'outlook' | 'yahoo' | 'icloud' | 'generic';
+}
+
+export interface PhoneNormalizationOptions extends NormalizationOptions {
+  defaultCountry?: string;
+  outputFormat?: 'E.164' | 'INTERNATIONAL' | 'NATIONAL' | 'RFC3966';
+}
+
+export interface NameNormalizationOptions extends NormalizationOptions {
+  titleCase?: boolean;
+  removeExtraSpaces?: boolean;
+  handleHyphens?: boolean;
+  handleApostrophes?: boolean;
+}
+
+export interface AddressNormalizationOptions extends NormalizationOptions {
+  standardizeStreetTypes?: boolean;
+  standardizeDirections?: boolean;
+  removeExtraSpaces?: boolean;
+  formatStyle?: 'single-line' | 'multi-line' | 'compact';
+}
+
+// Masking-specific types
+export interface EmailMaskingOptions extends MaskingOptions {
+  maskDomain?: boolean;
+  preserveTld?: boolean;
+  visibleLocalPart?: number;
+}
+
+export interface PhoneMaskingOptions extends MaskingOptions {
+  maskCountryCode?: boolean;
+  maskAreaCode?: boolean;
+  visibleDigits?: number;
+  groupSeparator?: string;
+}
+
+export interface NameMaskingOptions extends MaskingOptions {
+  preserveFirstName?: boolean;
+  preserveLastName?: boolean;
+  maskMiddleNames?: boolean;
+}
+
+export interface AddressMaskingOptions extends MaskingOptions {
+  maskStreetNumber?: boolean;
+  maskStreetName?: boolean;
+  maskCity?: boolean;
+  maskPostalCode?: boolean;
+  visibleStreetChars?: number;
+}
+
+export interface CreditCardMaskingOptions extends MaskingOptions {
+  visibleLastDigits?: number;
+  groupSeparator?: string;
+  preserveFirstDigits?: number;
+}
+
+// Redaction-specific types
+export interface RedactionOptions {
+  replacement?: string;
+  preserveLength?: boolean;
+  strictMode?: boolean;
+  customPatterns?: RedactionPattern[];
+}
+
+export interface RedactionPattern {
+  type: PIIType;
+  regex: RegExp;
+  replacement: string;
+  description: string;
+}
+
+export interface RedactionResult {
+  redacted: string;
+  originalLength: number;
+  redactedCount: number;
+  metadata?: Record<string, unknown>;
+}
+
+export interface RedactedSpan {
+  type: PIIType;
+  start: number;
+  end: number;
+  original: string;
+  replacement: string;
+}
+
+// Detection-specific types
+export interface DetectionOptions {
+  enableNLP?: boolean;
+  confidenceThreshold?: number;
+  maxTextLength?: number;
+  enableSpanExtraction?: boolean;
+  customPatterns?: PIIPattern[];
+  strictMode?: boolean;
+  includeContext?: boolean;
+  contextWindow?: number;
 }

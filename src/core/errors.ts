@@ -2,7 +2,8 @@
  * Error classes for Privakit PII handling library
  */
 
-import { PIIType, ValidationError } from './types.js';
+import type { ValidationError } from './types.js';
+import { PIIType } from './types.js';
 
 // Base error class for all Privakit errors
 export class PrivakitError extends Error {

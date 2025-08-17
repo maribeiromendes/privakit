@@ -6,9 +6,10 @@ import { normalizeEmail } from '../validate/email.js';
 import { normalizePhone } from '../validate/phone.js';
 import { normalizeNameCapitalization } from '../validate/name.js';
 import { formatAddress, normalizeCountry } from '../validate/address.js';
-import { NormalizationOptions, NormalizationResult, PIIType, LocaleContext } from '../core/types.js';
+import type { NormalizationOptions, NormalizationResult, LocaleContext } from '../core/types.js';
+import { PIIType } from '../core/types.js';
 import { PIINormalizationError, ErrorCodes } from '../core/errors.js';
-import { CountryCode } from 'libphonenumber-js';
+import type { CountryCode } from 'libphonenumber-js';
 
 export interface EmailNormalizationOptions extends NormalizationOptions {
   lowercase?: boolean;

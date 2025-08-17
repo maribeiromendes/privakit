@@ -12,18 +12,39 @@
 
 // Core types and utilities
 export * from './core/index.js';
+import type { PIIType, PolicyOperation, IPolicyEngine as PolicyEngineType } from './core/types.js';
 
 // Validation functions
-export {
+import * as emailValidation from './validate/email.js';
+import * as phoneValidation from './validate/phone.js';
+import * as nameValidation from './validate/name.js';
+import * as addressValidation from './validate/address.js';
+
+// Normalization functions
+import * as normalization from './normalize/index.js';
+
+// Masking functions
+import * as masking from './mask/index.js';
+
+// Redaction functions
+import * as redaction from './redact/index.js';
+
+// Detection functions
+import * as detection from './detect/index.js';
+
+// Policy engine
+import * as policy from './core/policy.js';
+
+export const {
   validateEmail,
   normalizeEmail,
   isDisposableEmail,
   extractEmailDomain,
   validateEmails,
   isValidEmailFormat
-} from './validate/email.js';
+} = emailValidation;
 
-export {
+export const {
   validatePhone,
   normalizePhone,
   formatPhone,
@@ -33,18 +54,18 @@ export {
   isValidPhoneFormat,
   validatePhones,
   createPhoneOptionsFromLocale
-} from './validate/phone.js';
+} = phoneValidation;
 
-export {
+export const {
   validateName,
   normalizeNameCapitalization,
   extractNameParts,
   isLikelyPersonName,
   validateNames,
   createFullName
-} from './validate/name.js';
+} = nameValidation;
 
-export {
+export const {
   validateAddress,
   formatAddress,
   normalizeCountry,
@@ -52,10 +73,9 @@ export {
   isPoBoxAddress,
   validateAddresses,
   createAddressOptionsFromLocale
-} from './validate/address.js';
+} = addressValidation;
 
-// Normalization functions
-export {
+export const {
   normalizeEmailAddress,
   normalizePhoneNumber,
   normalizePersonName,
@@ -63,10 +83,9 @@ export {
   normalizePII,
   normalizeMultiple,
   createNormalizationOptionsFromLocale
-} from './normalize/index.js';
+} = normalization;
 
-// Masking functions
-export {
+export const {
   maskEmail,
   maskPhone,
   maskName,
@@ -74,10 +93,9 @@ export {
   maskCreditCard,
   maskPII,
   maskMultiple
-} from './mask/index.js';
+} = masking;
 
-// Redaction functions
-export {
+export const {
   redactText,
   redactFromDetection,
   createSafeLogger,
@@ -89,10 +107,9 @@ export {
   getDefaultRedactionPatterns,
   addRedactionPattern,
   removeRedactionPattern
-} from './redact/index.js';
+} = redaction;
 
-// Detection functions
-export {
+export const {
   detectPII,
   detectPIIMultiple,
   createDetectionConfig,
@@ -101,13 +118,12 @@ export {
   removePIIPattern,
   hasPII,
   countPIIByType
-} from './detect/index.js';
+} = detection;
 
-// Policy engine
-export {
+export const {
   PolicyEngine,
   createPolicyEngine
-} from './core/policy.js';
+} = policy;
 
 // Type definitions for external consumption
 export type {
@@ -126,7 +142,7 @@ export type {
   PolicyRule,
   PolicyOperation,
   PolicyDecision,
-  PolicyEngine as IPolicyEngine,
+  IPolicyEngine,
   LocaleContext,
   PIIPattern,
   DetectionConfig,
@@ -240,7 +256,7 @@ export function processPII(text: string, options: {
   detection?: any;
   masking?: any;
   redaction?: any;
-  policy?: PolicyEngine;
+  policy?: PolicyEngineType;
 } = {}) {
   // Detect PII
   const detection = detectPII(text, options.detection);
@@ -292,7 +308,7 @@ export function createPIIProcessor(config: {
   detectionOptions?: any;
   maskingOptions?: any;
   redactionOptions?: any;
-  policyEngine?: PolicyEngine;
+  policyEngine?: PolicyEngineType;
   strictMode?: boolean;
 } = {}) {
   const policyEngine = config.policyEngine || createPolicyEngine(config.strictMode ? 'strict' : 'permissive');

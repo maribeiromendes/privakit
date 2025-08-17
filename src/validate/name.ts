@@ -3,7 +3,8 @@
  */
 
 import nlp from 'compromise';
-import { ValidationResult, PIIType, ConfidenceLevel } from '../core/types.js';
+import type { ValidationResult } from '../core/types.js';
+import { PIIType, ConfidenceLevel } from '../core/types.js';
 import { PIIValidationError, createValidationError, ErrorCodes } from '../core/errors.js';
 
 export interface NameValidationOptions {
@@ -441,6 +442,28 @@ export function validateNames(
   options: NameValidationOptions = {}
 ): NameValidationResult[] {
   return names.map(name => validateName(name, options));
+}
+
+/**
+ * Normalizes person name to standard format
+ */
+export function normalizePersonName(
+  name: string,
+  options: NameValidationOptions = {}
+): string {
+  try {
+    // Trim and clean up whitespace
+    let normalized = name.trim().replace(/\s+/g, ' ');
+    
+    // Apply title case normalization if requested
+    if (options.requireTitleCase !== false) {
+      normalized = normalizeNameCapitalization(normalized);
+    }
+    
+    return normalized;
+  } catch {
+    return name;
+  }
 }
 
 /**

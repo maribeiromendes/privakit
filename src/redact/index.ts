@@ -2,7 +2,8 @@
  * Redaction module for safe logging and hard removal of PII
  */
 
-import { PIIType, DetectionSpan, PIIDetectionResult } from '../core/types.js';
+import type { DetectionSpan, PIIDetectionResult } from '../core/types.js';
+import { PIIType } from '../core/types.js';
 import { PIIMaskingError, ErrorCodes } from '../core/errors.js';
 
 export interface RedactionOptions {

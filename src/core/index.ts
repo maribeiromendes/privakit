@@ -9,7 +9,7 @@ export * from './types.js';
 export * from './errors.js';
 
 // Policy engine
-export * from './policy.js';
+export { PolicyEngine, createPolicyEngine } from './policy.js';
 
 // Re-export commonly used types for convenience
 export type {

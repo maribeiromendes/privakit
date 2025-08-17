@@ -2,8 +2,10 @@
  * Phone validation using libphonenumber-js for international phone number validation
  */
 
-import { parsePhoneNumber, PhoneNumber, CountryCode, getCountryCallingCode } from 'libphonenumber-js';
-import { ValidationResult, PIIType, LocaleContext } from '../core/types.js';
+import { parsePhoneNumber, PhoneNumber, getCountryCallingCode } from 'libphonenumber-js';
+import type { CountryCode } from 'libphonenumber-js';
+import type { ValidationResult, LocaleContext } from '../core/types.js';
+import { PIIType } from '../core/types.js';
 import { PIIValidationError, createValidationError, ErrorCodes } from '../core/errors.js';
 
 export interface PhoneValidationOptions {
@@ -24,7 +26,6 @@ export interface PhoneValidationResult extends ValidationResult<string> {
   internationalFormat?: string;
   e164Format?: string;
   type?: 'mobile' | 'landline' | 'toll-free' | 'voip' | 'unknown';
-  isValid?: boolean;
   isPossible?: boolean;
 }
 
