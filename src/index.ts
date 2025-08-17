@@ -269,7 +269,11 @@ export function processPII(text: string, options: {
   try {
     detection = detectPII(text, options.detection);
   } catch (error) {
-    // Handle malformed input gracefully
+    // Re-throw for null/undefined inputs (expected behavior)
+    if (text === null || text === undefined) {
+      throw error;
+    }
+    // Handle other malformed input gracefully
     return {
       detection: {
         hasPII: false,
@@ -293,13 +297,16 @@ export function processPII(text: string, options: {
     };
   }
   
-  // Check policy compliance
+  // Check policy compliance across multiple operations
   const policyViolations: string[] = [];
   if (options.policy) {
+    const operationsToCheck = ['display', 'store', 'process', 'transfer'] as any[];
     for (const span of detection.spans) {
-      const decision = options.policy.evaluate(span.type, 'display' as any);
-      if (!decision.allowed) {
-        policyViolations.push(`${span.type.toUpperCase()} at position ${span.start}-${span.end}: ${decision.reason}`);
+      for (const operation of operationsToCheck) {
+        const decision = options.policy.evaluate(span.type, operation);
+        if (!decision.allowed) {
+          policyViolations.push(`${span.type.toUpperCase()} at position ${span.start}-${span.end}: ${decision.reason}`);
+        }
       }
     }
   }
