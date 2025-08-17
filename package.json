@@ -81,6 +81,7 @@
     "eslint": "^8.56.0",
     "husky": "^8.0.0",
     "lint-staged": "^16.1.5",
+    "prettier": "^3.6.2",
     "tsup": "^8.5.0",
     "typescript": "^5.3.3",
     "vite-tsconfig-paths": "^5.1.4",
@@ -118,16 +119,13 @@
   "type": "module",
   "lint-staged": {
     "src/**/*.ts": [
-      "prettier --write",
-      "git add"
+      "npx prettier --write"
     ],
     "docs/**/*.md": [
-      "prettier --write",
-      "git add"
+      "npx prettier --write"
     ],
     "*.md": [
-      "prettier --write",
-      "git add"
+      "npx prettier --write"
     ]
   }
 }

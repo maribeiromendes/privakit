@@ -377,6 +377,58 @@ const detection = detectPII(text, {
 });
 ```
 
+## 🛠 Development Setup
+
+### Prettier and Linting
+
+To ensure consistent code formatting and quality, Privakit uses Prettier and ESLint. These tools are integrated into the development workflow.
+
+#### Install Dependencies
+
+```bash
+npm install --save-dev prettier eslint husky lint-staged
+```
+
+#### Pre-Commit Hook
+
+Privakit uses Husky to enforce code formatting and linting before commits. The pre-commit hook runs `lint-staged` to format staged files automatically.
+
+##### Configuration
+
+Add the following to your `package.json`:
+
+```json
+"lint-staged": {
+  "src/**/*.ts": ["npx prettier --write"],
+  "docs/**/*.md": ["npx prettier --write"],
+  "*.md": ["npx prettier --write"]
+}
+```
+
+Ensure Husky is installed and initialized:
+
+```bash
+npx husky-init
+```
+
+Update the `.husky/pre-commit` file:
+
+```bash
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+npx lint-staged
+```
+
+### Verify Setup
+
+Run the following commands to ensure everything is working:
+
+```bash
+npx prettier --check src/**/*.ts docs/**/*.md *.md
+npx eslint src/**/*.ts
+```
+
 ## ✅ Next Steps
 
 Now that Privakit is installed and configured:
