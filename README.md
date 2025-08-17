@@ -4,78 +4,76 @@
 
 Privakit provides enterprise-grade tools for **detecting**, **validating**, **masking**, **redacting**, and **managing** personal data in compliance with GDPR, CCPA, and other privacy regulations.
 
-[![SonarQube Cloud](https://sonarcloud.io/images/project_badges/sonarcloud-light.svg)](https://sonarcloud.io/summary/new_code?id=maribeiromendes_privakit) 
+[![SonarQube Cloud](https://sonarcloud.io/images/project_badges/sonarcloud-light.svg)](https://sonarcloud.io/summary/new_code?id=maribeiromendes_privakit)
 
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=maribeiromendes_privakit&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=maribeiromendes_privakit) [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=maribeiromendes_privakit&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=maribeiromendes_privakit)[![CodeQL](https://github.com/maribeiromendes/privakit/actions/workflows/github-code-scanning/codeql/badge.svg?branch=main)](https://github.com/maribeiromendes/privakit/actions/workflows/github-code-scanning/codeql)
 
-  
-
 ## ✨ Key Features
 
--   🔍 **Smart PII Detection** - Automatically find 17+ types of PII in text using NLP and pattern matching
--   ✅ **Robust Validation** - Validate emails, phones, names, and addresses with international support
--   🎭 **Safe Masking** - Display-safe concealment while preserving usability
--   🚫 **Secure Redaction** - Complete removal for logging and archival
--   ⚖️ **Policy Engine** - GDPR/CCPA compliance automation with audit trails
--   🔧 **Data Normalization** - Standardize formats across locales and providers
--   🌐 **Zero Dependencies** - No external API calls, completely local processing
--   📦 **Tree Shakable** - Import only what you need for optimal bundle size
+- 🔍 **Smart PII Detection** - Automatically find 17+ types of PII in text using NLP and pattern matching
+- ✅ **Robust Validation** - Validate emails, phones, names, and addresses with international support
+- 🎭 **Safe Masking** - Display-safe concealment while preserving usability
+- 🚫 **Secure Redaction** - Complete removal for logging and archival
+- ⚖️ **Policy Engine** - GDPR/CCPA compliance automation with audit trails
+- 🔧 **Data Normalization** - Standardize formats across locales and providers
+- 🌐 **Zero Dependencies** - No external API calls, completely local processing
+- 📦 **Tree Shakable** - Import only what you need for optimal bundle size
 
 ## 🚀 Quick Start
 
-[//]:  ### Installation
+[//]: ### Installation
 
-[//]:  ```bash
-[//]:  npm install privakit # or yarn add privakit # or pnpm add privakit
-[//]:  ```
+[//]: ```bash
+
+[//]: npm install privakit # or yarn add privakit # or pnpm add privakit
+[//]: ```
 
 ### Basic Usage
 
 ```typescript
-import { detectPII, maskPII, createPolicyEngine } from 'privakit';
+import { detectPII, maskPII, createPolicyEngine } from "privakit";
 
 // Detect PII in text
 const text = "Contact John Doe at john@example.com or call (555) 123-4567";
 const detection = detectPII(text);
-console.log(detection.hasPII);           // true
-console.log(detection.detectedTypes);    // ['name', 'email', 'phone']
+console.log(detection.hasPII); // true
+console.log(detection.detectedTypes); // ['name', 'email', 'phone']
 
 // Apply safe masking for display
-const maskedEmail = maskPII('john@example.com', 'email');
-console.log(maskedEmail.masked);         // "j***@example.com"
+const maskedEmail = maskPII("john@example.com", "email");
+console.log(maskedEmail.masked); // "j***@example.com"
 
 // GDPR-compliant policy enforcement
-const gdprEngine = createPolicyEngine('gdpr');
-const decision = gdprEngine.evaluate('email', 'log');
-console.log(decision.allowed);           // false (protects by default)
+const gdprEngine = createPolicyEngine("gdpr");
+const decision = gdprEngine.evaluate("email", "log");
+console.log(decision.allowed); // false (protects by default)
 ```
 
 ## 🏗️ What is PII and Why It Matters
 
 **Personally Identifiable Information (PII)** is any data that can identify, contact, or locate an individual. This includes:
 
--   **Direct identifiers**: Names, emails, phone numbers, SSNs, addresses
--   **Digital footprints**: IP addresses, device IDs, online accounts
--   **Financial data**: Credit cards, bank accounts, payment information
--   **Behavioral data**: Location history, browsing patterns, preferences
+- **Direct identifiers**: Names, emails, phone numbers, SSNs, addresses
+- **Digital footprints**: IP addresses, device IDs, online accounts
+- **Financial data**: Credit cards, bank accounts, payment information
+- **Behavioral data**: Location history, browsing patterns, preferences
 
 ### Why PII Protection is Critical
 
 1.  **Legal Compliance** 📚
-    
-    -   **GDPR**: €20M+ fines for violations
-    -   **CCPA**: $7,500 per violation
-    -   **HIPAA**, **SOX**, **PCI DSS** requirements
+    - **GDPR**: €20M+ fines for violations
+    - **CCPA**: $7,500 per violation
+    - **HIPAA**, **SOX**, **PCI DSS** requirements
+
 2.  **Security Risks** 🔒
-    
-    -   Data breaches affecting millions
-    -   Identity theft and fraud
-    -   Social engineering attacks
+    - Data breaches affecting millions
+    - Identity theft and fraud
+    - Social engineering attacks
+
 3.  **Business Impact** 💼
-    
-    -   Customer trust and retention
-    -   Reputation management
-    -   Competitive advantage
+    - Customer trust and retention
+    - Reputation management
+    - Competitive advantage
 
 ## 🔧 Core Modules
 
@@ -123,12 +121,12 @@ Locale-aware, provider-specific, consistent data
 
 ## 📖 Comprehensive Documentation
 
--   📚 **[Full Documentation](./docs/README.md)** - Complete API reference and guides
--   🚀 **[Quick Start Guide](./docs/quick-start.md)** - Get up and running in minutes
--   🏗️ **[Core Concepts](./docs/core-concepts.md)** - Understanding PII and privacy principles
--   ⚙️ **[Installation Guide](./docs/installation.md)** - Setup for different environments
--   🔗 **[Integration Examples](./docs/examples/)** - Real-world usage patterns
--   🇧🇷 **[LGPD Guide (Brazil)](./docs/lgpd-brazil.md)** - Brazilian data protection compliance
+- 📚 **[Full Documentation](./docs/README.md)** - Complete API reference and guides
+- 🚀 **[Quick Start Guide](./docs/quick-start.md)** - Get up and running in minutes
+- 🏗️ **[Core Concepts](./docs/core-concepts.md)** - Understanding PII and privacy principles
+- ⚙️ **[Installation Guide](./docs/installation.md)** - Setup for different environments
+- 🔗 **[Integration Examples](./docs/examples/)** - Real-world usage patterns
+- 🇧🇷 **[LGPD Guide (Brazil)](./docs/lgpd-brazil.md)** - Brazilian data protection compliance
 
 ## 🛡️ Privacy & Security First
 
@@ -136,24 +134,24 @@ Privakit is built with **privacy by design** principles:
 
 ### ✅ Complete Privacy Protection
 
--   **No telemetry or tracking** - Zero data collection
--   **Local processing only** - No external API calls or network requests
--   **No data retention** - Stateless processing, no persistent storage
--   **Secure by default** - Conservative privacy settings out-of-the-box
+- **No telemetry or tracking** - Zero data collection
+- **Local processing only** - No external API calls or network requests
+- **No data retention** - Stateless processing, no persistent storage
+- **Secure by default** - Conservative privacy settings out-of-the-box
 
 ### ✅ Enterprise Security
 
--   **Memory safe** - Automatic cleanup of sensitive data
--   **Error safe** - No PII leaked in error messages or logs
--   **Audit ready** - Comprehensive logging and compliance reporting
--   **Deterministic** - Consistent, predictable results
+- **Memory safe** - Automatic cleanup of sensitive data
+- **Error safe** - No PII leaked in error messages or logs
+- **Audit ready** - Comprehensive logging and compliance reporting
+- **Deterministic** - Consistent, predictable results
 
 ### ✅ Compliance Ready
 
--   **GDPR Article 25** - Privacy by design and by default
--   **CCPA Section 1798.100** - Consumer privacy rights
--   **ISO 27001** - Information security management
--   **SOC 2 Type II** - Security, availability, and confidentiality
+- **GDPR Article 25** - Privacy by design and by default
+- **CCPA Section 1798.100** - Consumer privacy rights
+- **ISO 27001** - Information security management
+- **SOC 2 Type II** - Security, availability, and confidentiality
 
 ## 🌐 Third-Party Dependencies
 
@@ -218,7 +216,7 @@ import { validateEmail, validatePhone, createPolicyEngine } from 'privakit';asyn
 ### Log Sanitization
 
 ```typescript
-import { createSafeLogger } from 'privakit';// Create PII-safe loggerconst logger = createSafeLogger({  replacement: '[REDACTED]',  strictMode: true});// All PII automatically redactedlogger.log('User john@example.com failed login from 192.168.1.100');// Output: "User [REDACTED] failed login from [REDACTED]"
+import { createSafeLogger } from "privakit"; // Create PII-safe loggerconst logger = createSafeLogger({  replacement: '[REDACTED]',  strictMode: true});// All PII automatically redactedlogger.log('User john@example.com failed login from 192.168.1.100');// Output: "User [REDACTED] failed login from [REDACTED]"
 ```
 
 ### Content Moderation
@@ -248,7 +246,11 @@ import { detectPII, maskPII } from 'privakit';function UserProfile({ user }) {  
 #### Vue.js/Nuxt
 
 ```vue
-<script setup>import { detectPII, maskPII } from 'privakit';const email = ref('user@example.com');const maskedEmail = computed(() => maskPII(email.value, 'email').masked);</script>
+<script setup>
+import { detectPII, maskPII } from "privakit";
+const email = ref("user@example.com");
+const maskedEmail = computed(() => maskPII(email.value, "email").masked);
+</script>
 ```
 
 #### Angular
@@ -260,23 +262,28 @@ import { detectPII, maskPII } from 'privakit';@Component({...})export class User
 #### Node.js/Express
 
 ```typescript
-import { createRedactionMiddleware } from 'privakit';app.use(createRedactionMiddleware({  strictMode: process.env.NODE_ENV === 'production'}));
+import { createRedactionMiddleware } from "privakit";
+app.use(
+  createRedactionMiddleware({
+    strictMode: process.env.NODE_ENV === "production",
+  }),
+);
 ```
 
 **📖 [Complete Framework Guide](./docs/framework-integration.md)** - Detailed integration examples for React, Vue, Angular, Svelte, Next.js, Nuxt, and more.
 
 ## 📊 Performance & Bundle Size
 
--   **Core library**: ~50KB gzipped
--   **Tree-shakeable**: Import only what you need
--   **Zero runtime dependencies**: All deps are for validation/NLP
--   **Memory efficient**: No data retention between calls
--   **Fast processing**: Optimized regex and NLP pipelines
+- **Core library**: ~50KB gzipped
+- **Tree-shakeable**: Import only what you need
+- **Zero runtime dependencies**: All deps are for validation/NLP
+- **Memory efficient**: No data retention between calls
+- **Fast processing**: Optimized regex and NLP pipelines
 
 ```typescript
 // Minimal import for bundle optimization
-import { validateEmail } from 'privakit/validate/email';
-import { maskEmail } from 'privakit/mask';
+import { validateEmail } from "privakit/validate/email";
+import { maskEmail } from "privakit/mask";
 // Only email validation and masking included in bundle
 ```
 
@@ -285,9 +292,11 @@ import { maskEmail } from 'privakit/mask';
 Experience privakit in action with our comprehensive test application! The test app provides a visual interface to explore all privakit features.
 
 ### 🌐 Try It Online
-**[Live Demo →](https://maribeiromendes.github.io/privakit/)** *(Auto-deployed from main branch)*
+
+**[Live Demo →](https://maribeiromendes.github.io/privakit/)** _(Auto-deployed from main branch)_
 
 ### 🚀 Run Locally
+
 ```bash
 # Clone the repository
 git clone https://github.com/maribeiromendes/privakit.git
@@ -305,6 +314,7 @@ The test app will be available at `http://localhost:5175`
 ### ✨ Test App Features
 
 **🧪 Interactive Testing Sections:**
+
 - **📧 Validation & Normalization** - Test email, phone, name validation with real-time feedback
 - **🔍 PII Detection** - Analyze text for personal information with confidence scoring
 - **🎭 Masking & Redaction** - Compare display-safe masking vs secure redaction
@@ -315,6 +325,7 @@ The test app will be available at `http://localhost:5175`
 - **💡 Examples** - Real-world use case scenarios
 
 **📖 Built-in Documentation:**
+
 - Step-by-step usage guides for each feature
 - Live links to official privacy regulation texts
 - Implementation status transparency
@@ -323,6 +334,7 @@ The test app will be available at `http://localhost:5175`
 ### 🛠️ Current Implementation Status
 
 **✅ Fully Implemented:**
+
 - **PII Detection** - 17+ PII types with NLP and pattern matching
 - **Phone Validation** - International support via libphonenumber-js (US, BR, CA, GB, DE, and more)
 - **Email Validation** - Comprehensive validation with domain analysis
@@ -333,11 +345,13 @@ The test app will be available at `http://localhost:5175`
 - **Compliance Testing** - Multi-regulation validation (GDPR, LGPD, HIPAA, CCPA, PIPEDA, Privacy Act)
 
 **🚧 In Development:**
+
 - **Full Locale Support** - Country-specific validation rules (currently `/src/locales/` folders are placeholders)
 - **Advanced Address Validation** - Region-specific address formats
 - **Cultural Name Patterns** - Locale-aware name validation beyond basic patterns
 
 **📋 Planned:**
+
 - **Biometric Data Detection** - Advanced pattern recognition
 - **Real-time Streaming** - Processing live data streams
 - **Advanced Anonymization** - k-anonymity and differential privacy
@@ -347,22 +361,26 @@ The test app will be available at `http://localhost:5175`
 **🌟 We need your help to make privakit better!**
 
 **📱 Test the App:**
+
 - Try the test app and report any issues
 - Test with real-world data from your use cases
 - Suggest new features or improvements
 
 **🌍 Deploy the Demo:**
+
 - Help us deploy the test app to Vercel, Netlify, or other platforms
 - Share the live demo with your team
 - Contribute deployment configurations
 
 **💻 Contribute Code:**
+
 - Implement locale-specific validation rules
 - Add new PII detection patterns
 - Improve compliance engine accuracy
 - Enhance documentation
 
 **🔗 Get Started Contributing:**
+
 ```bash
 # Run the test app locally
 npm run dev:test-app
@@ -395,10 +413,11 @@ The `dev-scripts/` folder contains organized development and testing utilities:
 
 - **`dev-scripts/debug/`** - Component-specific debugging scripts
 - **`dev-scripts/validation/`** - Privacy compliance and dependency testing
-- **`dev-scripts/research/`** - Pattern research and improvement scripts  
+- **`dev-scripts/research/`** - Pattern research and improvement scripts
 - **`dev-scripts/utils/`** - Build validation and utility scripts
 
 **Quick validation commands:**
+
 ```bash
 # Verify privacy compliance (CRITICAL before any release)
 node dev-scripts/validation/test-privacy.js
@@ -430,4 +449,4 @@ For security issues, please report them privately via the [GitHub security tab](
 
 **Built with ❤️ for developers who care about privacy.**
 
-*Privakit - Making PII protection simple, automatic, and compliant.*
+_Privakit - Making PII protection simple, automatic, and compliant._

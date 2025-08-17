@@ -2,10 +2,14 @@
  * Email validation using validator.js for robust email validation
  */
 
-import validator from 'validator';
-import type { ValidationResult } from '../core/types.js';
-import { PIIType } from '../core/types.js';
-import { PIIValidationError, createValidationError, ErrorCodes } from '../core/errors.js';
+import validator from "validator";
+import type { ValidationResult } from "../core/types.js";
+import { PIIType } from "../core/types.js";
+import {
+  PIIValidationError,
+  createValidationError,
+  ErrorCodes,
+} from "../core/errors.js";
 
 export interface EmailValidationOptions {
   allowDisplayName?: boolean;
@@ -26,72 +30,79 @@ export interface EmailValidationResult extends ValidationResult<string> {
 
 // Common disposable email domains for filtering
 const DISPOSABLE_DOMAINS = new Set([
-  '10minutemail.com',
-  'guerrillamail.com',
-  'mailinator.com',
-  'tempmail.org',
-  'yopmail.com',
-  'temp-mail.org',
-  'sharklasers.com'
+  "10minutemail.com",
+  "guerrillamail.com",
+  "mailinator.com",
+  "tempmail.org",
+  "yopmail.com",
+  "temp-mail.org",
+  "sharklasers.com",
 ]);
 
 // Common corporate domains
 const CORPORATE_DOMAINS = new Set([
-  'gmail.com',
-  'yahoo.com',
-  'hotmail.com',
-  'outlook.com',
-  'icloud.com',
-  'protonmail.com'
+  "gmail.com",
+  "yahoo.com",
+  "hotmail.com",
+  "outlook.com",
+  "icloud.com",
+  "protonmail.com",
 ]);
 
 /**
  * Validates an email address with comprehensive checks
  */
 export function validateEmail(
-  email: string, 
-  options: EmailValidationOptions = {}
+  email: string,
+  options: EmailValidationOptions = {},
 ): EmailValidationResult {
   const errors: any[] = [];
-  
+
   // Basic input validation
-  if (!email || typeof email !== 'string') {
-    errors.push(createValidationError(
-      ErrorCodes.REQUIRED_FIELD,
-      'Email address is required',
-      'email',
-      email
-    ));
+  if (!email || typeof email !== "string") {
+    errors.push(
+      createValidationError(
+        ErrorCodes.REQUIRED_FIELD,
+        "Email address is required",
+        "email",
+        email,
+      ),
+    );
     return {
       isValid: false,
       errors,
-      metadata: { type: PIIType.Email }
+      metadata: { type: PIIType.Email },
     };
   }
 
   const trimmedEmail = email.trim();
-  
+
   if (trimmedEmail.length === 0) {
-    errors.push(createValidationError(
-      ErrorCodes.REQUIRED_FIELD,
-      'Email address cannot be empty',
-      'email',
-      email
-    ));
+    errors.push(
+      createValidationError(
+        ErrorCodes.REQUIRED_FIELD,
+        "Email address cannot be empty",
+        "email",
+        email,
+      ),
+    );
     return {
       isValid: false,
       errors,
-      metadata: { type: PIIType.Email }
+      metadata: { type: PIIType.Email },
     };
   }
 
-  if (trimmedEmail.length > 254) { // RFC 5321 practical limit
-    errors.push(createValidationError(
-      ErrorCodes.FIELD_TOO_LONG,
-      'Email address exceeds maximum length of 320 characters',
-      'email',
-      email
-    ));
+  if (trimmedEmail.length > 254) {
+    // RFC 5321 practical limit
+    errors.push(
+      createValidationError(
+        ErrorCodes.FIELD_TOO_LONG,
+        "Email address exceeds maximum length of 320 characters",
+        "email",
+        email,
+      ),
+    );
   }
 
   // Use validator.js for robust email validation
@@ -100,59 +111,71 @@ export function validateEmail(
     require_tld: options.requireTld ?? true,
     allow_utf8_local_part: options.allowUtf8LocalPart ?? true,
     require_display_name: false,
-    allow_ip_domain: options.allowIpDomain ?? false
+    allow_ip_domain: options.allowIpDomain ?? false,
   };
 
   const isValidFormat = validator.isEmail(trimmedEmail, validatorOptions);
-  
+
   if (!isValidFormat) {
-    errors.push(createValidationError(
-      ErrorCodes.INVALID_EMAIL,
-      'Invalid email address format',
-      'email',
-      trimmedEmail
-    ));
+    errors.push(
+      createValidationError(
+        ErrorCodes.INVALID_EMAIL,
+        "Invalid email address format",
+        "email",
+        trimmedEmail,
+      ),
+    );
   }
 
   // Extract domain and local part for additional validation
   let domain: string | undefined;
   let localPart: string | undefined;
-  
+
   if (isValidFormat) {
-    const atIndex = trimmedEmail.lastIndexOf('@');
+    const atIndex = trimmedEmail.lastIndexOf("@");
     if (atIndex > 0) {
       localPart = trimmedEmail.substring(0, atIndex);
       domain = trimmedEmail.substring(atIndex + 1).toLowerCase();
-      
+
       // Domain-specific validation
       if (options.domainSpecificValidation && domain) {
         if (options.blacklistedDomains?.includes(domain)) {
-          errors.push(createValidationError(
-            ErrorCodes.INVALID_EMAIL,
-            `Email domain '${domain}' is not allowed`,
-            'email',
-            trimmedEmail
-          ));
+          errors.push(
+            createValidationError(
+              ErrorCodes.INVALID_EMAIL,
+              `Email domain '${domain}' is not allowed`,
+              "email",
+              trimmedEmail,
+            ),
+          );
         }
-        
-        if (options.whitelistedDomains && !options.whitelistedDomains.includes(domain)) {
-          errors.push(createValidationError(
-            ErrorCodes.INVALID_EMAIL,
-            `Email domain '${domain}' is not in the allowed list`,
-            'email',
-            trimmedEmail
-          ));
+
+        if (
+          options.whitelistedDomains &&
+          !options.whitelistedDomains.includes(domain)
+        ) {
+          errors.push(
+            createValidationError(
+              ErrorCodes.INVALID_EMAIL,
+              `Email domain '${domain}' is not in the allowed list`,
+              "email",
+              trimmedEmail,
+            ),
+          );
         }
       }
-      
+
       // Local part validation (before @)
-      if (localPart.length > 64) { // RFC 5321 limit
-        errors.push(createValidationError(
-          ErrorCodes.FIELD_TOO_LONG,
-          'Email local part exceeds maximum length of 64 characters',
-          'email',
-          trimmedEmail
-        ));
+      if (localPart.length > 64) {
+        // RFC 5321 limit
+        errors.push(
+          createValidationError(
+            ErrorCodes.FIELD_TOO_LONG,
+            "Email local part exceeds maximum length of 64 characters",
+            "email",
+            trimmedEmail,
+          ),
+        );
       }
     }
   }
@@ -174,8 +197,8 @@ export function validateEmail(
       type: PIIType.Email,
       validationOptions: options,
       originalLength: email.length,
-      trimmedLength: trimmedEmail.length
-    }
+      trimmedLength: trimmedEmail.length,
+    },
   };
 }
 
@@ -183,7 +206,7 @@ export function validateEmail(
  * Normalizes an email address to canonical format
  */
 export function normalizeEmail(email: string): string {
-  if (!email || typeof email !== 'string') {
+  if (!email || typeof email !== "string") {
     return email;
   }
 
@@ -195,17 +218,19 @@ export function normalizeEmail(email: string): string {
 
   // Use validator.js normalize function for valid emails
   try {
-    return validator.normalizeEmail(email, {
-      gmail_lowercase: true,
-      gmail_remove_dots: false, // Keep dots for safety
-      gmail_remove_subaddress: false, // Keep +tags for safety
-      outlookdotcom_lowercase: true,
-      outlookdotcom_remove_subaddress: false,
-      yahoo_lowercase: true,
-      yahoo_remove_subaddress: false,
-      icloud_lowercase: true,
-      icloud_remove_subaddress: false
-    }) || email.toLowerCase().trim();
+    return (
+      validator.normalizeEmail(email, {
+        gmail_lowercase: true,
+        gmail_remove_dots: false, // Keep dots for safety
+        gmail_remove_subaddress: false, // Keep +tags for safety
+        outlookdotcom_lowercase: true,
+        outlookdotcom_remove_subaddress: false,
+        yahoo_lowercase: true,
+        yahoo_remove_subaddress: false,
+        icloud_lowercase: true,
+        icloud_remove_subaddress: false,
+      }) || email.toLowerCase().trim()
+    );
   } catch {
     // If normalization fails, fall back to basic lowercase/trim
     return email.toLowerCase().trim();
@@ -232,17 +257,17 @@ export function extractEmailDomain(email: string): string | null {
  * Validates multiple email addresses
  */
 export function validateEmails(
-  emails: string[], 
-  options: EmailValidationOptions = {}
+  emails: string[],
+  options: EmailValidationOptions = {},
 ): EmailValidationResult[] {
-  return emails.map(email => validateEmail(email, options));
+  return emails.map((email) => validateEmail(email, options));
 }
 
 /**
  * Checks if email passes basic format validation (fast check)
  */
 export function isValidEmailFormat(email: string): boolean {
-  if (!email || typeof email !== 'string') {
+  if (!email || typeof email !== "string") {
     return false;
   }
   return validator.isEmail(email.trim());

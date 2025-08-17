@@ -4,35 +4,35 @@
 
 // Risk levels for PII classification
 export enum RiskLevel {
-  Low = 'low',
-  Moderate = 'moderate',
-  High = 'high',
-  Critical = 'critical'
+  Low = "low",
+  Moderate = "moderate",
+  High = "high",
+  Critical = "critical",
 }
 
 // PII types that can be detected
 export enum PIIType {
-  Email = 'email',
-  Phone = 'phone',
-  Name = 'name',
-  Address = 'address',
-  SSN = 'ssn',
-  CreditCard = 'creditcard',
-  IPAddress = 'ip',
-  URL = 'url',
-  ZipCode = 'zipcode',
-  NationalID = 'nationalid',
-  DateOfBirth = 'dateofbirth',
-  IBAN = 'iban',
-  VAT = 'vat'
+  Email = "email",
+  Phone = "phone",
+  Name = "name",
+  Address = "address",
+  SSN = "ssn",
+  CreditCard = "creditcard",
+  IPAddress = "ip",
+  URL = "url",
+  ZipCode = "zipcode",
+  NationalID = "nationalid",
+  DateOfBirth = "dateofbirth",
+  IBAN = "iban",
+  VAT = "vat",
 }
 
 // Confidence levels for detection
 export enum ConfidenceLevel {
-  Low = 'low',
-  Medium = 'medium',
-  High = 'high',
-  VeryHigh = 'very_high'
+  Low = "low",
+  Medium = "medium",
+  High = "high",
+  VeryHigh = "very_high",
 }
 
 // Detection span with position information
@@ -120,12 +120,12 @@ export interface PolicyRule {
 
 // Policy operations
 export enum PolicyOperation {
-  Store = 'store',
-  Process = 'process',
-  Transfer = 'transfer',
-  Log = 'log',
-  Display = 'display',
-  Export = 'export'
+  Store = "store",
+  Process = "process",
+  Transfer = "transfer",
+  Log = "log",
+  Display = "display",
+  Export = "export",
 }
 
 // Policy engine interface
@@ -147,7 +147,7 @@ export interface PolicyDecision {
 
 // Pseudonymization options
 export interface PseudonymizationOptions {
-  algorithm: 'aes' | 'hmac' | 'sha256';
+  algorithm: "aes" | "hmac" | "sha256";
   key?: string;
   salt?: string;
   preserveFormat?: boolean;
@@ -164,7 +164,7 @@ export interface PseudonymizationResult {
 
 // Anonymization options
 export interface AnonymizationOptions {
-  algorithm: 'hash' | 'generalize' | 'suppress';
+  algorithm: "hash" | "generalize" | "suppress";
   salt?: string;
   generalizationLevel?: number;
   suppressionThreshold?: number;
@@ -252,7 +252,7 @@ export interface NameValidationResult extends ValidationResult<string> {
   firstName?: string;
   lastName?: string;
   middleNames?: string[];
-  nameType?: 'person' | 'organization' | 'unknown';
+  nameType?: "person" | "organization" | "unknown";
   isLikelyName?: boolean;
   confidence?: ConfidenceLevel;
 }
@@ -267,12 +267,12 @@ export interface AddressValidationOptions {
 
 export interface AddressValidationResult extends ValidationResult<string> {
   components?: AddressComponent[];
-  addressType?: 'residential' | 'business' | 'po_box' | 'unknown';
+  addressType?: "residential" | "business" | "po_box" | "unknown";
   confidence?: ConfidenceLevel;
 }
 
 export interface AddressComponent {
-  type: 'street' | 'city' | 'state' | 'postal_code' | 'country';
+  type: "street" | "city" | "state" | "postal_code" | "country";
   value: string;
   confidence: ConfidenceLevel;
 }
@@ -282,12 +282,12 @@ export interface EmailNormalizationOptions extends NormalizationOptions {
   lowercase?: boolean;
   removeDots?: boolean;
   removeSubaddress?: boolean;
-  provider?: 'gmail' | 'outlook' | 'yahoo' | 'icloud' | 'generic';
+  provider?: "gmail" | "outlook" | "yahoo" | "icloud" | "generic";
 }
 
 export interface PhoneNormalizationOptions extends NormalizationOptions {
   defaultCountry?: string;
-  outputFormat?: 'E.164' | 'INTERNATIONAL' | 'NATIONAL' | 'RFC3966';
+  outputFormat?: "E.164" | "INTERNATIONAL" | "NATIONAL" | "RFC3966";
 }
 
 export interface NameNormalizationOptions extends NormalizationOptions {
@@ -301,7 +301,7 @@ export interface AddressNormalizationOptions extends NormalizationOptions {
   standardizeStreetTypes?: boolean;
   standardizeDirections?: boolean;
   removeExtraSpaces?: boolean;
-  formatStyle?: 'single-line' | 'multi-line' | 'compact';
+  formatStyle?: "single-line" | "multi-line" | "compact";
 }
 
 // Masking-specific types

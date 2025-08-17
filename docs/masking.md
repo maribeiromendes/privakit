@@ -7,12 +7,12 @@ The Masking module provides display-safe concealment of PII while preserving rea
 ### Masking vs Redaction
 
 ```typescript
-import { maskPII, redactText } from 'privakit';
+import { maskPII, redactText } from "privakit";
 
 const email = "john.doe@company.com";
 
 // Masking: Preserves structure, safe for display
-const masked = maskPII(email, 'email');
+const masked = maskPII(email, "email");
 console.log(masked.masked); // "j*******@company.com"
 
 // Redaction: Complete removal, safe for logs
@@ -24,7 +24,7 @@ console.log(redacted.redacted); // "Email: [REDACTED]"
 
 - **User interfaces**: Show partially hidden data
 - **Debugging**: Preserve format while hiding sensitive info
-- **Confirmation screens**: "Send to j***@company.com?"
+- **Confirmation screens**: "Send to j\*\*\*@company.com?"
 - **Search results**: Show matching structure without exposing data
 - **Audit trails**: Record actions without storing full PII
 
@@ -33,31 +33,31 @@ console.log(redacted.redacted); // "Email: [REDACTED]"
 ### Basic Email Masking
 
 ```typescript
-import { maskEmail } from 'privakit';
+import { maskEmail } from "privakit";
 
 // Default masking
-console.log(maskEmail('user@example.com').masked);
+console.log(maskEmail("user@example.com").masked);
 // Output: "u***@example.com"
 
-console.log(maskEmail('john.doe@company.com').masked);
+console.log(maskEmail("john.doe@company.com").masked);
 // Output: "j*******@company.com"
 ```
 
 ### Advanced Email Options
 
 ```typescript
-import { maskEmail, EmailMaskingOptions } from 'privakit';
+import { maskEmail, EmailMaskingOptions } from "privakit";
 
 const options: EmailMaskingOptions = {
-  maskChar: '#',           // Custom mask character
-  visibleStart: 2,         // Show first 2 characters
-  visibleEnd: 1,          // Show last 1 character of local part
-  maskDomain: true,        // Also mask domain
-  preserveTLD: true,       // Keep top-level domain visible
-  minVisibleChars: 1       // Minimum characters to show
+  maskChar: "#", // Custom mask character
+  visibleStart: 2, // Show first 2 characters
+  visibleEnd: 1, // Show last 1 character of local part
+  maskDomain: true, // Also mask domain
+  preserveTLD: true, // Keep top-level domain visible
+  minVisibleChars: 1, // Minimum characters to show
 };
 
-const result = maskEmail('john.doe@company.com', options);
+const result = maskEmail("john.doe@company.com", options);
 console.log(result.masked); // "jo####e@c######.com"
 ```
 
@@ -65,16 +65,16 @@ console.log(result.masked); // "jo####e@c######.com"
 
 ```typescript
 // Mask domain but preserve TLD
-const result = maskEmail('user@sensitive-company.com', {
+const result = maskEmail("user@sensitive-company.com", {
   maskDomain: true,
-  preserveTLD: true
+  preserveTLD: true,
 });
 console.log(result.masked); // "u***@s****************.com"
 
 // Mask everything including TLD
-const fullMask = maskEmail('user@secret.org', {
+const fullMask = maskEmail("user@secret.org", {
   maskDomain: true,
-  preserveTLD: false
+  preserveTLD: false,
 });
 console.log(fullMask.masked); // "u***@******.**"
 ```
@@ -83,13 +83,13 @@ console.log(fullMask.masked); // "u***@******.**"
 
 ```typescript
 // Handle corporate email policies
-const corporateEmail = 'john.doe+project@company.com';
+const corporateEmail = "john.doe+project@company.com";
 
 // Preserve subaddressing for functionality
 const result = maskEmail(corporateEmail, {
   visibleStart: 1,
   visibleEnd: 0,
-  preserveFormat: true
+  preserveFormat: true,
 });
 console.log(result.masked); // "j*******+*******@company.com"
 ```
@@ -99,13 +99,13 @@ console.log(result.masked); // "j*******+*******@company.com"
 ### Basic Phone Masking
 
 ```typescript
-import { maskPhone } from 'privakit';
+import { maskPhone } from "privakit";
 
 // US phone numbers
-console.log(maskPhone('+1 (555) 123-4567').masked);
+console.log(maskPhone("+1 (555) 123-4567").masked);
 // Output: "+1 *** ***-**67"
 
-console.log(maskPhone('555-123-4567').masked);
+console.log(maskPhone("555-123-4567").masked);
 // Output: "***-***-**67"
 ```
 
@@ -113,27 +113,27 @@ console.log(maskPhone('555-123-4567').masked);
 
 ```typescript
 // International numbers
-console.log(maskPhone('+44 20 7946 0958').masked);
+console.log(maskPhone("+44 20 7946 0958").masked);
 // Output: "+44 ** ****-**58"
 
-console.log(maskPhone('+33 1 42 86 83 26').masked);
+console.log(maskPhone("+33 1 42 86 83 26").masked);
 // Output: "+33 * ** ** **-**26"
 ```
 
 ### Phone Masking Options
 
 ```typescript
-import { maskPhone, PhoneMaskingOptions } from 'privakit';
+import { maskPhone, PhoneMaskingOptions } from "privakit";
 
 const options: PhoneMaskingOptions = {
-  maskChar: 'X',
-  preserveAreaCode: true,      // Keep area code visible
-  maskCountryCode: false,      // Keep country code visible  
-  visibleEnd: 4,              // Show last 4 digits
-  defaultCountry: 'US'
+  maskChar: "X",
+  preserveAreaCode: true, // Keep area code visible
+  maskCountryCode: false, // Keep country code visible
+  visibleEnd: 4, // Show last 4 digits
+  defaultCountry: "US",
 };
 
-const result = maskPhone('(555) 123-4567', options);
+const result = maskPhone("(555) 123-4567", options);
 console.log(result.masked); // "+1 555 XXX-4567"
 ```
 
@@ -141,26 +141,26 @@ console.log(result.masked); // "+1 555 XXX-4567"
 
 ```typescript
 // Handle business vs personal phone distinction
-function maskPhoneByContext(phone: string, context: 'business' | 'personal') {
-  if (context === 'business') {
+function maskPhoneByContext(phone: string, context: "business" | "personal") {
+  if (context === "business") {
     // Business phones: show area code for context
     return maskPhone(phone, {
       preserveAreaCode: true,
-      visibleEnd: 0  // Hide specific number
+      visibleEnd: 0, // Hide specific number
     });
   } else {
     // Personal phones: standard masking
     return maskPhone(phone, {
       preserveAreaCode: false,
-      visibleEnd: 4
+      visibleEnd: 4,
     });
   }
 }
 
-console.log(maskPhoneByContext('(555) 123-4567', 'business').masked);
+console.log(maskPhoneByContext("(555) 123-4567", "business").masked);
 // Output: "+1 555 XXX-XXXX"
 
-console.log(maskPhoneByContext('(555) 123-4567', 'personal').masked);
+console.log(maskPhoneByContext("(555) 123-4567", "personal").masked);
 // Output: "+1 XXX XXX-4567"
 ```
 
@@ -169,13 +169,13 @@ console.log(maskPhoneByContext('(555) 123-4567', 'personal').masked);
 ### Basic Name Masking
 
 ```typescript
-import { maskName } from 'privakit';
+import { maskName } from "privakit";
 
 // Simple names
-console.log(maskName('John Doe').masked);
+console.log(maskName("John Doe").masked);
 // Output: "**** ***"
 
-console.log(maskName('Mary Johnson').masked);
+console.log(maskName("Mary Johnson").masked);
 // Output: "**** *******"
 ```
 
@@ -183,8 +183,8 @@ console.log(maskName('Mary Johnson').masked);
 
 ```typescript
 // Preserve first letters for context
-const result = maskName('John Michael Doe', {
-  preserveFirstLetter: true
+const result = maskName("John Michael Doe", {
+  preserveFirstLetter: true,
 });
 console.log(result.masked); // "J*** M****** D**"
 ```
@@ -192,17 +192,17 @@ console.log(result.masked); // "J*** M****** D**"
 ### Complex Name Handling
 
 ```typescript
-import { maskName, NameMaskingOptions } from 'privakit';
+import { maskName, NameMaskingOptions } from "privakit";
 
 const options: NameMaskingOptions = {
   preserveFirstLetter: true,
-  maskMiddleName: false,       // Don't mask middle names
-  maskLastName: false,         // Don't mask last names
-  maskChar: '•'
+  maskMiddleName: false, // Don't mask middle names
+  maskLastName: false, // Don't mask last names
+  maskChar: "•",
 };
 
 // Useful for partial disclosure
-const result = maskName('Dr. John Michael Smith Jr.', options);
+const result = maskName("Dr. John Michael Smith Jr.", options);
 console.log(result.masked); // "D•. J••• Michael Smith J•."
 ```
 
@@ -210,26 +210,29 @@ console.log(result.masked); // "D•. J••• Michael Smith J•."
 
 ```typescript
 // Handle different name formats respectfully
-function maskNameCulturally(name: string, culture: 'western' | 'eastern' | 'mononym') {
+function maskNameCulturally(
+  name: string,
+  culture: "western" | "eastern" | "mononym",
+) {
   switch (culture) {
-    case 'western':
+    case "western":
       return maskName(name, {
         preserveFirstLetter: true,
-        maskLastName: false  // Family name context important
+        maskLastName: false, // Family name context important
       });
-    
-    case 'eastern':
+
+    case "eastern":
       // In some cultures, family name comes first
       return maskName(name, {
         preserveFirstLetter: true,
-        maskMiddleName: true
+        maskMiddleName: true,
       });
-    
-    case 'mononym':
+
+    case "mononym":
       // Single names (celebrities, historical figures)
       return maskName(name, {
         preserveFirstLetter: true,
-        visibleEnd: 1
+        visibleEnd: 1,
       });
   }
 }
@@ -240,7 +243,7 @@ function maskNameCulturally(name: string, culture: 'western' | 'eastern' | 'mono
 ### Basic Address Masking
 
 ```typescript
-import { maskAddress } from 'privakit';
+import { maskAddress } from "privakit";
 
 const address = `123 Main Street
 Apt 4B
@@ -250,24 +253,24 @@ const result = maskAddress(address);
 console.log(result.masked);
 // Output:
 // "*** Main Street
-// Apt 4B  
+// Apt 4B
 // Anytown, ST 12345"
 ```
 
 ### Selective Address Masking
 
 ```typescript
-import { maskAddress, AddressMaskingOptions } from 'privakit';
+import { maskAddress, AddressMaskingOptions } from "privakit";
 
 const options: AddressMaskingOptions = {
-  maskStreetNumber: true,     // Hide house number
-  maskStreetName: false,      // Keep street name
-  maskCity: false,           // Keep city  
-  maskPostalCode: true,      // Hide ZIP code
-  preserveCountry: true      // Always show country
+  maskStreetNumber: true, // Hide house number
+  maskStreetName: false, // Keep street name
+  maskCity: false, // Keep city
+  maskPostalCode: true, // Hide ZIP code
+  preserveCountry: true, // Always show country
 };
 
-const result = maskAddress('123 Oak Avenue, Portland, OR 97201', options);
+const result = maskAddress("123 Oak Avenue, Portland, OR 97201", options);
 console.log(result.masked); // "*** Oak Avenue, Portland, OR *****"
 ```
 
@@ -275,34 +278,37 @@ console.log(result.masked); // "*** Oak Avenue, Portland, OR *****"
 
 ```typescript
 // Different privacy levels for different contexts
-function maskAddressByPrivacy(address: string, level: 'low' | 'medium' | 'high') {
+function maskAddressByPrivacy(
+  address: string,
+  level: "low" | "medium" | "high",
+) {
   switch (level) {
-    case 'low':
+    case "low":
       // Show city and state only
       return maskAddress(address, {
         maskStreetNumber: true,
         maskStreetName: true,
         maskCity: false,
-        maskPostalCode: true
+        maskPostalCode: true,
       });
-    
-    case 'medium':
+
+    case "medium":
       // Show street but hide specific address
       return maskAddress(address, {
         maskStreetNumber: true,
         maskStreetName: false,
         maskCity: false,
-        maskPostalCode: true
+        maskPostalCode: true,
       });
-    
-    case 'high':
+
+    case "high":
       // Hide everything except country
       return maskAddress(address, {
         maskStreetNumber: true,
         maskStreetName: true,
         maskCity: true,
         maskPostalCode: true,
-        preserveCountry: true
+        preserveCountry: true,
       });
   }
 }
@@ -317,9 +323,9 @@ const sensitiveAddress = "1600 Pennsylvania Avenue, Washington, DC 20500";
 const publicSafe = maskAddress(sensitiveAddress, {
   maskStreetNumber: true,
   maskStreetName: true,
-  maskCity: false,        // DC is public knowledge
-  maskPostalCode: true,   // ZIP could be sensitive
-  preserveCountry: true
+  maskCity: false, // DC is public knowledge
+  maskPostalCode: true, // ZIP could be sensitive
+  preserveCountry: true,
 });
 console.log(publicSafe.masked); // "*** ************ ******, Washington, DC *****, US"
 ```
@@ -329,15 +335,15 @@ console.log(publicSafe.masked); // "*** ************ ******, Washington, DC ****
 ### Basic Credit Card Masking
 
 ```typescript
-import { maskCreditCard } from 'privakit';
+import { maskCreditCard } from "privakit";
 
 // Default: show last 4 digits
-console.log(maskCreditCard('4111111111111111').masked);
+console.log(maskCreditCard("4111111111111111").masked);
 // Output: "************1111"
 
 // With separators for readability
-const result = maskCreditCard('4111-1111-1111-1111', {
-  groupSeparator: ' '
+const result = maskCreditCard("4111-1111-1111-1111", {
+  groupSeparator: " ",
 });
 console.log(result.masked); // "**** **** **** 1111"
 ```
@@ -345,27 +351,27 @@ console.log(result.masked); // "**** **** **** 1111"
 ### PCI DSS Compliant Masking
 
 ```typescript
-import { maskCreditCard, CreditCardMaskingOptions } from 'privakit';
+import { maskCreditCard, CreditCardMaskingOptions } from "privakit";
 
 // PCI DSS allows showing first 6 and last 4
 const pciOptions: CreditCardMaskingOptions = {
-  preserveFirst4: false,      // Don't show first 4
-  preserveLast4: true,        // Show last 4 (PCI compliant)
-  groupSeparator: ' ',
-  maskChar: 'X'
+  preserveFirst4: false, // Don't show first 4
+  preserveLast4: true, // Show last 4 (PCI compliant)
+  groupSeparator: " ",
+  maskChar: "X",
 };
 
-const result = maskCreditCard('4111111111111111', pciOptions);
+const result = maskCreditCard("4111111111111111", pciOptions);
 console.log(result.masked); // "XXXX XXXX XXXX 1111"
 
 // Bank identification (first 6) + last 4 (maximum PCI allows)
 const bankIdOptions: CreditCardMaskingOptions = {
-  preserveFirst4: true,       // Show bank identification
-  preserveLast4: true,        // Show last 4
-  groupSeparator: ' '
+  preserveFirst4: true, // Show bank identification
+  preserveLast4: true, // Show last 4
+  groupSeparator: " ",
 };
 
-const bankResult = maskCreditCard('4111111111111111', bankIdOptions);
+const bankResult = maskCreditCard("4111111111111111", bankIdOptions);
 console.log(bankResult.masked); // "4111 **** **** 1111"
 ```
 
@@ -376,29 +382,37 @@ console.log(bankResult.masked); // "4111 **** **** 1111"
 function maskCardWithType(cardNumber: string) {
   // Detect card type from first digits
   const firstDigit = cardNumber.charAt(0);
-  let cardType = 'Unknown';
-  
+  let cardType = "Unknown";
+
   switch (firstDigit) {
-    case '4': cardType = 'Visa'; break;
-    case '5': cardType = 'MasterCard'; break;
-    case '3': cardType = 'American Express'; break;
-    case '6': cardType = 'Discover'; break;
+    case "4":
+      cardType = "Visa";
+      break;
+    case "5":
+      cardType = "MasterCard";
+      break;
+    case "3":
+      cardType = "American Express";
+      break;
+    case "6":
+      cardType = "Discover";
+      break;
   }
-  
+
   const masked = maskCreditCard(cardNumber, {
     preserveFirst4: false,
     preserveLast4: true,
-    groupSeparator: ' '
+    groupSeparator: " ",
   });
-  
+
   return {
     ...masked,
     cardType,
-    display: `${cardType} ending in ${cardNumber.slice(-4)}`
+    display: `${cardType} ending in ${cardNumber.slice(-4)}`,
   };
 }
 
-const result = maskCardWithType('4111111111111111');
+const result = maskCardWithType("4111111111111111");
 console.log(result.display); // "Visa ending in 1111"
 ```
 
@@ -407,16 +421,16 @@ console.log(result.display); // "Visa ending in 1111"
 ### Universal Masking Function
 
 ```typescript
-import { maskPII } from 'privakit';
+import { maskPII } from "privakit";
 
 // Automatically applies appropriate masking based on PII type
-console.log(maskPII('user@example.com', 'email').masked);
+console.log(maskPII("user@example.com", "email").masked);
 // Output: "u***@example.com"
 
-console.log(maskPII('555-123-4567', 'phone').masked);
+console.log(maskPII("555-123-4567", "phone").masked);
 // Output: "***-***-**67"
 
-console.log(maskPII('John Doe', 'name').masked);
+console.log(maskPII("John Doe", "name").masked);
 // Output: "**** ***"
 ```
 
@@ -424,10 +438,10 @@ console.log(maskPII('John Doe', 'name').masked);
 
 ```typescript
 // For unsupported PII types, uses generic masking
-const result = maskPII('CUSTOM-ID-12345', 'nationalid', {
+const result = maskPII("CUSTOM-ID-12345", "nationalid", {
   visibleStart: 2,
   visibleEnd: 2,
-  maskChar: '#'
+  maskChar: "#",
 });
 console.log(result.masked); // "CU############45"
 console.log(result.metadata?.fallback); // true
@@ -436,17 +450,13 @@ console.log(result.metadata?.fallback); // true
 ### Batch Masking
 
 ```typescript
-import { maskMultiple } from 'privakit';
+import { maskMultiple } from "privakit";
 
-const emails = [
-  'user1@example.com',
-  'user2@company.com',
-  'admin@service.org'
-];
+const emails = ["user1@example.com", "user2@company.com", "admin@service.org"];
 
-const results = maskMultiple(emails, 'email', {
+const results = maskMultiple(emails, "email", {
   visibleStart: 1,
-  visibleEnd: 0
+  visibleEnd: 0,
 });
 
 results.forEach((result, index) => {
@@ -454,7 +464,7 @@ results.forEach((result, index) => {
 });
 // Output:
 // Email 1: u***@example.com
-// Email 2: u***@company.com  
+// Email 2: u***@company.com
 // Email 3: a***@service.org
 ```
 
@@ -466,26 +476,26 @@ results.forEach((result, index) => {
 // Create custom masking logic
 function maskCustomPattern(value: string, pattern: string): string {
   // Pattern: 'XXXX-XXXX-NNNN' where X = mask, N = visible
-  let result = '';
+  let result = "";
   let valueIndex = 0;
-  
+
   for (const char of pattern) {
-    if (char === 'X') {
-      result += '*';
+    if (char === "X") {
+      result += "*";
       valueIndex++;
-    } else if (char === 'N') {
-      result += value[valueIndex] || '*';
+    } else if (char === "N") {
+      result += value[valueIndex] || "*";
       valueIndex++;
     } else {
       result += char; // Separator (-, space, etc.)
     }
   }
-  
+
   return result;
 }
 
 // Usage
-console.log(maskCustomPattern('1234567890', 'XXXX-XXXX-NN'));
+console.log(maskCustomPattern("1234567890", "XXXX-XXXX-NN"));
 // Output: "****-****-90"
 ```
 
@@ -493,28 +503,44 @@ console.log(maskCustomPattern('1234567890', 'XXXX-XXXX-NN'));
 
 ```typescript
 // Adjust masking based on user role/context
-function maskForRole(data: string, type: string, userRole: 'admin' | 'user' | 'guest') {
-  const baseOptions = { maskChar: '*' };
-  
+function maskForRole(
+  data: string,
+  type: string,
+  userRole: "admin" | "user" | "guest",
+) {
+  const baseOptions = { maskChar: "*" };
+
   switch (userRole) {
-    case 'admin':
+    case "admin":
       // Admins see more
-      return maskPII(data, type, { ...baseOptions, visibleStart: 3, visibleEnd: 3 });
-    
-    case 'user':
+      return maskPII(data, type, {
+        ...baseOptions,
+        visibleStart: 3,
+        visibleEnd: 3,
+      });
+
+    case "user":
       // Regular users see standard masking
-      return maskPII(data, type, { ...baseOptions, visibleStart: 1, visibleEnd: 2 });
-    
-    case 'guest':
+      return maskPII(data, type, {
+        ...baseOptions,
+        visibleStart: 1,
+        visibleEnd: 2,
+      });
+
+    case "guest":
       // Guests see minimal information
-      return maskPII(data, type, { ...baseOptions, visibleStart: 1, visibleEnd: 0 });
+      return maskPII(data, type, {
+        ...baseOptions,
+        visibleStart: 1,
+        visibleEnd: 0,
+      });
   }
 }
 
-const email = 'john.doe@company.com';
-console.log(maskForRole(email, 'email', 'admin').masked);  // "joh****@com******.com"
-console.log(maskForRole(email, 'email', 'user').masked);   // "j*****@com******.om"
-console.log(maskForRole(email, 'email', 'guest').masked);  // "j*****@com*******.***"
+const email = "john.doe@company.com";
+console.log(maskForRole(email, "email", "admin").masked); // "joh****@com******.com"
+console.log(maskForRole(email, "email", "user").masked); // "j*****@com******.om"
+console.log(maskForRole(email, "email", "guest").masked); // "j*****@com*******.***"
 ```
 
 ### Progressive Disclosure
@@ -525,28 +551,28 @@ class ProgressiveMasking {
   private data: string;
   private type: string;
   private verificationLevel: number = 0;
-  
+
   constructor(data: string, type: string) {
     this.data = data;
     this.type = type;
   }
-  
+
   verify(level: number) {
     this.verificationLevel = Math.max(this.verificationLevel, level);
   }
-  
+
   getMasked(): string {
     const options = {
       visibleStart: this.verificationLevel,
-      visibleEnd: Math.min(this.verificationLevel, 4)
+      visibleEnd: Math.min(this.verificationLevel, 4),
     };
-    
+
     return maskPII(this.data, this.type, options).masked;
   }
 }
 
 // Usage
-const maskedData = new ProgressiveMasking('john.doe@company.com', 'email');
+const maskedData = new ProgressiveMasking("john.doe@company.com", "email");
 console.log(maskedData.getMasked()); // "*****************"
 
 maskedData.verify(1);
@@ -566,21 +592,22 @@ function renderUserProfile(user: any) {
   return {
     name: maskName(user.fullName, { preserveFirstLetter: true }).masked,
     email: maskEmail(user.email, { visibleStart: 2, visibleEnd: 0 }).masked,
-    phone: maskPhone(user.phone, { preserveAreaCode: true, visibleEnd: 0 }).masked,
-    address: maskAddress(user.address, { 
+    phone: maskPhone(user.phone, { preserveAreaCode: true, visibleEnd: 0 })
+      .masked,
+    address: maskAddress(user.address, {
       maskStreetNumber: true,
       maskStreetName: false,
       maskCity: false,
-      maskPostalCode: true
-    }).masked
+      maskPostalCode: true,
+    }).masked,
   };
 }
 
 const user = {
-  fullName: 'John Doe',
-  email: 'john.doe@example.com',
-  phone: '+1-555-123-4567',
-  address: '123 Main St, Anytown, ST 12345'
+  fullName: "John Doe",
+  email: "john.doe@example.com",
+  phone: "+1-555-123-4567",
+  address: "123 Main St, Anytown, ST 12345",
 };
 
 const profile = renderUserProfile(user);
@@ -589,7 +616,7 @@ console.log(profile);
 // {
 //   name: "J*** D**",
 //   email: "jo*************",
-//   phone: "+1 555 XXX-XXXX", 
+//   phone: "+1 555 XXX-XXXX",
 //   address: "*** Main St, Anytown, ST *****"
 // }
 ```
@@ -599,35 +626,35 @@ console.log(profile);
 ```typescript
 // Mask PII in search results while preserving context
 function maskSearchResults(results: string[], searchTerm: string) {
-  return results.map(result => {
+  return results.map((result) => {
     const detection = detectPII(result);
-    
+
     if (!detection.hasPII) {
       return result; // No masking needed
     }
-    
+
     let masked = result;
-    
+
     // Mask each detected PII span
-    detection.spans.forEach(span => {
+    detection.spans.forEach((span) => {
       const maskedValue = maskPII(span.text, span.type, {
-        preserveLength: true  // Keep search highlighting accurate
+        preserveLength: true, // Keep search highlighting accurate
       }).masked;
-      
+
       masked = masked.replace(span.text, maskedValue);
     });
-    
+
     return masked;
   });
 }
 
 const searchResults = [
-  'Contact John Doe at john@example.com',
-  'No PII in this result',
-  'Phone support: 555-123-4567'
+  "Contact John Doe at john@example.com",
+  "No PII in this result",
+  "Phone support: 555-123-4567",
 ];
 
-const maskedResults = maskSearchResults(searchResults, 'contact');
+const maskedResults = maskSearchResults(searchResults, "contact");
 console.log(maskedResults);
 // Output:
 // [
@@ -644,20 +671,20 @@ console.log(maskedResults);
 function debugSafeLog(data: any, context: string) {
   const jsonString = JSON.stringify(data);
   const detection = detectPII(jsonString);
-  
+
   if (detection.hasPII) {
     let safeData = jsonString;
-    
+
     // Mask each PII instance
-    detection.spans.forEach(span => {
+    detection.spans.forEach((span) => {
       const masked = maskPII(span.text, span.type, {
         preserveLength: true,
-        maskChar: '•'
+        maskChar: "•",
       }).masked;
-      
+
       safeData = safeData.replace(span.text, masked);
     });
-    
+
     console.log(`[DEBUG:${context}] ${safeData}`);
   } else {
     console.log(`[DEBUG:${context}] ${jsonString}`);
@@ -667,11 +694,11 @@ function debugSafeLog(data: any, context: string) {
 // Usage
 const userData = {
   id: 123,
-  email: 'user@example.com',
-  preferences: { theme: 'dark' }
+  email: "user@example.com",
+  preferences: { theme: "dark" },
 };
 
-debugSafeLog(userData, 'user-login');
+debugSafeLog(userData, "user-login");
 // Output: [DEBUG:user-login] {"id":123,"email":"u•••@example.com","preferences":{"theme":"dark"}}
 ```
 
@@ -682,10 +709,10 @@ debugSafeLog(userData, 'user-login');
 ```typescript
 // ✅ Use consistent masking across application
 const MASKING_CONFIG = {
-  email: { visibleStart: 1, visibleEnd: 0, maskChar: '*' },
-  phone: { preserveAreaCode: true, visibleEnd: 4, maskChar: '*' },
-  name: { preserveFirstLetter: true, maskChar: '*' },
-  creditcard: { preserveLast4: true, groupSeparator: ' ', maskChar: '*' }
+  email: { visibleStart: 1, visibleEnd: 0, maskChar: "*" },
+  phone: { preserveAreaCode: true, visibleEnd: 4, maskChar: "*" },
+  name: { preserveFirstLetter: true, maskChar: "*" },
+  creditcard: { preserveLast4: true, groupSeparator: " ", maskChar: "*" },
 };
 
 function maskConsistently(value: string, type: string) {
@@ -699,11 +726,11 @@ function maskConsistently(value: string, type: string) {
 // ✅ Ensure masked data can't be easily reversed
 function secureMask(value: string, type: string) {
   const result = maskPII(value, type);
-  
+
   // Don't include original value in metadata
   delete result.metadata?.originalValue;
   delete result.metadata?.unmaskingHint;
-  
+
   return {
     masked: result.masked,
     pattern: result.pattern,
@@ -711,8 +738,8 @@ function secureMask(value: string, type: string) {
     metadata: {
       type,
       maskedLength: result.masked.length,
-      timestamp: Date.now()
-    }
+      timestamp: Date.now(),
+    },
   };
 }
 ```
@@ -723,18 +750,20 @@ function secureMask(value: string, type: string) {
 // ✅ Log masking operations for audit
 function auditedMask(value: string, type: string, context: string) {
   const result = maskPII(value, type);
-  
+
   // Log masking event (without original value)
-  console.log(JSON.stringify({
-    event: 'pii_masked',
-    type,
-    context,
-    maskedLength: result.masked.length,
-    originalLength: result.originalLength,
-    timestamp: new Date().toISOString(),
-    // Never log original value
-  }));
-  
+  console.log(
+    JSON.stringify({
+      event: "pii_masked",
+      type,
+      context,
+      maskedLength: result.masked.length,
+      originalLength: result.originalLength,
+      timestamp: new Date().toISOString(),
+      // Never log original value
+    }),
+  );
+
   return result;
 }
 ```
@@ -744,7 +773,7 @@ function auditedMask(value: string, type: string, context: string) {
 ### User Experience Benefits
 
 1. **Trust Building**: Users see their data is protected
-2. **Verification**: "Send to j***@example.com?" builds confidence
+2. **Verification**: "Send to j\*\*\*@example.com?" builds confidence
 3. **Error Prevention**: Partial display prevents typos in critical operations
 4. **Context Preservation**: Users recognize their data without full exposure
 
@@ -765,6 +794,7 @@ function auditedMask(value: string, type: string, context: string) {
 ---
 
 **Next Steps:**
+
 - 🚫 **Learn redaction**: [Redaction Documentation](./redaction.md)
 - 🔧 **Explore normalization**: [Normalization Documentation](./normalization.md)
 - ⚖️ **Understand policies**: [Policy Engine Documentation](./policy-engine.md)

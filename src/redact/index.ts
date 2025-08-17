@@ -2,9 +2,9 @@
  * Redaction module for safe logging and hard removal of PII
  */
 
-import type { DetectionSpan, PIIDetectionResult } from '../core/types.js';
-import { PIIType } from '../core/types.js';
-import { PIIMaskingError, ErrorCodes } from '../core/errors.js';
+import type { DetectionSpan, PIIDetectionResult } from "../core/types.js";
+import { PIIType } from "../core/types.js";
+import { PIIMaskingError, ErrorCodes } from "../core/errors.js";
 
 export interface RedactionOptions {
   replacement?: string;
@@ -41,60 +41,62 @@ export interface RedactedSpan {
   end: number;
   originalText: string;
   redactedText: string;
-  replacementType: 'marker' | 'placeholder' | 'removal';
+  replacementType: "marker" | "placeholder" | "removal";
 }
 
 // Common PII patterns for redaction
 const DEFAULT_REDACTION_PATTERNS: RedactionPattern[] = [
   {
-    name: 'email',
+    name: "email",
     regex: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
-    replacement: '[EMAIL]',
+    replacement: "[EMAIL]",
     type: PIIType.Email,
-    description: 'Email addresses'
+    description: "Email addresses",
   },
   {
-    name: 'phone-us',
-    regex: /\b(?:\+?1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})\b/g,
-    replacement: '[PHONE]',
+    name: "phone-us",
+    regex:
+      /\b(?:\+?1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})\b/g,
+    replacement: "[PHONE]",
     type: PIIType.Phone,
-    description: 'US phone numbers'
+    description: "US phone numbers",
   },
   {
-    name: 'phone-international',
+    name: "phone-international",
     regex: /\+(?:[0-9] ?){6,14}[0-9]/g,
-    replacement: '[PHONE]',
+    replacement: "[PHONE]",
     type: PIIType.Phone,
-    description: 'International phone numbers'
+    description: "International phone numbers",
   },
   {
-    name: 'ssn',
+    name: "ssn",
     regex: /\b(?:\d{3}-?\d{2}-?\d{4})\b/g,
-    replacement: '[SSN]',
+    replacement: "[SSN]",
     type: PIIType.SSN,
-    description: 'Social Security Numbers'
+    description: "Social Security Numbers",
   },
   {
-    name: 'credit-card',
+    name: "credit-card",
     regex: /\b(?:\d{4}[-\s]?){3}\d{4}\b/g,
-    replacement: '[CREDIT_CARD]',
+    replacement: "[CREDIT_CARD]",
     type: PIIType.CreditCard,
-    description: 'Credit card numbers'
+    description: "Credit card numbers",
   },
   {
-    name: 'ip-address',
+    name: "ip-address",
     regex: /\b(?:\d{1,3}\.){3}\d{1,3}\b/g,
-    replacement: '[IP_ADDRESS]',
+    replacement: "[IP_ADDRESS]",
     type: PIIType.IPAddress,
-    description: 'IP addresses'
+    description: "IP addresses",
   },
   {
-    name: 'url',
-    regex: /https?:\/\/(?:[-\w.])+(?:\:[0-9]+)?(?:\/(?:[\w\/_.])*(?:\?(?:[\w&=%.])*)?(?:\#(?:[\w.])*)?)?/g,
-    replacement: '[URL]',
+    name: "url",
+    regex:
+      /https?:\/\/(?:[-\w.])+(?:\:[0-9]+)?(?:\/(?:[\w\/_.])*(?:\?(?:[\w&=%.])*)?(?:\#(?:[\w.])*)?)?/g,
+    replacement: "[URL]",
     type: PIIType.URL,
-    description: 'URLs'
-  }
+    description: "URLs",
+  },
 ];
 
 /**
@@ -102,20 +104,20 @@ const DEFAULT_REDACTION_PATTERNS: RedactionPattern[] = [
  */
 export function redactText(
   text: string,
-  options: RedactionOptions = {}
+  options: RedactionOptions = {},
 ): RedactionResult {
-  if (!text || typeof text !== 'string') {
+  if (!text || typeof text !== "string") {
     return {
-      redacted: text || '',
+      redacted: text || "",
       redactionCount: 0,
       redactedSpans: [],
       originalLength: text?.length || 0,
-      redactedLength: text?.length || 0
+      redactedLength: text?.length || 0,
     };
   }
 
-  const replacement = options.replacement || '[REDACTED]';
-  const redactionMarker = options.redactionMarker || '[REDACTED]';
+  const replacement = options.replacement || "[REDACTED]";
+  const redactionMarker = options.redactionMarker || "[REDACTED]";
   let redacted = text;
   const redactedSpans: RedactedSpan[] = [];
   let redactionCount = 0;
@@ -130,7 +132,7 @@ export function redactText(
   for (const pattern of patterns) {
     const regex = new RegExp(pattern.regex.source, pattern.regex.flags);
     let match;
-    
+
     while ((match = regex.exec(redacted)) !== null) {
       const originalText = match[0];
       let redactedText: string;
@@ -138,7 +140,7 @@ export function redactText(
       if (options.includeType && pattern.type) {
         redactedText = `[${pattern.type.toUpperCase()}]`;
       } else if (options.preserveLength) {
-        redactedText = '*'.repeat(originalText.length);
+        redactedText = "*".repeat(originalText.length);
       } else if (options.preserveFormat) {
         redactedText = preserveFormatRedaction(originalText);
       } else {
@@ -152,13 +154,14 @@ export function redactText(
         end: match.index + originalText.length,
         originalText,
         redactedText,
-        replacementType: options.preserveLength ? 'placeholder' : 'marker'
+        replacementType: options.preserveLength ? "placeholder" : "marker",
       });
 
       // Replace in the text
-      redacted = redacted.substring(0, match.index) + 
-                redactedText + 
-                redacted.substring(match.index + originalText.length);
+      redacted =
+        redacted.substring(0, match.index) +
+        redactedText +
+        redacted.substring(match.index + originalText.length);
 
       redactionCount++;
 
@@ -177,8 +180,8 @@ export function redactText(
       patterns: patterns.length,
       preserveLength: options.preserveLength || false,
       preserveFormat: options.preserveFormat || false,
-      strictMode: options.strictMode || false
-    }
+      strictMode: options.strictMode || false,
+    },
   };
 }
 
@@ -188,19 +191,19 @@ export function redactText(
 export function redactFromDetection(
   text: string,
   detection: PIIDetectionResult,
-  options: RedactionOptions = {}
+  options: RedactionOptions = {},
 ): RedactionResult {
   if (!text || !detection.spans || detection.spans.length === 0) {
     return {
-      redacted: text || '',
+      redacted: text || "",
       redactionCount: 0,
       redactedSpans: [],
       originalLength: text?.length || 0,
-      redactedLength: text?.length || 0
+      redactedLength: text?.length || 0,
     };
   }
 
-  const replacement = options.replacement || '[REDACTED]';
+  const replacement = options.replacement || "[REDACTED]";
   let redacted = text;
   const redactedSpans: RedactedSpan[] = [];
   let offsetAdjustment = 0;
@@ -215,7 +218,7 @@ export function redactFromDetection(
     if (options.includeType) {
       redactedText = `[${span.type.toUpperCase()}]`;
     } else if (options.preserveLength) {
-      const maskChar = options.maskChar || '*';
+      const maskChar = options.maskChar || "*";
       redactedText = maskChar.repeat(originalText.length);
     } else if (options.preserveFormat) {
       redactedText = preserveFormatRedaction(originalText);
@@ -226,10 +229,11 @@ export function redactFromDetection(
     // Apply redaction
     const startPos = span.start;
     const endPos = span.end;
-    
-    redacted = redacted.substring(0, startPos) + 
-               redactedText + 
-               redacted.substring(endPos);
+
+    redacted =
+      redacted.substring(0, startPos) +
+      redactedText +
+      redacted.substring(endPos);
 
     redactedSpans.push({
       type: span.type,
@@ -237,7 +241,7 @@ export function redactFromDetection(
       end: endPos,
       originalText,
       redactedText,
-      replacementType: options.preserveLength ? 'placeholder' : 'marker'
+      replacementType: options.preserveLength ? "placeholder" : "marker",
     });
   }
 
@@ -250,8 +254,8 @@ export function redactFromDetection(
     metadata: {
       detectionBased: true,
       confidenceThreshold: detection.confidence,
-      originalSpanCount: detection.spans.length
-    }
+      originalSpanCount: detection.spans.length,
+    },
   };
 }
 
@@ -261,49 +265,49 @@ export function redactFromDetection(
 export function createSafeLogger(options: RedactionOptions = {}) {
   const redactionOpts = {
     ...options,
-    strictMode: true // Always use strict mode for logging
+    strictMode: true, // Always use strict mode for logging
   };
 
   return {
     log: (message: string, ...args: any[]) => {
       const redactedMessage = redactText(message, redactionOpts).redacted;
-      const redactedArgs = args.map(arg => 
-        typeof arg === 'string' ? redactText(arg, redactionOpts).redacted : arg
+      const redactedArgs = args.map((arg) =>
+        typeof arg === "string" ? redactText(arg, redactionOpts).redacted : arg,
       );
       console.log(redactedMessage, ...redactedArgs);
     },
-    
+
     error: (message: string, ...args: any[]) => {
       const redactedMessage = redactText(message, redactionOpts).redacted;
-      const redactedArgs = args.map(arg => 
-        typeof arg === 'string' ? redactText(arg, redactionOpts).redacted : arg
+      const redactedArgs = args.map((arg) =>
+        typeof arg === "string" ? redactText(arg, redactionOpts).redacted : arg,
       );
       console.error(redactedMessage, ...redactedArgs);
     },
-    
+
     warn: (message: string, ...args: any[]) => {
       const redactedMessage = redactText(message, redactionOpts).redacted;
-      const redactedArgs = args.map(arg => 
-        typeof arg === 'string' ? redactText(arg, redactionOpts).redacted : arg
+      const redactedArgs = args.map((arg) =>
+        typeof arg === "string" ? redactText(arg, redactionOpts).redacted : arg,
       );
       console.warn(redactedMessage, ...redactedArgs);
     },
-    
+
     info: (message: string, ...args: any[]) => {
       const redactedMessage = redactText(message, redactionOpts).redacted;
-      const redactedArgs = args.map(arg => 
-        typeof arg === 'string' ? redactText(arg, redactionOpts).redacted : arg
+      const redactedArgs = args.map((arg) =>
+        typeof arg === "string" ? redactText(arg, redactionOpts).redacted : arg,
       );
       console.info(redactedMessage, ...redactedArgs);
     },
-    
+
     debug: (message: string, ...args: any[]) => {
       const redactedMessage = redactText(message, redactionOpts).redacted;
-      const redactedArgs = args.map(arg => 
-        typeof arg === 'string' ? redactText(arg, redactionOpts).redacted : arg
+      const redactedArgs = args.map((arg) =>
+        typeof arg === "string" ? redactText(arg, redactionOpts).redacted : arg,
       );
       console.debug(redactedMessage, ...redactedArgs);
-    }
+    },
   };
 }
 
@@ -316,7 +320,9 @@ export function createRedactionMiddleware(options: RedactionOptions = {}) {
     const redactedError = {
       ...error,
       message: redactText(error.message, options).redacted,
-      stack: error.stack ? redactText(error.stack, options).redacted : undefined
+      stack: error.stack
+        ? redactText(error.stack, options).redacted
+        : undefined,
     };
 
     // Redact PII from request data if present
@@ -324,16 +330,16 @@ export function createRedactionMiddleware(options: RedactionOptions = {}) {
       ...req,
       body: redactObject(req.body, options),
       query: redactObject(req.query, options),
-      params: redactObject(req.params, options)
+      params: redactObject(req.params, options),
     };
 
     // Log the redacted error
-    console.error('Redacted error:', redactedError, 'Request:', {
+    console.error("Redacted error:", redactedError, "Request:", {
       method: redactedReq.method,
-      url: redactText(redactedReq.url || '', options).redacted,
+      url: redactText(redactedReq.url || "", options).redacted,
       body: redactedReq.body,
       query: redactedReq.query,
-      params: redactedReq.params
+      params: redactedReq.params,
     });
 
     next(error);
@@ -345,22 +351,25 @@ export function createRedactionMiddleware(options: RedactionOptions = {}) {
  */
 export function redactObject(
   obj: Record<string, any>,
-  options: RedactionOptions = {}
+  options: RedactionOptions = {},
 ): Record<string, any> {
-  if (!obj || typeof obj !== 'object') {
+  if (!obj || typeof obj !== "object") {
     return obj;
   }
 
   const redacted: Record<string, any> = {};
 
   for (const [key, value] of Object.entries(obj)) {
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       redacted[key] = redactText(value, options).redacted;
-    } else if (typeof value === 'object' && value !== null) {
+    } else if (typeof value === "object" && value !== null) {
       if (Array.isArray(value)) {
-        redacted[key] = value.map(item => 
-          typeof item === 'string' ? redactText(item, options).redacted : 
-          typeof item === 'object' ? redactObject(item, options) : item
+        redacted[key] = value.map((item) =>
+          typeof item === "string"
+            ? redactText(item, options).redacted
+            : typeof item === "object"
+              ? redactObject(item, options)
+              : item,
         );
       } else {
         redacted[key] = redactObject(value, options);
@@ -382,14 +391,16 @@ export function createRedactionSummary(result: RedactionResult): string {
     `- Original length: ${result.originalLength} characters`,
     `- Redacted length: ${result.redactedLength} characters`,
     `- Redactions made: ${result.redactionCount}`,
-    `- Redacted spans:`
+    `- Redacted spans:`,
   ];
 
   for (const span of result.redactedSpans) {
-    summary.push(`  * ${span.type} at ${span.start}-${span.end}: "${span.originalText}" → "${span.redactedText}"`);
+    summary.push(
+      `  * ${span.type} at ${span.start}-${span.end}: "${span.originalText}" → "${span.redactedText}"`,
+    );
   }
 
-  return summary.join('\n');
+  return summary.join("\n");
 }
 
 /**
@@ -397,9 +408,9 @@ export function createRedactionSummary(result: RedactionResult): string {
  */
 export function redactMultiple(
   texts: string[],
-  options: RedactionOptions = {}
+  options: RedactionOptions = {},
 ): RedactionResult[] {
-  return texts.map(text => redactText(text, options));
+  return texts.map((text) => redactText(text, options));
 }
 
 /**
@@ -407,28 +418,30 @@ export function redactMultiple(
  */
 export function validateRedaction(
   text: string,
-  allowedPatterns: RegExp[] = []
+  allowedPatterns: RegExp[] = [],
 ): { isRedacted: boolean; violations: string[] } {
   const violations: string[] = [];
-  
+
   // Check against default patterns
   for (const pattern of DEFAULT_REDACTION_PATTERNS) {
     const matches = text.match(pattern.regex);
     if (matches) {
       // Check if matches are in allowed patterns
-      const isAllowed = allowedPatterns.some(allowed => 
-        matches.every(match => allowed.test(match))
+      const isAllowed = allowedPatterns.some((allowed) =>
+        matches.every((match) => allowed.test(match)),
       );
-      
+
       if (!isAllowed) {
-        violations.push(`Found unredacted ${pattern.description}: ${matches.join(', ')}`);
+        violations.push(
+          `Found unredacted ${pattern.description}: ${matches.join(", ")}`,
+        );
       }
     }
   }
 
   return {
     isRedacted: violations.length === 0,
-    violations
+    violations,
   };
 }
 
@@ -439,24 +452,30 @@ export function validateRedaction(
  */
 function preserveFormatRedaction(text: string): string {
   // Email format preservation
-  if (text.includes('@') && text.includes('.')) {
-    const [local, domain] = text.split('@');
-    const [domainName, ...tlds] = domain.split('.');
-    return '*'.repeat(local.length) + '@' + '*'.repeat(domainName.length) + '.' + tlds.join('.');
+  if (text.includes("@") && text.includes(".")) {
+    const [local, domain] = text.split("@");
+    const [domainName, ...tlds] = domain.split(".");
+    return (
+      "*".repeat(local.length) +
+      "@" +
+      "*".repeat(domainName.length) +
+      "." +
+      tlds.join(".")
+    );
   }
-  
+
   // Phone format preservation
   if (/^\+?[\d\s\-\(\)\.]+$/.test(text)) {
-    return text.replace(/\d/g, '*');
+    return text.replace(/\d/g, "*");
   }
-  
+
   // Credit card format preservation
   if (/^\d{4}[\s\-]?\d{4}[\s\-]?\d{4}[\s\-]?\d{4}$/.test(text)) {
-    return text.replace(/\d/g, '*');
+    return text.replace(/\d/g, "*");
   }
-  
+
   // Default: replace alphanumeric with *
-  return text.replace(/[a-zA-Z0-9]/g, '*');
+  return text.replace(/[a-zA-Z0-9]/g, "*");
 }
 
 /**
@@ -477,7 +496,7 @@ export function addRedactionPattern(pattern: RedactionPattern): void {
  * Removes redaction pattern by name
  */
 export function removeRedactionPattern(name: string): boolean {
-  const index = DEFAULT_REDACTION_PATTERNS.findIndex(p => p.name === name);
+  const index = DEFAULT_REDACTION_PATTERNS.findIndex((p) => p.name === name);
   if (index >= 0) {
     DEFAULT_REDACTION_PATTERNS.splice(index, 1);
     return true;

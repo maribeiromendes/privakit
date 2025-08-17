@@ -2,9 +2,9 @@
  * Policy engine for PII handling rules and compliance
  */
 
-import type { PolicyRule, PolicyDecision, IPolicyEngine } from './types.js';
-import { PIIType, RiskLevel, PolicyOperation } from './types.js';
-import { PIIPolicyError, ErrorCodes } from './errors.js';
+import type { PolicyRule, PolicyDecision, IPolicyEngine } from "./types.js";
+import { PIIType, RiskLevel, PolicyOperation } from "./types.js";
+import { PIIPolicyError, ErrorCodes } from "./errors.js";
 
 // Default policy rules based on common compliance requirements
 const DEFAULT_RULES: PolicyRule[] = [
@@ -16,7 +16,7 @@ const DEFAULT_RULES: PolicyRule[] = [
     requireMasking: true,
     requireEncryption: true,
     retentionDays: 365,
-    allowedOperations: [PolicyOperation.Store, PolicyOperation.Process]
+    allowedOperations: [PolicyOperation.Store, PolicyOperation.Process],
   },
   {
     type: PIIType.CreditCard,
@@ -25,9 +25,9 @@ const DEFAULT_RULES: PolicyRule[] = [
     requireMasking: true,
     requireEncryption: true,
     retentionDays: 90,
-    allowedOperations: [PolicyOperation.Process]
+    allowedOperations: [PolicyOperation.Process],
   },
-  
+
   // High risk PII
   {
     type: PIIType.DateOfBirth,
@@ -36,7 +36,11 @@ const DEFAULT_RULES: PolicyRule[] = [
     requireMasking: true,
     requireEncryption: true,
     retentionDays: 1095, // 3 years
-    allowedOperations: [PolicyOperation.Store, PolicyOperation.Process, PolicyOperation.Display]
+    allowedOperations: [
+      PolicyOperation.Store,
+      PolicyOperation.Process,
+      PolicyOperation.Display,
+    ],
   },
   {
     type: PIIType.Address,
@@ -45,9 +49,14 @@ const DEFAULT_RULES: PolicyRule[] = [
     requireMasking: true,
     requireEncryption: false,
     retentionDays: 1095,
-    allowedOperations: [PolicyOperation.Store, PolicyOperation.Process, PolicyOperation.Display, PolicyOperation.Export]
+    allowedOperations: [
+      PolicyOperation.Store,
+      PolicyOperation.Process,
+      PolicyOperation.Display,
+      PolicyOperation.Export,
+    ],
   },
-  
+
   // Moderate risk PII
   {
     type: PIIType.Email,
@@ -56,7 +65,13 @@ const DEFAULT_RULES: PolicyRule[] = [
     requireMasking: true,
     requireEncryption: false,
     retentionDays: 2555, // 7 years
-    allowedOperations: [PolicyOperation.Store, PolicyOperation.Process, PolicyOperation.Display, PolicyOperation.Transfer, PolicyOperation.Export]
+    allowedOperations: [
+      PolicyOperation.Store,
+      PolicyOperation.Process,
+      PolicyOperation.Display,
+      PolicyOperation.Transfer,
+      PolicyOperation.Export,
+    ],
   },
   {
     type: PIIType.Phone,
@@ -65,7 +80,13 @@ const DEFAULT_RULES: PolicyRule[] = [
     requireMasking: true,
     requireEncryption: false,
     retentionDays: 2555,
-    allowedOperations: [PolicyOperation.Store, PolicyOperation.Process, PolicyOperation.Display, PolicyOperation.Transfer, PolicyOperation.Export]
+    allowedOperations: [
+      PolicyOperation.Store,
+      PolicyOperation.Process,
+      PolicyOperation.Display,
+      PolicyOperation.Transfer,
+      PolicyOperation.Export,
+    ],
   },
   {
     type: PIIType.Name,
@@ -74,9 +95,15 @@ const DEFAULT_RULES: PolicyRule[] = [
     requireMasking: true,
     requireEncryption: false,
     retentionDays: 2555,
-    allowedOperations: [PolicyOperation.Store, PolicyOperation.Process, PolicyOperation.Display, PolicyOperation.Transfer, PolicyOperation.Export]
+    allowedOperations: [
+      PolicyOperation.Store,
+      PolicyOperation.Process,
+      PolicyOperation.Display,
+      PolicyOperation.Transfer,
+      PolicyOperation.Export,
+    ],
   },
-  
+
   // Low risk PII
   {
     type: PIIType.ZipCode,
@@ -85,7 +112,7 @@ const DEFAULT_RULES: PolicyRule[] = [
     requireMasking: false,
     requireEncryption: false,
     retentionDays: 3650, // 10 years
-    allowedOperations: Object.values(PolicyOperation)
+    allowedOperations: Object.values(PolicyOperation),
   },
   {
     type: PIIType.IPAddress,
@@ -94,8 +121,12 @@ const DEFAULT_RULES: PolicyRule[] = [
     requireMasking: false,
     requireEncryption: false,
     retentionDays: 365,
-    allowedOperations: [PolicyOperation.Log, PolicyOperation.Process, PolicyOperation.Display]
-  }
+    allowedOperations: [
+      PolicyOperation.Log,
+      PolicyOperation.Process,
+      PolicyOperation.Display,
+    ],
+  },
 ];
 
 export class PolicyEngine implements IPolicyEngine {
@@ -104,15 +135,15 @@ export class PolicyEngine implements IPolicyEngine {
 
   constructor(customRules?: PolicyRule[], strictMode: boolean = false) {
     this.strictMode = strictMode;
-    
+
     // Load default rules
-    DEFAULT_RULES.forEach(rule => {
+    DEFAULT_RULES.forEach((rule) => {
       this.rules.set(rule.type, rule);
     });
-    
+
     // Override with custom rules if provided
     if (customRules) {
-      customRules.forEach(rule => {
+      customRules.forEach((rule) => {
         this.addRule(rule);
       });
     }
@@ -120,7 +151,7 @@ export class PolicyEngine implements IPolicyEngine {
 
   public evaluate(type: PIIType, operation: PolicyOperation): PolicyDecision {
     const rule = this.rules.get(type);
-    
+
     if (!rule) {
       if (this.strictMode) {
         return {
@@ -128,7 +159,7 @@ export class PolicyEngine implements IPolicyEngine {
           requiresMasking: true,
           requiresEncryption: true,
           reason: `No policy rule defined for PII type: ${type}`,
-          metadata: { strictMode: true }
+          metadata: { strictMode: true },
         };
       } else {
         // Default permissive behavior for unknown types
@@ -137,23 +168,23 @@ export class PolicyEngine implements IPolicyEngine {
           requiresMasking: false,
           requiresEncryption: false,
           reason: `No specific rule found, using permissive default for ${type}`,
-          metadata: { defaultRule: true }
+          metadata: { defaultRule: true },
         };
       }
     }
 
     const allowed = rule.allowedOperations.includes(operation);
-    
+
     if (!allowed) {
       return {
         allowed: false,
         requiresMasking: rule.requireMasking,
         requiresEncryption: rule.requireEncryption,
         reason: `Operation '${operation}' not allowed for PII type '${type}' (risk level: ${rule.riskLevel})`,
-        metadata: { 
-          riskLevel: rule.riskLevel, 
-          allowedOperations: rule.allowedOperations 
-        }
+        metadata: {
+          riskLevel: rule.riskLevel,
+          allowedOperations: rule.allowedOperations,
+        },
       };
     }
 
@@ -164,7 +195,7 @@ export class PolicyEngine implements IPolicyEngine {
         requiresMasking: true,
         requiresEncryption: rule.requireEncryption,
         reason: `Logging not allowed for PII type '${type}' due to risk level: ${rule.riskLevel}`,
-        metadata: { riskLevel: rule.riskLevel }
+        metadata: { riskLevel: rule.riskLevel },
       };
     }
 
@@ -173,10 +204,10 @@ export class PolicyEngine implements IPolicyEngine {
       requiresMasking: rule.requireMasking,
       requiresEncryption: rule.requireEncryption,
       reason: `Operation '${operation}' allowed for PII type '${type}'`,
-      metadata: { 
+      metadata: {
         riskLevel: rule.riskLevel,
-        retentionDays: rule.retentionDays
-      }
+        retentionDays: rule.retentionDays,
+      },
     };
   }
 
@@ -221,7 +252,10 @@ export class PolicyEngine implements IPolicyEngine {
     return decision.requiresMasking;
   }
 
-  public requiresEncryption(type: PIIType, operation: PolicyOperation): boolean {
+  public requiresEncryption(
+    type: PIIType,
+    operation: PolicyOperation,
+  ): boolean {
     const decision = this.evaluate(type, operation);
     return decision.requiresEncryption;
   }
@@ -240,11 +274,11 @@ export class PolicyEngine implements IPolicyEngine {
   private validateRule(rule: PolicyRule): void {
     if (!rule.type) {
       throw new PIIPolicyError(
-        'Policy rule must specify a PII type',
+        "Policy rule must specify a PII type",
         undefined,
         undefined,
-        'Missing PII type',
-        { rule }
+        "Missing PII type",
+        { rule },
       );
     }
 
@@ -253,8 +287,8 @@ export class PolicyEngine implements IPolicyEngine {
         `Invalid PII type: ${rule.type}`,
         rule.type,
         undefined,
-        'Invalid PII type',
-        { rule }
+        "Invalid PII type",
+        { rule },
       );
     }
 
@@ -263,62 +297,67 @@ export class PolicyEngine implements IPolicyEngine {
         `Invalid risk level: ${rule.riskLevel}`,
         rule.type,
         undefined,
-        'Invalid risk level',
-        { rule }
+        "Invalid risk level",
+        { rule },
       );
     }
 
-    if (!Array.isArray(rule.allowedOperations) || rule.allowedOperations.length === 0) {
+    if (
+      !Array.isArray(rule.allowedOperations) ||
+      rule.allowedOperations.length === 0
+    ) {
       throw new PIIPolicyError(
-        'Policy rule must specify at least one allowed operation',
+        "Policy rule must specify at least one allowed operation",
         rule.type,
         undefined,
-        'Missing allowed operations',
-        { rule }
+        "Missing allowed operations",
+        { rule },
       );
     }
 
     const invalidOperations = rule.allowedOperations.filter(
-      op => !Object.values(PolicyOperation).includes(op)
+      (op) => !Object.values(PolicyOperation).includes(op),
     );
 
     if (invalidOperations.length > 0) {
       throw new PIIPolicyError(
-        `Invalid operations: ${invalidOperations.join(', ')}`,
+        `Invalid operations: ${invalidOperations.join(", ")}`,
         rule.type,
         undefined,
-        'Invalid operations',
-        { rule, invalidOperations }
+        "Invalid operations",
+        { rule, invalidOperations },
       );
     }
 
     if (rule.retentionDays !== undefined && rule.retentionDays < 0) {
       throw new PIIPolicyError(
-        'Retention days cannot be negative',
+        "Retention days cannot be negative",
         rule.type,
         undefined,
-        'Invalid retention period',
-        { rule }
+        "Invalid retention period",
+        { rule },
       );
     }
   }
 }
 
 // Factory function for creating policy engines with common configurations
-export function createPolicyEngine(config: 'strict' | 'permissive' | 'gdpr' | 'ccpa' = 'permissive'): PolicyEngine {
+export function createPolicyEngine(
+  config: "strict" | "permissive" | "gdpr" | "ccpa" = "permissive",
+): PolicyEngine {
   switch (config) {
-    case 'strict':
+    case "strict":
       return new PolicyEngine(undefined, true);
-      
-    case 'permissive':
+
+    case "permissive":
       return new PolicyEngine(undefined, false);
-      
-    case 'gdpr':
+
+    case "gdpr":
       return createGDPRPolicyEngine();
-      
-    case 'ccpa':
+
+    case "ccpa":
       return createCCPAPolicyEngine();
-      
+
     default:
       return new PolicyEngine();
   }
@@ -335,7 +374,11 @@ function createGDPRPolicyEngine(): PolicyEngine {
       requireMasking: true,
       requireEncryption: true, // Required for GDPR
       retentionDays: 1095, // 3 years max
-      allowedOperations: [PolicyOperation.Store, PolicyOperation.Process, PolicyOperation.Display]
+      allowedOperations: [
+        PolicyOperation.Store,
+        PolicyOperation.Process,
+        PolicyOperation.Display,
+      ],
     },
     {
       type: PIIType.Name,
@@ -344,10 +387,14 @@ function createGDPRPolicyEngine(): PolicyEngine {
       requireMasking: true,
       requireEncryption: true,
       retentionDays: 1095,
-      allowedOperations: [PolicyOperation.Store, PolicyOperation.Process, PolicyOperation.Display]
-    }
+      allowedOperations: [
+        PolicyOperation.Store,
+        PolicyOperation.Process,
+        PolicyOperation.Display,
+      ],
+    },
   ];
-  
+
   return new PolicyEngine(gdprRules, true);
 }
 
@@ -362,9 +409,14 @@ function createCCPAPolicyEngine(): PolicyEngine {
       requireMasking: true,
       requireEncryption: false,
       retentionDays: 1825, // 5 years
-      allowedOperations: [PolicyOperation.Store, PolicyOperation.Process, PolicyOperation.Display, PolicyOperation.Export]
-    }
+      allowedOperations: [
+        PolicyOperation.Store,
+        PolicyOperation.Process,
+        PolicyOperation.Display,
+        PolicyOperation.Export,
+      ],
+    },
   ];
-  
+
   return new PolicyEngine(ccpaRules, false);
 }

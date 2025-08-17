@@ -5,11 +5,13 @@ Welcome to the comprehensive documentation for **Privakit** - a TypeScript/JavaS
 ## 📚 Documentation Structure
 
 ### Getting Started
+
 - [Installation & Setup](./installation.md)
 - [Quick Start Guide](./quick-start.md)
 - [Core Concepts](./core-concepts.md)
 
 ### API Reference
+
 - [Validation](./validation.md) - Email, phone, name, and address validation
 - [Normalization](./normalization.md) - Standardizing PII formats
 - [Detection](./detection.md) - Automatic PII detection in text
@@ -18,36 +20,37 @@ Welcome to the comprehensive documentation for **Privakit** - a TypeScript/JavaS
 - [Policy Engine](./policy-engine.md) - GDPR/CCPA compliance
 
 ### Regional Compliance
+
 - 🇧🇷 [LGPD Guide (Brazil)](./lgpd-brazil.md) - Lei Geral de Proteção de Dados
 - 🇪🇺 [GDPR Support](./policy-engine.md#gdpr-policy-engine) - European compliance
 - 🇺🇸 [CCPA Support](./policy-engine.md#ccpa-policy-engine) - California privacy rights
 
 ## 🔗 Quick Navigation
 
-| Module | Purpose | Key Features |
-|--------|---------|-------------|
-| [**Validation**](./validation.md) | Verify PII correctness | ✅ Email, phone, name validation<br>✅ International support<br>✅ Custom rules |
-| [**Detection**](./detection.md) | Find PII in text | 🔍 17+ PII types<br>🔍 NLP-powered<br>🔍 Confidence scoring |
-| [**Masking**](./masking.md) | Hide PII safely | 🎭 Preserve readability<br>🎭 Configurable visibility<br>🎭 Multiple formats |
-| [**Redaction**](./redaction.md) | Remove PII completely | 🚫 Logging safety<br>🚫 Middleware support<br>🚫 Audit trails |
-| [**Policy Engine**](./policy-engine.md) | Compliance automation | ⚖️ GDPR/CCPA ready<br>⚖️ Risk-based rules<br>⚖️ Audit logging |
-| [**Normalization**](./normalization.md) | Standardize formats | 🔧 Consistent data<br>🔧 Locale-aware<br>🔧 Provider-specific |
+| Module                                  | Purpose                | Key Features                                                                    |
+| --------------------------------------- | ---------------------- | ------------------------------------------------------------------------------- |
+| [**Validation**](./validation.md)       | Verify PII correctness | ✅ Email, phone, name validation<br>✅ International support<br>✅ Custom rules |
+| [**Detection**](./detection.md)         | Find PII in text       | 🔍 17+ PII types<br>🔍 NLP-powered<br>🔍 Confidence scoring                     |
+| [**Masking**](./masking.md)             | Hide PII safely        | 🎭 Preserve readability<br>🎭 Configurable visibility<br>🎭 Multiple formats    |
+| [**Redaction**](./redaction.md)         | Remove PII completely  | 🚫 Logging safety<br>🚫 Middleware support<br>🚫 Audit trails                   |
+| [**Policy Engine**](./policy-engine.md) | Compliance automation  | ⚖️ GDPR/CCPA ready<br>⚖️ Risk-based rules<br>⚖️ Audit logging                   |
+| [**Normalization**](./normalization.md) | Standardize formats    | 🔧 Consistent data<br>🔧 Locale-aware<br>🔧 Provider-specific                   |
 
 ## 🚀 Quick Example
 
 ```typescript
-import { detectPII, maskPII, createPolicyEngine } from 'privakit';
+import { detectPII, maskPII, createPolicyEngine } from "privakit";
 
 // Detect PII in text
 const text = "Contact John Doe at john@example.com";
 const detection = detectPII(text);
 
 // Apply GDPR-compliant masking
-const policyEngine = createPolicyEngine('gdpr');
-const decision = policyEngine.evaluate('email', 'display');
+const policyEngine = createPolicyEngine("gdpr");
+const decision = policyEngine.evaluate("email", "display");
 
 if (decision.requiresMasking) {
-  const masked = maskPII('john@example.com', 'email');
+  const masked = maskPII("john@example.com", "email");
   console.log(masked.masked); // "j***@example.com"
 }
 ```

@@ -5,6 +5,7 @@ Privakit is designed to work seamlessly across all major JavaScript frameworks a
 ## 🌐 Universal Compatibility
 
 Privakit supports:
+
 - ✅ **Node.js** (16+) - Server-side applications
 - ✅ **React** (16.8+) - Web and React Native apps
 - ✅ **Vue.js** (3.0+) - Progressive web applications
@@ -81,7 +82,7 @@ export function usePII(options: UsePIIOptions = {}) {
     errors: [] as string[]
   });
 
-  const policyEngine = useMemo(() => 
+  const policyEngine = useMemo(() =>
     createPolicyEngine(options.policyType || 'gdpr', {
       strictMode: options.strictMode ?? true
     }), [options.policyType, options.strictMode]
@@ -93,13 +94,13 @@ export function usePII(options: UsePIIOptions = {}) {
     try {
       // Detect PII in text
       const detection = detectPII(text);
-      
+
       if (!detection.hasPII) {
         return { safe: text, hasPII: false, processed: text };
       }
 
       // Check policy compliance
-      const decisions = detection.spans.map(span => 
+      const decisions = detection.spans.map(span =>
         policyEngine.evaluate(span.type, operation)
       );
 
@@ -126,19 +127,19 @@ export function usePII(options: UsePIIOptions = {}) {
         decisions
       };
 
-      setProcessingState(prev => ({ 
-        ...prev, 
-        isProcessing: false, 
-        lastProcessed: result 
+      setProcessingState(prev => ({
+        ...prev,
+        isProcessing: false,
+        lastProcessed: result
       }));
 
       return result;
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-      setProcessingState(prev => ({ 
-        ...prev, 
-        isProcessing: false, 
-        errors: [...prev.errors, errorMsg] 
+      setProcessingState(prev => ({
+        ...prev,
+        isProcessing: false,
+        errors: [...prev.errors, errorMsg]
       }));
       throw error;
     }
@@ -186,7 +187,7 @@ function PrivacyAwareComponent() {
 
   return (
     <div>
-      <textarea 
+      <textarea
         value={userInput}
         onChange={(e) => setUserInput(e.target.value)}
         placeholder="Enter text (may contain PII)"
@@ -222,11 +223,11 @@ const PIIAwareInput = () => {
 
   const handleTextChange = (newText: string) => {
     setText(newText);
-    
+
     // Check for PII in real-time
     const detection = detectPII(newText);
     setHasPII(detection.hasPII);
-    
+
     if (detection.hasPII) {
       Alert.alert(
         'PII Detected',
@@ -277,7 +278,7 @@ const PIIAwareInput = () => {
       <span v-if="emailError" class="error-text">{{ emailError }}</span>
       <span v-if="maskedEmail" class="preview">Preview: {{ maskedEmail }}</span>
     </div>
-    
+
     <div class="input-group">
       <label for="message">Message:</label>
       <textarea
@@ -291,66 +292,72 @@ const PIIAwareInput = () => {
         ⚠️ This message contains personally identifiable information
       </div>
     </div>
-    
-    <button @click="submitForm" :disabled="!canSubmit">
-      Submit
-    </button>
+
+    <button @click="submitForm" :disabled="!canSubmit">Submit</button>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import { detectPII, maskPII, validateEmail, createPolicyEngine } from 'privakit'
+import { ref, computed, watch } from "vue";
+import {
+  detectPII,
+  maskPII,
+  validateEmail,
+  createPolicyEngine,
+} from "privakit";
 
 // Reactive state
-const email = ref('')
-const message = ref('')
-const emailError = ref('')
-const maskedEmail = ref('')
-const messageHasPII = ref(false)
+const email = ref("");
+const message = ref("");
+const emailError = ref("");
+const maskedEmail = ref("");
+const messageHasPII = ref(false);
 
 // Policy engine
-const policyEngine = createPolicyEngine('gdpr')
+const policyEngine = createPolicyEngine("gdpr");
 
 // Computed properties
-const canSubmit = computed(() => 
-  email.value && !emailError.value && !messageHasPII.value
-)
+const canSubmit = computed(
+  () => email.value && !emailError.value && !messageHasPII.value,
+);
 
 // Methods
 const validateEmailField = () => {
-  const result = validateEmail(email.value)
-  emailError.value = result.isValid ? '' : 'Please enter a valid email address'
-  
+  const result = validateEmail(email.value);
+  emailError.value = result.isValid ? "" : "Please enter a valid email address";
+
   if (result.isValid) {
-    const masked = maskPII(email.value, 'email', { visibleStart: 2 })
-    maskedEmail.value = masked.masked
+    const masked = maskPII(email.value, "email", { visibleStart: 2 });
+    maskedEmail.value = masked.masked;
   } else {
-    maskedEmail.value = ''
+    maskedEmail.value = "";
   }
-}
+};
 
 const checkMessageForPII = () => {
-  const detection = detectPII(message.value)
-  messageHasPII.value = detection.hasPII
-}
+  const detection = detectPII(message.value);
+  messageHasPII.value = detection.hasPII;
+};
 
 const submitForm = async () => {
   // Final PII check before submission
-  const messageDetection = detectPII(message.value)
-  
+  const messageDetection = detectPII(message.value);
+
   if (messageDetection.hasPII) {
     // Apply redaction for logging
-    const safeMessage = redactText(message.value).redacted
-    console.log('Form submitted with safe message:', safeMessage)
+    const safeMessage = redactText(message.value).redacted;
+    console.log("Form submitted with safe message:", safeMessage);
   } else {
-    console.log('Form submitted:', { email: email.value, message: message.value })
+    console.log("Form submitted:", {
+      email: email.value,
+      message: message.value,
+    });
   }
-}
+};
 
 // Watchers
-watch(email, validateEmailField)
-watch(message, checkMessageForPII)
+watch(email, validateEmailField);
+watch(message, checkMessageForPII);
 </script>
 ```
 
@@ -358,52 +365,57 @@ watch(message, checkMessageForPII)
 
 ```typescript
 // plugins/privakit.ts
-import { App } from 'vue'
-import { detectPII, maskPII, validateEmail, createPolicyEngine } from 'privakit'
+import { App } from "vue";
+import {
+  detectPII,
+  maskPII,
+  validateEmail,
+  createPolicyEngine,
+} from "privakit";
 
 export default {
   install(app: App, options = {}) {
-    const policyEngine = createPolicyEngine(options.policy || 'gdpr')
-    
+    const policyEngine = createPolicyEngine(options.policy || "gdpr");
+
     app.config.globalProperties.$privakit = {
       detectPII,
       maskPII,
       validateEmail,
       policyEngine,
-      
+
       // Helper methods
-      processText: (text: string, operation: string = 'display') => {
-        const detection = detectPII(text)
-        
+      processText: (text: string, operation: string = "display") => {
+        const detection = detectPII(text);
+
         if (!detection.hasPII) {
-          return { safe: text, hasPII: false }
+          return { safe: text, hasPII: false };
         }
-        
-        let processed = text
-        detection.spans.forEach(span => {
-          const decision = policyEngine.evaluate(span.type, operation)
+
+        let processed = text;
+        detection.spans.forEach((span) => {
+          const decision = policyEngine.evaluate(span.type, operation);
           if (decision.requiresMasking) {
-            const masked = maskPII(span.text, span.type)
-            processed = processed.replace(span.text, masked.masked)
+            const masked = maskPII(span.text, span.type);
+            processed = processed.replace(span.text, masked.masked);
           }
-        })
-        
-        return { safe: processed, hasPII: true, detection }
-      }
-    }
-    
-    app.provide('privakit', app.config.globalProperties.$privakit)
-  }
-}
+        });
+
+        return { safe: processed, hasPII: true, detection };
+      },
+    };
+
+    app.provide("privakit", app.config.globalProperties.$privakit);
+  },
+};
 
 // main.ts
-import { createApp } from 'vue'
-import App from './App.vue'
-import PrivakitPlugin from './plugins/privakit'
+import { createApp } from "vue";
+import App from "./App.vue";
+import PrivakitPlugin from "./plugins/privakit";
 
-const app = createApp(App)
-app.use(PrivakitPlugin, { policy: 'gdpr' })
-app.mount('#app')
+const app = createApp(App);
+app.use(PrivakitPlugin, { policy: "gdpr" });
+app.mount("#app");
 ```
 
 ## 🅰️ Angular Integration
@@ -412,9 +424,15 @@ app.mount('#app')
 
 ```typescript
 // services/pii.service.ts
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { detectPII, maskPII, validateEmail, createPolicyEngine, PolicyEngine } from 'privakit';
+import { Injectable } from "@angular/core";
+import { BehaviorSubject, Observable } from "rxjs";
+import {
+  detectPII,
+  maskPII,
+  validateEmail,
+  createPolicyEngine,
+  PolicyEngine,
+} from "privakit";
 
 export interface PIIDetectionResult {
   hasPII: boolean;
@@ -424,43 +442,49 @@ export interface PIIDetectionResult {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root",
 })
 export class PIIService {
   private policyEngine: PolicyEngine;
   private processingSubject = new BehaviorSubject<boolean>(false);
-  
-  public isProcessing$: Observable<boolean> = this.processingSubject.asObservable();
+
+  public isProcessing$: Observable<boolean> =
+    this.processingSubject.asObservable();
 
   constructor() {
-    this.policyEngine = createPolicyEngine('gdpr', {
+    this.policyEngine = createPolicyEngine("gdpr", {
       strictMode: true,
-      auditRequired: true
+      auditRequired: true,
     });
   }
 
-  async processText(text: string, operation: string = 'display'): Promise<PIIDetectionResult> {
+  async processText(
+    text: string,
+    operation: string = "display",
+  ): Promise<PIIDetectionResult> {
     this.processingSubject.next(true);
-    
+
     try {
       const detection = detectPII(text);
-      
+
       if (!detection.hasPII) {
         return {
           hasPII: false,
           originalText: text,
-          safeText: text
+          safeText: text,
         };
       }
 
       let safeText = text;
       for (const span of detection.spans) {
         const decision = this.policyEngine.evaluate(span.type, operation);
-        
+
         if (!decision.allowed) {
-          throw new Error(`Operation '${operation}' not allowed for ${span.type}: ${decision.reason}`);
+          throw new Error(
+            `Operation '${operation}' not allowed for ${span.type}: ${decision.reason}`,
+          );
         }
-        
+
         if (decision.requiresMasking) {
           const masked = maskPII(span.text, span.type);
           safeText = safeText.replace(span.text, masked.masked);
@@ -471,7 +495,7 @@ export class PIIService {
         hasPII: true,
         originalText: text,
         safeText,
-        detection
+        detection,
       };
     } finally {
       this.processingSubject.next(false);
@@ -492,55 +516,55 @@ export class PIIService {
 
 ```typescript
 // components/user-form.component.ts
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { PIIService } from '../services/pii.service';
+import { Component, OnInit } from "@angular/core";
+import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { PIIService } from "../services/pii.service";
 
 @Component({
-  selector: 'app-user-form',
-  templateUrl: './user-form.component.html',
-  styleUrls: ['./user-form.component.scss']
+  selector: "app-user-form",
+  templateUrl: "./user-form.component.html",
+  styleUrls: ["./user-form.component.scss"],
 })
 export class UserFormComponent implements OnInit {
   userForm: FormGroup;
-  emailPreview: string = '';
+  emailPreview: string = "";
   messageHasPII: boolean = false;
   isProcessing: boolean = false;
 
   constructor(
     private fb: FormBuilder,
-    private piiService: PIIService
+    private piiService: PIIService,
   ) {
     this.userForm = this.fb.group({
-      email: ['', [Validators.required, this.emailValidator.bind(this)]],
-      message: ['', Validators.required]
+      email: ["", [Validators.required, this.emailValidator.bind(this)]],
+      message: ["", Validators.required],
     });
   }
 
   ngOnInit() {
     // Subscribe to processing state
     this.piiService.isProcessing$.subscribe(
-      processing => this.isProcessing = processing
+      (processing) => (this.isProcessing = processing),
     );
 
     // Watch email field for real-time masking
-    this.userForm.get('email')?.valueChanges.subscribe(email => {
-      if (email && this.userForm.get('email')?.valid) {
-        const masked = this.piiService.maskSensitiveData(email, 'email');
+    this.userForm.get("email")?.valueChanges.subscribe((email) => {
+      if (email && this.userForm.get("email")?.valid) {
+        const masked = this.piiService.maskSensitiveData(email, "email");
         this.emailPreview = masked.masked;
       } else {
-        this.emailPreview = '';
+        this.emailPreview = "";
       }
     });
 
     // Watch message field for PII detection
-    this.userForm.get('message')?.valueChanges.subscribe(async message => {
+    this.userForm.get("message")?.valueChanges.subscribe(async (message) => {
       if (message) {
         try {
-          const result = await this.piiService.processText(message, 'display');
+          const result = await this.piiService.processText(message, "display");
           this.messageHasPII = result.hasPII;
         } catch (error) {
-          console.error('PII processing error:', error);
+          console.error("PII processing error:", error);
         }
       } else {
         this.messageHasPII = false;
@@ -550,7 +574,7 @@ export class UserFormComponent implements OnInit {
 
   emailValidator(control: any) {
     if (!control.value) return null;
-    
+
     const result = this.piiService.validateEmailAddress(control.value);
     return result.isValid ? null : { invalidEmail: true };
   }
@@ -558,23 +582,23 @@ export class UserFormComponent implements OnInit {
   async onSubmit() {
     if (this.userForm.valid) {
       const formData = this.userForm.value;
-      
+
       try {
         // Process message for safe submission
         const messageResult = await this.piiService.processText(
-          formData.message, 
-          'store'
+          formData.message,
+          "store",
         );
-        
+
         const submissionData = {
           email: formData.email,
-          message: messageResult.safeText
+          message: messageResult.safeText,
         };
-        
-        console.log('Safe form submission:', submissionData);
+
+        console.log("Safe form submission:", submissionData);
         // Submit to your API
       } catch (error) {
-        console.error('Form submission error:', error);
+        console.error("Form submission error:", error);
       }
     }
   }
@@ -586,23 +610,24 @@ export class UserFormComponent implements OnInit {
 <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
   <div class="form-group">
     <label for="email">Email:</label>
-    <input 
+    <input
       id="email"
-      type="email" 
+      type="email"
       formControlName="email"
       [class.error]="userForm.get('email')?.invalid && userForm.get('email')?.touched"
     />
-    <div *ngIf="userForm.get('email')?.invalid && userForm.get('email')?.touched" class="error-text">
+    <div
+      *ngIf="userForm.get('email')?.invalid && userForm.get('email')?.touched"
+      class="error-text"
+    >
       Please enter a valid email address
     </div>
-    <div *ngIf="emailPreview" class="preview">
-      Preview: {{ emailPreview }}
-    </div>
+    <div *ngIf="emailPreview" class="preview">Preview: {{ emailPreview }}</div>
   </div>
 
   <div class="form-group">
     <label for="message">Message:</label>
-    <textarea 
+    <textarea
       id="message"
       formControlName="message"
       [class.has-pii]="messageHasPII"
@@ -613,10 +638,7 @@ export class UserFormComponent implements OnInit {
     </div>
   </div>
 
-  <button 
-    type="submit" 
-    [disabled]="userForm.invalid || isProcessing"
-  >
+  <button type="submit" [disabled]="userForm.invalid || isProcessing">
     <span *ngIf="isProcessing">Processing...</span>
     <span *ngIf="!isProcessing">Submit</span>
   </button>
@@ -630,28 +652,28 @@ export class UserFormComponent implements OnInit {
 <script lang="ts">
   import { onMount } from 'svelte';
   import { detectPII, maskPII, validateEmail, createPolicyEngine } from 'privakit';
-  
+
   let email = '';
   let message = '';
   let emailError = '';
   let emailPreview = '';
   let messageHasPII = false;
   let isProcessing = false;
-  
+
   const policyEngine = createPolicyEngine('gdpr');
-  
+
   $: if (email) {
     validateEmailInput(email);
   }
-  
+
   $: if (message) {
     checkMessagePII(message);
   }
-  
+
   function validateEmailInput(emailValue: string) {
     const result = validateEmail(emailValue);
     emailError = result.isValid ? '' : 'Please enter a valid email address';
-    
+
     if (result.isValid) {
       const masked = maskPII(emailValue, 'email', { visibleStart: 2 });
       emailPreview = masked.masked;
@@ -659,7 +681,7 @@ export class UserFormComponent implements OnInit {
       emailPreview = '';
     }
   }
-  
+
   async function checkMessagePII(messageValue: string) {
     isProcessing = true;
     try {
@@ -671,16 +693,16 @@ export class UserFormComponent implements OnInit {
       isProcessing = false;
     }
   }
-  
+
   async function handleSubmit() {
     if (emailError || messageHasPII) return;
-    
+
     isProcessing = true;
     try {
       // Process message for safe submission
       let safeMessage = message;
       const detection = detectPII(message);
-      
+
       if (detection.hasPII) {
         for (const span of detection.spans) {
           const decision = policyEngine.evaluate(span.type, 'store');
@@ -690,10 +712,10 @@ export class UserFormComponent implements OnInit {
           }
         }
       }
-      
+
       const submissionData = { email, message: safeMessage };
       console.log('Safe form submission:', submissionData);
-      
+
       // Submit to your API
     } catch (error) {
       console.error('Submission error:', error);
@@ -744,26 +766,26 @@ export class UserFormComponent implements OnInit {
   .form-group {
     margin-bottom: 1rem;
   }
-  
+
   .error {
     border-color: red;
   }
-  
+
   .has-pii {
     border-color: orange;
     background-color: #fff3cd;
   }
-  
+
   .error-text {
     color: red;
     font-size: 0.875rem;
   }
-  
+
   .pii-warning {
     color: orange;
     font-size: 0.875rem;
   }
-  
+
   .preview {
     color: gray;
     font-style: italic;
@@ -778,17 +800,20 @@ export class UserFormComponent implements OnInit {
 
 ```typescript
 // pages/api/submit-form.ts or app/api/submit-form/route.ts
-import { NextApiRequest, NextApiResponse } from 'next';
-import { detectPII, redactText, createPolicyEngine } from 'privakit';
+import { NextApiRequest, NextApiResponse } from "next";
+import { detectPII, redactText, createPolicyEngine } from "privakit";
 
-const policyEngine = createPolicyEngine('gdpr', {
+const policyEngine = createPolicyEngine("gdpr", {
   strictMode: true,
-  auditRequired: true
+  auditRequired: true,
 });
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
@@ -796,36 +821,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Validate and process the form data
     const messageDetection = detectPII(message);
-    
+
     if (messageDetection.hasPII) {
       // Check policy compliance
       for (const span of messageDetection.spans) {
-        const decision = policyEngine.evaluate(span.type, 'store');
-        
+        const decision = policyEngine.evaluate(span.type, "store");
+
         if (!decision.allowed) {
           return res.status(400).json({
             error: `Cannot store ${span.type}: ${decision.reason}`,
-            policyViolation: true
+            policyViolation: true,
           });
         }
       }
-      
+
       // Redact PII for logging
       const safeMessage = redactText(message).redacted;
-      console.log('Form submitted with redacted message:', safeMessage);
+      console.log("Form submitted with redacted message:", safeMessage);
     }
 
     // Process the form (save to database, send email, etc.)
     const result = await processFormSubmission({ email, message });
 
-    res.status(200).json({ 
-      success: true, 
-      message: 'Form submitted successfully',
-      hadPII: messageDetection.hasPII
+    res.status(200).json({
+      success: true,
+      message: "Form submitted successfully",
+      hadPII: messageDetection.hasPII,
     });
   } catch (error) {
-    console.error('Form processing error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Form processing error:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 }
 
@@ -839,22 +864,25 @@ async function processFormSubmission(data: any) {
 
 ```typescript
 // app/api/validate/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import { validateEmail, validatePhone } from 'privakit';
+import { NextRequest, NextResponse } from "next/server";
+import { validateEmail, validatePhone } from "privakit";
 
 export async function POST(request: NextRequest) {
   const { type, value } = await request.json();
 
   let result;
   switch (type) {
-    case 'email':
+    case "email":
       result = validateEmail(value);
       break;
-    case 'phone':
+    case "phone":
       result = validatePhone(value);
       break;
     default:
-      return NextResponse.json({ error: 'Invalid validation type' }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid validation type" },
+        { status: 400 },
+      );
   }
 
   return NextResponse.json(result);
@@ -865,10 +893,10 @@ export async function POST(request: NextRequest) {
 
 ```typescript
 // hooks/usePII.ts
-'use client';
+"use client";
 
-import { useState, useCallback } from 'react';
-import { detectPII, maskPII, validateEmail } from 'privakit';
+import { useState, useCallback } from "react";
+import { detectPII, maskPII, validateEmail } from "privakit";
 
 export function usePII() {
   const [isLoading, setIsLoading] = useState(false);
@@ -880,29 +908,29 @@ export function usePII() {
 
     try {
       const detection = detectPII(text);
-      
+
       if (detection.hasPII) {
         let maskedText = text;
-        detection.spans.forEach(span => {
+        detection.spans.forEach((span) => {
           const masked = maskPII(span.text, span.type);
           maskedText = maskedText.replace(span.text, masked.masked);
         });
-        
-        return { 
-          original: text, 
-          masked: maskedText, 
-          hasPII: true, 
-          detection 
+
+        return {
+          original: text,
+          masked: maskedText,
+          hasPII: true,
+          detection,
         };
       }
-      
-      return { 
-        original: text, 
-        masked: text, 
-        hasPII: false 
+
+      return {
+        original: text,
+        masked: text,
+        hasPII: false,
       };
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
       setError(errorMessage);
       throw err;
     } finally {
@@ -910,42 +938,46 @@ export function usePII() {
     }
   }, []);
 
-  const validateData = useCallback(async (data: string, type: 'email' | 'phone') => {
-    setIsLoading(true);
-    setError(null);
+  const validateData = useCallback(
+    async (data: string, type: "email" | "phone") => {
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      // For client-side validation, we can validate directly
-      if (type === 'email') {
-        return validateEmail(data);
+      try {
+        // For client-side validation, we can validate directly
+        if (type === "email") {
+          return validateEmail(data);
+        }
+
+        // For server-side validation, make API call
+        const response = await fetch("/api/validate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type, value: data }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Validation failed");
+        }
+
+        return await response.json();
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Validation error";
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setIsLoading(false);
       }
-      
-      // For server-side validation, make API call
-      const response = await fetch('/api/validate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, value: data })
-      });
-      
-      if (!response.ok) {
-        throw new Error('Validation failed');
-      }
-      
-      return await response.json();
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Validation error';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    },
+    [],
+  );
 
   return {
     processText,
     validateData,
     isLoading,
-    error
+    error,
   };
 }
 ```
@@ -956,10 +988,15 @@ export function usePII() {
 
 ```typescript
 // plugins/privakit.client.ts
-import { detectPII, maskPII, validateEmail, createPolicyEngine } from 'privakit';
+import {
+  detectPII,
+  maskPII,
+  validateEmail,
+  createPolicyEngine,
+} from "privakit";
 
 export default defineNuxtPlugin(() => {
-  const policyEngine = createPolicyEngine('gdpr');
+  const policyEngine = createPolicyEngine("gdpr");
 
   return {
     provide: {
@@ -968,28 +1005,28 @@ export default defineNuxtPlugin(() => {
         maskPII,
         validateEmail,
         policyEngine,
-        
+
         // Helper composable
-        processText: (text: string, operation: string = 'display') => {
+        processText: (text: string, operation: string = "display") => {
           const detection = detectPII(text);
-          
+
           if (!detection.hasPII) {
             return { safe: text, hasPII: false };
           }
-          
+
           let processed = text;
-          detection.spans.forEach(span => {
+          detection.spans.forEach((span) => {
             const decision = policyEngine.evaluate(span.type, operation);
             if (decision.requiresMasking) {
               const masked = maskPII(span.text, span.type);
               processed = processed.replace(span.text, masked.masked);
             }
           });
-          
+
           return { safe: processed, hasPII: true, detection };
-        }
-      }
-    }
+        },
+      },
+    },
   };
 });
 ```
@@ -1000,23 +1037,23 @@ export default defineNuxtPlugin(() => {
 // composables/usePII.ts
 export const usePII = () => {
   const { $privakit } = useNuxtApp();
-  
+
   const processText = (text: string, operation?: string) => {
     return $privakit.processText(text, operation);
   };
-  
+
   const validateEmail = (email: string) => {
     return $privakit.validateEmail(email);
   };
-  
+
   const maskSensitiveData = (data: string, type: string) => {
     return $privakit.maskPII(data, type);
   };
-  
+
   return {
     processText,
     validateEmail,
-    maskSensitiveData
+    maskSensitiveData,
   };
 };
 ```
@@ -1027,12 +1064,12 @@ export const usePII = () => {
 
 ```typescript
 // middleware/pii-protection.ts
-import { Request, Response, NextFunction } from 'express';
-import { detectPII, redactText, createPolicyEngine } from 'privakit';
+import { Request, Response, NextFunction } from "express";
+import { detectPII, redactText, createPolicyEngine } from "privakit";
 
-const policyEngine = createPolicyEngine('gdpr', {
+const policyEngine = createPolicyEngine("gdpr", {
   strictMode: true,
-  auditRequired: true
+  auditRequired: true,
 });
 
 export interface PIIProtectionOptions {
@@ -1045,36 +1082,36 @@ export interface PIIProtectionOptions {
 export function piiProtection(options: PIIProtectionOptions = {}) {
   return (req: Request, res: Response, next: NextFunction) => {
     // Intercept request body for PII detection
-    if (req.body && typeof req.body === 'object') {
+    if (req.body && typeof req.body === "object") {
       const bodyString = JSON.stringify(req.body);
       const detection = detectPII(bodyString);
-      
+
       if (detection.hasPII) {
         // Add PII metadata to request
         req.piiDetection = detection;
-        
+
         // Check policy compliance
-        const violations = detection.spans.filter(span => {
-          const decision = policyEngine.evaluate(span.type, 'receive');
+        const violations = detection.spans.filter((span) => {
+          const decision = policyEngine.evaluate(span.type, "receive");
           return !decision.allowed;
         });
-        
+
         if (options.blockPIISubmission && violations.length > 0) {
           return res.status(400).json({
-            error: 'Request contains disallowed PII',
-            violations: violations.map(v => ({
+            error: "Request contains disallowed PII",
+            violations: violations.map((v) => ({
               type: v.type,
-              reason: 'Not allowed for receive operation'
-            }))
+              reason: "Not allowed for receive operation",
+            })),
           });
         }
-        
+
         // Redact logs if enabled
         if (options.redactLogs) {
           const originalLog = console.log;
           console.log = (...args) => {
-            const redactedArgs = args.map(arg => {
-              if (typeof arg === 'string') {
+            const redactedArgs = args.map((arg) => {
+              if (typeof arg === "string") {
                 return redactText(arg).redacted;
               }
               return arg;
@@ -1084,17 +1121,17 @@ export function piiProtection(options: PIIProtectionOptions = {}) {
         }
       }
     }
-    
+
     // Intercept response for PII masking
     if (options.maskResponses) {
       const originalSend = res.send;
-      res.send = function(data) {
-        if (typeof data === 'string') {
+      res.send = function (data) {
+        if (typeof data === "string") {
           const detection = detectPII(data);
           if (detection.hasPII) {
             let maskedData = data;
-            detection.spans.forEach(span => {
-              const decision = policyEngine.evaluate(span.type, 'send');
+            detection.spans.forEach((span) => {
+              const decision = policyEngine.evaluate(span.type, "send");
               if (decision.requiresMasking) {
                 const masked = maskPII(span.text, span.type);
                 maskedData = maskedData.replace(span.text, masked.masked);
@@ -1106,30 +1143,32 @@ export function piiProtection(options: PIIProtectionOptions = {}) {
         return originalSend.call(this, data);
       };
     }
-    
+
     next();
   };
 }
 
 // Usage
-import express from 'express';
-import { piiProtection } from './middleware/pii-protection';
+import express from "express";
+import { piiProtection } from "./middleware/pii-protection";
 
 const app = express();
 
 app.use(express.json());
-app.use(piiProtection({
-  redactLogs: true,
-  blockPIISubmission: false,
-  maskResponses: true
-}));
+app.use(
+  piiProtection({
+    redactLogs: true,
+    blockPIISubmission: false,
+    maskResponses: true,
+  }),
+);
 
-app.post('/api/submit', (req, res) => {
+app.post("/api/submit", (req, res) => {
   // Access PII detection results
   if (req.piiDetection?.hasPII) {
-    console.log('Request contains PII types:', req.piiDetection.detectedTypes);
+    console.log("Request contains PII types:", req.piiDetection.detectedTypes);
   }
-  
+
   res.json({ success: true });
 });
 ```
@@ -1138,14 +1177,14 @@ app.post('/api/submit', (req, res) => {
 
 ```typescript
 // middleware/safe-logger.ts
-import { createSafeLogger } from 'privakit';
-import winston from 'winston';
+import { createSafeLogger } from "privakit";
+import winston from "winston";
 
 // Create PII-safe logger
 const safeLogger = createSafeLogger({
-  replacement: '[REDACTED]',
+  replacement: "[REDACTED]",
   strictMode: true,
-  auditTrail: true
+  auditTrail: true,
 });
 
 // Winston integration
@@ -1156,14 +1195,14 @@ const logger = winston.createLogger({
       // Redact PII from log messages
       const safeMessage = safeLogger.redact(message);
       const safeMeta = safeLogger.redact(JSON.stringify(meta));
-      
+
       return `${timestamp} [${level}]: ${safeMessage} ${safeMeta}`;
-    })
+    }),
   ),
   transports: [
-    new winston.transports.File({ filename: 'app.log' }),
-    new winston.transports.Console()
-  ]
+    new winston.transports.File({ filename: "app.log" }),
+    new winston.transports.Console(),
+  ],
 });
 
 export { logger };
@@ -1214,12 +1253,12 @@ export const PIIAwareInput: React.FC<PIIAwareInputProps> = ({
 
   const handleTextChange = useCallback((newText: string) => {
     setText(newText);
-    
+
     // Validate if it's an email field
     if (type === 'email') {
       const validation = validateEmail(newText);
       setIsValid(validation.isValid);
-      
+
       if (validation.isValid) {
         const masked = maskPII(newText, 'email');
         setMaskedPreview(masked.masked);
@@ -1227,19 +1266,19 @@ export const PIIAwareInput: React.FC<PIIAwareInputProps> = ({
         setMaskedPreview('');
       }
     }
-    
+
     // Check for PII
     const detection = detectPII(newText);
     setHasPII(detection.hasPII);
-    
+
     if (detection.hasPII && type === 'general') {
       Alert.alert(
         'PII Detected',
         'This text contains personally identifiable information. Please be careful when sharing.',
         [
           { text: 'OK', style: 'default' },
-          { 
-            text: 'Mask PII', 
+          {
+            text: 'Mask PII',
             style: 'default',
             onPress: () => {
               let maskedText = newText;
@@ -1254,7 +1293,7 @@ export const PIIAwareInput: React.FC<PIIAwareInputProps> = ({
         ]
       );
     }
-    
+
     // Notify parent component
     if (onSafeTextChange) {
       let safeText = newText;
@@ -1282,17 +1321,17 @@ export const PIIAwareInput: React.FC<PIIAwareInputProps> = ({
         multiline={type === 'general'}
         keyboardType={type === 'email' ? 'email-address' : 'default'}
       />
-      
+
       {hasPII && (
         <View style={styles.warningContainer}>
           <Text style={styles.warningText}>⚠️ PII detected</Text>
         </View>
       )}
-      
+
       {type === 'email' && !isValid && text.length > 0 && (
         <Text style={styles.errorText}>Please enter a valid email address</Text>
       )}
-      
+
       {maskedPreview && (
         <Text style={styles.previewText}>Preview: {maskedPreview}</Text>
       )}
@@ -1344,67 +1383,70 @@ const styles = StyleSheet.create({
 
 ```typescript
 // main.ts (Main Process)
-import { app, BrowserWindow, ipcMain } from 'electron';
-import { detectPII, redactText, createPolicyEngine } from 'privakit';
+import { app, BrowserWindow, ipcMain } from "electron";
+import { detectPII, redactText, createPolicyEngine } from "privakit";
 
-const policyEngine = createPolicyEngine('gdpr');
+const policyEngine = createPolicyEngine("gdpr");
 
 // Handle PII processing in main process for security
-ipcMain.handle('process-pii', async (event, text: string, operation: string) => {
-  try {
-    const detection = detectPII(text);
-    
-    if (!detection.hasPII) {
-      return { safe: text, hasPII: false };
-    }
-    
-    // Apply policy decisions
-    let processedText = text;
-    for (const span of detection.spans) {
-      const decision = policyEngine.evaluate(span.type, operation);
-      
-      if (!decision.allowed) {
-        throw new Error(`Operation not allowed: ${decision.reason}`);
+ipcMain.handle(
+  "process-pii",
+  async (event, text: string, operation: string) => {
+    try {
+      const detection = detectPII(text);
+
+      if (!detection.hasPII) {
+        return { safe: text, hasPII: false };
       }
-      
-      if (decision.requiresRedaction) {
-        const redacted = redactText(span.text);
-        processedText = processedText.replace(span.text, redacted.redacted);
-      } else if (decision.requiresMasking) {
-        const masked = maskPII(span.text, span.type);
-        processedText = processedText.replace(span.text, masked.masked);
+
+      // Apply policy decisions
+      let processedText = text;
+      for (const span of detection.spans) {
+        const decision = policyEngine.evaluate(span.type, operation);
+
+        if (!decision.allowed) {
+          throw new Error(`Operation not allowed: ${decision.reason}`);
+        }
+
+        if (decision.requiresRedaction) {
+          const redacted = redactText(span.text);
+          processedText = processedText.replace(span.text, redacted.redacted);
+        } else if (decision.requiresMasking) {
+          const masked = maskPII(span.text, span.type);
+          processedText = processedText.replace(span.text, masked.masked);
+        }
       }
+
+      return {
+        safe: processedText,
+        hasPII: true,
+        detection,
+        operation,
+      };
+    } catch (error) {
+      throw new Error(`PII processing failed: ${error.message}`);
     }
-    
-    return {
-      safe: processedText,
-      hasPII: true,
-      detection,
-      operation
-    };
-  } catch (error) {
-    throw new Error(`PII processing failed: ${error.message}`);
-  }
-});
+  },
+);
 
 // renderer.ts (Renderer Process)
-import { ipcRenderer } from 'electron';
+import { ipcRenderer } from "electron";
 
 export class PIIProcessor {
-  static async processText(text: string, operation: string = 'display') {
+  static async processText(text: string, operation: string = "display") {
     try {
-      return await ipcRenderer.invoke('process-pii', text, operation);
+      return await ipcRenderer.invoke("process-pii", text, operation);
     } catch (error) {
-      console.error('PII processing error:', error);
+      console.error("PII processing error:", error);
       throw error;
     }
   }
 }
 
 // Usage in renderer
-const userInput = 'Contact john@example.com for more info';
-const result = await PIIProcessor.processText(userInput, 'display');
-console.log('Safe text:', result.safe);
+const userInput = "Contact john@example.com for more info";
+const result = await PIIProcessor.processText(userInput, "display");
+console.log("Safe text:", result.safe);
 ```
 
 ## 🎯 Framework-Specific Best Practices
@@ -1412,32 +1454,33 @@ console.log('Safe text:', result.safe);
 ### Performance Optimization
 
 1. **Tree Shaking**: Import only needed functions
+
 ```typescript
 // ✅ Good - tree shakeable
-import { validateEmail, maskPII } from 'privakit';
+import { validateEmail, maskPII } from "privakit";
 
 // ❌ Avoid - imports everything
-import * as Privakit from 'privakit';
+import * as Privakit from "privakit";
 ```
 
 2. **Lazy Loading**: Load Privakit when needed
+
 ```typescript
 // React lazy loading
-const PIIProcessor = lazy(() => import('./components/PIIProcessor'));
+const PIIProcessor = lazy(() => import("./components/PIIProcessor"));
 
 // Vue async component
-const PIIForm = defineAsyncComponent(() => import('./PIIForm.vue'));
+const PIIForm = defineAsyncComponent(() => import("./PIIForm.vue"));
 
 // Angular lazy loading
-const PIIModule = () => import('./pii/pii.module').then(m => m.PIIModule);
+const PIIModule = () => import("./pii/pii.module").then((m) => m.PIIModule);
 ```
 
 3. **Memoization**: Cache validation results
+
 ```typescript
 // React
-const memoizedValidation = useMemo(() => 
-  validateEmail(email), [email]
-);
+const memoizedValidation = useMemo(() => validateEmail(email), [email]);
 
 // Vue
 const validationResult = computed(() => validateEmail(email.value));
@@ -1453,8 +1496,8 @@ async function safePIIProcessing(text: string) {
   } catch (error) {
     // Log error safely (without PII)
     const safeError = redactText(error.message).redacted;
-    console.error('PII processing failed:', safeError);
-    
+    console.error("PII processing failed:", safeError);
+
     // Return safe fallback
     return { safe: text, hasPII: false, error: true };
   }
@@ -1479,7 +1522,7 @@ interface PIIValidationResult {
 }
 
 // Framework-specific type extensions
-declare module 'vue' {
+declare module "vue" {
   interface ComponentCustomProperties {
     $privakit: {
       detectPII: (text: string) => any;

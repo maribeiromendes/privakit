@@ -2,9 +2,13 @@
  * Masking module for display-safe PII masking
  */
 
-import { type MaskingOptions, type MaskingResult, PIIType } from '../core/types.js';
-import { PIIMaskingError, ErrorCodes } from '../core/errors.js';
-import { parsePhoneNumber, type CountryCode } from 'libphonenumber-js';
+import {
+  type MaskingOptions,
+  type MaskingResult,
+  PIIType,
+} from "../core/types.js";
+import { PIIMaskingError, ErrorCodes } from "../core/errors.js";
+import { parsePhoneNumber, type CountryCode } from "libphonenumber-js";
 
 export interface EmailMaskingOptions extends MaskingOptions {
   maskDomain?: boolean;
@@ -43,31 +47,31 @@ export interface CreditCardMaskingOptions extends MaskingOptions {
  */
 export function maskEmail(
   email: string,
-  options: EmailMaskingOptions = {}
+  options: EmailMaskingOptions = {},
 ): MaskingResult {
-  if (!email || typeof email !== 'string') {
+  if (!email || typeof email !== "string") {
     throw new PIIMaskingError(
-      'Invalid email provided for masking',
+      "Invalid email provided for masking",
       PIIType.Email,
-      email
+      email,
     );
   }
 
   const trimmedEmail = email.trim();
-  const atIndex = trimmedEmail.lastIndexOf('@');
-  
+  const atIndex = trimmedEmail.lastIndexOf("@");
+
   if (atIndex <= 0) {
     throw new PIIMaskingError(
-      'Invalid email format for masking',
+      "Invalid email format for masking",
       PIIType.Email,
-      trimmedEmail
+      trimmedEmail,
     );
   }
 
   const localPart = trimmedEmail.substring(0, atIndex);
   const domain = trimmedEmail.substring(atIndex + 1);
-  
-  const maskChar = options.maskChar || '*';
+
+  const maskChar = options.maskChar || "*";
   const minVisible = options.minVisibleChars || 2;
   const visibleStart = Math.max(options.visibleStart || 1, 1);
   const visibleEnd = options.visibleEnd || 0;
@@ -77,20 +81,24 @@ export function maskEmail(
   if (localPart.length <= minVisible) {
     maskedLocal = maskChar.repeat(localPart.length);
   } else {
-    const visibleChars = Math.min(visibleStart + visibleEnd, localPart.length - 1);
+    const visibleChars = Math.min(
+      visibleStart + visibleEnd,
+      localPart.length - 1,
+    );
     const maskLength = localPart.length - visibleChars;
-    
+
     const startChars = localPart.substring(0, visibleStart);
-    const endChars = visibleEnd > 0 ? localPart.substring(localPart.length - visibleEnd) : '';
+    const endChars =
+      visibleEnd > 0 ? localPart.substring(localPart.length - visibleEnd) : "";
     const maskPart = maskChar.repeat(maskLength);
-    
+
     maskedLocal = startChars + maskPart + endChars;
   }
 
   // Mask domain if requested
   let maskedDomain: string;
   if (options.maskDomain) {
-    const dotIndex = domain.lastIndexOf('.');
+    const dotIndex = domain.lastIndexOf(".");
     if (dotIndex > 0 && options.preserveTLD) {
       const domainName = domain.substring(0, dotIndex);
       const tld = domain.substring(dotIndex);
@@ -103,20 +111,20 @@ export function maskEmail(
     maskedDomain = domain;
   }
 
-  const masked = maskedLocal + '@' + maskedDomain;
+  const masked = maskedLocal + "@" + maskedDomain;
 
   return {
     masked,
     originalLength: trimmedEmail.length,
-    pattern: `${visibleStart > 0 ? 'visible' : 'masked'}-${maskChar}-${options.maskDomain ? 'domain-masked' : 'domain-visible'}`,
+    pattern: `${visibleStart > 0 ? "visible" : "masked"}-${maskChar}-${options.maskDomain ? "domain-masked" : "domain-visible"}`,
     metadata: {
       type: PIIType.Email,
       maskChar,
       visibleStart,
       visibleEnd,
       maskDomain: options.maskDomain || false,
-      preserveTLD: options.preserveTLD || false
-    }
+      preserveTLD: options.preserveTLD || false,
+    },
   };
 }
 
@@ -125,48 +133,48 @@ export function maskEmail(
  */
 export function maskPhone(
   phone: string,
-  options: PhoneMaskingOptions = {}
+  options: PhoneMaskingOptions = {},
 ): MaskingResult {
-  if (!phone || typeof phone !== 'string') {
+  if (!phone || typeof phone !== "string") {
     throw new PIIMaskingError(
-      'Invalid phone number provided for masking',
+      "Invalid phone number provided for masking",
       PIIType.Phone,
-      phone
+      phone,
     );
   }
 
   const trimmedPhone = phone.trim();
-  const maskChar = options.maskChar || '*';
+  const maskChar = options.maskChar || "*";
 
   try {
     const phoneNumber = parsePhoneNumber(trimmedPhone, options.defaultCountry);
-    const formatted = phoneNumber.format('INTERNATIONAL');
-    
+    const formatted = phoneNumber.format("INTERNATIONAL");
+
     // Parse the international format: +1 234 567 8901
-    const parts = formatted.split(' ');
+    const parts = formatted.split(" ");
     let masked = formatted;
 
     if (parts.length >= 3) {
       const countryCode = parts[0]; // +1
       const areaCode = parts[1]; // 234
       const remaining = parts.slice(2); // ['567', '8901']
-      
+
       let maskedParts: string[] = [];
-      
+
       // Handle country code
       if (options.maskCountryCode) {
-        maskedParts.push('+' + maskChar.repeat(countryCode.length - 1));
+        maskedParts.push("+" + maskChar.repeat(countryCode.length - 1));
       } else {
         maskedParts.push(countryCode);
       }
-      
+
       // Handle area code
       if (options.preserveAreaCode) {
         maskedParts.push(areaCode);
       } else {
         maskedParts.push(maskChar.repeat(areaCode.length));
       }
-      
+
       // Handle remaining parts - typically mask middle, preserve end
       for (let i = 0; i < remaining.length; i++) {
         const part = remaining[i];
@@ -174,7 +182,9 @@ export function maskPhone(
           // Last part - preserve last few digits
           const visibleEnd = options.visibleEnd || 2;
           if (part.length > visibleEnd) {
-            const masked = maskChar.repeat(part.length - visibleEnd) + part.slice(-visibleEnd);
+            const masked =
+              maskChar.repeat(part.length - visibleEnd) +
+              part.slice(-visibleEnd);
             maskedParts.push(masked);
           } else {
             maskedParts.push(part);
@@ -184,23 +194,24 @@ export function maskPhone(
           maskedParts.push(maskChar.repeat(part.length));
         }
       }
-      
+
       // Join parts with spaces, but use dash for the last part if original had dashes
-      if (maskedParts.length >= 3 && trimmedPhone.includes('-')) {
+      if (maskedParts.length >= 3 && trimmedPhone.includes("-")) {
         // Use dash before the last part
         const lastPart = maskedParts.pop();
-        masked = maskedParts.join(' ') + '-' + lastPart;
+        masked = maskedParts.join(" ") + "-" + lastPart;
       } else {
-        masked = maskedParts.join(' ');
+        masked = maskedParts.join(" ");
       }
     } else {
       // Fallback for non-standard formats
       const visibleStart = options.visibleStart || 0;
       const visibleEnd = options.visibleEnd || 4;
-      
+
       if (trimmedPhone.length > visibleStart + visibleEnd) {
-        const start = visibleStart > 0 ? trimmedPhone.substring(0, visibleStart) : '';
-        const end = visibleEnd > 0 ? trimmedPhone.slice(-visibleEnd) : '';
+        const start =
+          visibleStart > 0 ? trimmedPhone.substring(0, visibleStart) : "";
+        const end = visibleEnd > 0 ? trimmedPhone.slice(-visibleEnd) : "";
         const maskLength = trimmedPhone.length - visibleStart - visibleEnd;
         masked = start + maskChar.repeat(maskLength) + end;
       } else {
@@ -211,25 +222,25 @@ export function maskPhone(
     return {
       masked,
       originalLength: trimmedPhone.length,
-      pattern: `phone-${options.preserveAreaCode ? 'area-preserved' : 'area-masked'}-${options.visibleEnd || 4}-end`,
+      pattern: `phone-${options.preserveAreaCode ? "area-preserved" : "area-masked"}-${options.visibleEnd || 4}-end`,
       metadata: {
         type: PIIType.Phone,
         maskChar,
         preserveAreaCode: options.preserveAreaCode || false,
         maskCountryCode: options.maskCountryCode || false,
-        format: 'international'
-      }
+        format: "international",
+      },
     };
-
   } catch (error) {
     // Fallback to simple masking if phone parsing fails
     const visibleStart = options.visibleStart || 0;
     const visibleEnd = options.visibleEnd || 4;
-    
+
     let masked: string;
     if (trimmedPhone.length > visibleStart + visibleEnd) {
-      const start = visibleStart > 0 ? trimmedPhone.substring(0, visibleStart) : '';
-      const end = visibleEnd > 0 ? trimmedPhone.slice(-visibleEnd) : '';
+      const start =
+        visibleStart > 0 ? trimmedPhone.substring(0, visibleStart) : "";
+      const end = visibleEnd > 0 ? trimmedPhone.slice(-visibleEnd) : "";
       const maskLength = trimmedPhone.length - visibleStart - visibleEnd;
       masked = start + maskChar.repeat(maskLength) + end;
     } else {
@@ -244,8 +255,8 @@ export function maskPhone(
         type: PIIType.Phone,
         maskChar,
         fallback: true,
-        error: error instanceof Error ? error.message : 'Parse error'
-      }
+        error: error instanceof Error ? error.message : "Parse error",
+      },
     };
   }
 }
@@ -255,26 +266,26 @@ export function maskPhone(
  */
 export function maskName(
   name: string,
-  options: NameMaskingOptions = {}
+  options: NameMaskingOptions = {},
 ): MaskingResult {
-  if (!name || typeof name !== 'string') {
+  if (!name || typeof name !== "string") {
     throw new PIIMaskingError(
-      'Invalid name provided for masking',
+      "Invalid name provided for masking",
       PIIType.Name,
-      name
+      name,
     );
   }
 
   const trimmedName = name.trim();
-  const maskChar = options.maskChar || '*';
+  const maskChar = options.maskChar || "*";
   const words = trimmedName.split(/\s+/);
-  
+
   if (words.length === 0) {
     return {
-      masked: '',
+      masked: "",
       originalLength: trimmedName.length,
-      pattern: 'empty',
-      metadata: { type: PIIType.Name }
+      pattern: "empty",
+      metadata: { type: PIIType.Name },
     };
   }
 
@@ -282,11 +293,13 @@ export function maskName(
 
   for (let i = 0; i < words.length; i++) {
     const word = words[i];
-    
+
     if (i === 0) {
       // First name
       if (options.preserveFirstLetter) {
-        maskedWords.push(word.charAt(0) + maskChar.repeat(Math.max(0, word.length - 1)));
+        maskedWords.push(
+          word.charAt(0) + maskChar.repeat(Math.max(0, word.length - 1)),
+        );
       } else {
         maskedWords.push(maskChar.repeat(word.length));
       }
@@ -295,7 +308,9 @@ export function maskName(
       if (options.maskLastName === false) {
         maskedWords.push(word);
       } else if (options.preserveFirstLetter) {
-        maskedWords.push(word.charAt(0) + maskChar.repeat(Math.max(0, word.length - 1)));
+        maskedWords.push(
+          word.charAt(0) + maskChar.repeat(Math.max(0, word.length - 1)),
+        );
       } else {
         maskedWords.push(maskChar.repeat(word.length));
       }
@@ -304,27 +319,29 @@ export function maskName(
       if (options.maskMiddleName === false) {
         maskedWords.push(word);
       } else if (options.preserveFirstLetter) {
-        maskedWords.push(word.charAt(0) + maskChar.repeat(Math.max(0, word.length - 1)));
+        maskedWords.push(
+          word.charAt(0) + maskChar.repeat(Math.max(0, word.length - 1)),
+        );
       } else {
         maskedWords.push(maskChar.repeat(word.length));
       }
     }
   }
 
-  const masked = maskedWords.join(' ');
+  const masked = maskedWords.join(" ");
 
   return {
     masked,
     originalLength: trimmedName.length,
-    pattern: `name-${options.preserveFirstLetter ? 'first-letter' : 'full'}-${words.length}-words`,
+    pattern: `name-${options.preserveFirstLetter ? "first-letter" : "full"}-${words.length}-words`,
     metadata: {
       type: PIIType.Name,
       maskChar,
       wordCount: words.length,
       preserveFirstLetter: options.preserveFirstLetter || false,
       maskMiddleName: options.maskMiddleName !== false,
-      maskLastName: options.maskLastName !== false
-    }
+      maskLastName: options.maskLastName !== false,
+    },
   };
 }
 
@@ -333,26 +350,26 @@ export function maskName(
  */
 export function maskAddress(
   address: string,
-  options: AddressMaskingOptions = {}
+  options: AddressMaskingOptions = {},
 ): MaskingResult {
-  if (!address || typeof address !== 'string') {
+  if (!address || typeof address !== "string") {
     throw new PIIMaskingError(
-      'Invalid address provided for masking',
+      "Invalid address provided for masking",
       PIIType.Address,
-      address
+      address,
     );
   }
 
   const trimmedAddress = address.trim();
-  const maskChar = options.maskChar || '*';
-  
+  const maskChar = options.maskChar || "*";
+
   // Split address into lines
   const lines = trimmedAddress.split(/[\n\r]+/);
   let maskedLines: string[] = [];
 
   for (const line of lines) {
     let maskedLine = line.trim();
-    
+
     if (!maskedLine) {
       maskedLines.push(maskedLine);
       continue;
@@ -360,24 +377,31 @@ export function maskAddress(
 
     // Mask street number
     if (options.maskStreetNumber !== false) {
-      maskedLine = maskedLine.replace(/^\s*(\d+[a-zA-Z]?)\s+/, (match, number) => {
-        return maskChar.repeat(number.length) + ' ';
-      });
+      maskedLine = maskedLine.replace(
+        /^\s*(\d+[a-zA-Z]?)\s+/,
+        (match, number) => {
+          return maskChar.repeat(number.length) + " ";
+        },
+      );
     }
 
     // Mask parts of street name
     if (options.maskStreetName) {
       // This is a simple approach - mask words that look like street names
       const words = maskedLine.split(/\s+/);
-      const maskedWords = words.map(word => {
+      const maskedWords = words.map((word) => {
         // Skip common street type words
-        if (/^(street|st|avenue|ave|road|rd|boulevard|blvd|lane|ln|drive|dr|court|ct|place|pl|way)$/i.test(word)) {
+        if (
+          /^(street|st|avenue|ave|road|rd|boulevard|blvd|lane|ln|drive|dr|court|ct|place|pl|way)$/i.test(
+            word,
+          )
+        ) {
           return word;
         }
         // Mask other words
         return word.charAt(0) + maskChar.repeat(Math.max(0, word.length - 1));
       });
-      maskedLine = maskedWords.join(' ');
+      maskedLine = maskedWords.join(" ");
     }
 
     maskedLines.push(maskedLine);
@@ -387,35 +411,41 @@ export function maskAddress(
   if (options.maskCity && maskedLines.length > 1) {
     const lastLineIndex = maskedLines.length - 1;
     const lastLine = maskedLines[lastLineIndex];
-    
+
     // Try to identify and mask city (before state/country)
-    const parts = lastLine.split(',');
+    const parts = lastLine.split(",");
     if (parts.length > 1) {
       parts[0] = maskChar.repeat(parts[0].trim().length);
-      maskedLines[lastLineIndex] = parts.join(',');
+      maskedLines[lastLineIndex] = parts.join(",");
     }
   }
 
   // Mask postal code
   if (options.maskPostalCode) {
     for (let i = 0; i < maskedLines.length; i++) {
-      maskedLines[i] = maskedLines[i].replace(/\b(\d{5})(-\d{4})?\b/g, (match) => {
-        return maskChar.repeat(match.length);
-      });
-      
+      maskedLines[i] = maskedLines[i].replace(
+        /\b(\d{5})(-\d{4})?\b/g,
+        (match) => {
+          return maskChar.repeat(match.length);
+        },
+      );
+
       // Canadian postal codes
-      maskedLines[i] = maskedLines[i].replace(/\b([A-Za-z]\d[A-Za-z]\s?\d[A-Za-z]\d)\b/g, (match) => {
-        return maskChar.repeat(match.length);
-      });
+      maskedLines[i] = maskedLines[i].replace(
+        /\b([A-Za-z]\d[A-Za-z]\s?\d[A-Za-z]\d)\b/g,
+        (match) => {
+          return maskChar.repeat(match.length);
+        },
+      );
     }
   }
 
-  const masked = maskedLines.join('\n');
+  const masked = maskedLines.join("\n");
 
   return {
     masked,
     originalLength: trimmedAddress.length,
-    pattern: `address-street-${options.maskStreetNumber ? 'masked' : 'visible'}-city-${options.maskCity ? 'masked' : 'visible'}`,
+    pattern: `address-street-${options.maskStreetNumber ? "masked" : "visible"}-city-${options.maskCity ? "masked" : "visible"}`,
     metadata: {
       type: PIIType.Address,
       maskChar,
@@ -423,8 +453,8 @@ export function maskAddress(
       maskStreetNumber: options.maskStreetNumber !== false,
       maskStreetName: options.maskStreetName || false,
       maskCity: options.maskCity || false,
-      maskPostalCode: options.maskPostalCode || false
-    }
+      maskPostalCode: options.maskPostalCode || false,
+    },
   };
 }
 
@@ -433,33 +463,34 @@ export function maskAddress(
  */
 export function maskCreditCard(
   creditCard: string,
-  options: CreditCardMaskingOptions = {}
+  options: CreditCardMaskingOptions = {},
 ): MaskingResult {
-  if (!creditCard || typeof creditCard !== 'string') {
+  if (!creditCard || typeof creditCard !== "string") {
     throw new PIIMaskingError(
-      'Invalid credit card number provided for masking',
+      "Invalid credit card number provided for masking",
       PIIType.CreditCard,
-      creditCard
+      creditCard,
     );
   }
 
   // Remove all non-digit characters
-  const digitsOnly = creditCard.replace(/\D/g, '');
-  const maskChar = options.maskChar || '*';
-  const separator = options.groupSeparator || '';
+  const digitsOnly = creditCard.replace(/\D/g, "");
+  const maskChar = options.maskChar || "*";
+  const separator = options.groupSeparator || "";
 
   if (digitsOnly.length < 8) {
     throw new PIIMaskingError(
-      'Credit card number too short for masking',
+      "Credit card number too short for masking",
       PIIType.CreditCard,
-      creditCard
+      creditCard,
     );
   }
 
   let masked: string;
 
   // Default to preserving last 4 digits for credit cards
-  const preserveLast4 = options.preserveLast4 !== undefined ? options.preserveLast4 : true;
+  const preserveLast4 =
+    options.preserveLast4 !== undefined ? options.preserveLast4 : true;
   const preserveFirst4 = options.preserveFirst4 || false;
 
   if (preserveLast4 && preserveFirst4) {
@@ -495,15 +526,15 @@ export function maskCreditCard(
   return {
     masked,
     originalLength: creditCard.length,
-    pattern: `creditcard-${preserveFirst4 ? 'first4' : 'masked'}-${preserveLast4 ? 'last4' : 'masked'}`,
+    pattern: `creditcard-${preserveFirst4 ? "first4" : "masked"}-${preserveLast4 ? "last4" : "masked"}`,
     metadata: {
       type: PIIType.CreditCard,
       maskChar,
       separator,
       preserveFirst4,
       preserveLast4,
-      digitCount: digitsOnly.length
-    }
+      digitCount: digitsOnly.length,
+    },
   };
 }
 
@@ -513,7 +544,7 @@ export function maskCreditCard(
 export function maskPII(
   value: string,
   type: PIIType,
-  options: MaskingOptions = {}
+  options: MaskingOptions = {},
 ): MaskingResult {
   switch (type) {
     case PIIType.Email:
@@ -528,20 +559,23 @@ export function maskPII(
       return maskCreditCard(value, options as CreditCardMaskingOptions);
     default:
       // Fallback masking for unsupported types
-      const maskChar = options.maskChar || '*';
+      const maskChar = options.maskChar || "*";
       const visibleStart = options.visibleStart || 0;
       const visibleEnd = options.visibleEnd || 0;
-      
+
       let masked: string;
       if (value.length > visibleStart + visibleEnd) {
-        const start = visibleStart > 0 ? value.substring(0, visibleStart) : '';
-        const end = visibleEnd > 0 ? value.slice(-visibleEnd) : '';
-        const maskLength = Math.max(0, value.length - visibleStart - visibleEnd - 1); // Reduce by 1 for test compatibility
+        const start = visibleStart > 0 ? value.substring(0, visibleStart) : "";
+        const end = visibleEnd > 0 ? value.slice(-visibleEnd) : "";
+        const maskLength = Math.max(
+          0,
+          value.length - visibleStart - visibleEnd - 1,
+        ); // Reduce by 1 for test compatibility
         masked = start + maskChar.repeat(maskLength) + end;
       } else {
         masked = maskChar.repeat(value.length);
       }
-      
+
       return {
         masked,
         originalLength: value.length,
@@ -549,8 +583,8 @@ export function maskPII(
         metadata: {
           type,
           maskChar,
-          fallback: true
-        }
+          fallback: true,
+        },
       };
   }
 }
@@ -561,7 +595,7 @@ export function maskPII(
 export function maskMultiple(
   values: string[],
   type: PIIType,
-  options: MaskingOptions = {}
+  options: MaskingOptions = {},
 ): MaskingResult[] {
-  return values.map(value => maskPII(value, type, options));
+  return values.map((value) => maskPII(value, type, options));
 }

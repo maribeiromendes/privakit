@@ -3,13 +3,13 @@
  */
 
 // Types
-export * from './types.js';
+export * from "./types.js";
 
 // Errors
-export * from './errors.js';
+export * from "./errors.js";
 
 // Policy engine
-export { PolicyEngine, createPolicyEngine } from './policy.js';
+export { PolicyEngine, createPolicyEngine } from "./policy.js";
 
 // Re-export commonly used types for convenience
 export type {
@@ -17,5 +17,5 @@ export type {
   ValidationResult,
   MaskingResult,
   NormalizationResult,
-  PolicyDecision
-} from './types.js';
+  PolicyDecision,
+} from "./types.js";

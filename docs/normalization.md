@@ -7,34 +7,34 @@ The Normalization module standardizes PII data formats across different locales,
 ### Why Normalize PII?
 
 ```typescript
-import { normalizeEmailAddress, normalizePhoneNumber } from 'privakit';
+import { normalizeEmailAddress, normalizePhoneNumber } from "privakit";
 
 // Different input formats for the same data
 const emailVariations = [
-  'USER@EXAMPLE.COM',
-  'User@Example.com',
-  'user@example.com',
-  '  user@example.com  '
+  "USER@EXAMPLE.COM",
+  "User@Example.com",
+  "user@example.com",
+  "  user@example.com  ",
 ];
 
 // All normalize to the same format
-emailVariations.forEach(email => {
+emailVariations.forEach((email) => {
   console.log(normalizeEmailAddress(email).normalized);
   // All output: "user@example.com"
 });
 
 // Phone number variations
 const phoneVariations = [
-  '(555) 123-4567',
-  '555-123-4567',
-  '555.123.4567',
-  '+1 555 123 4567',
-  '15551234567'
+  "(555) 123-4567",
+  "555-123-4567",
+  "555.123.4567",
+  "+1 555 123 4567",
+  "15551234567",
 ];
 
 // All normalize to E.164 format
-phoneVariations.forEach(phone => {
-  console.log(normalizePhoneNumber(phone, 'US').e164);
+phoneVariations.forEach((phone) => {
+  console.log(normalizePhoneNumber(phone, "US").e164);
   // All output: "+15551234567"
 });
 ```
@@ -53,34 +53,34 @@ phoneVariations.forEach(phone => {
 ### Basic Email Normalization
 
 ```typescript
-import { normalizeEmailAddress } from 'privakit';
+import { normalizeEmailAddress } from "privakit";
 
 // Standard normalization
-const result = normalizeEmailAddress('USER@EXAMPLE.COM');
-console.log(result.normalized);     // "user@example.com"
-console.log(result.isValid);        // true
-console.log(result.domain);         // "example.com"
-console.log(result.localPart);      // "user"
+const result = normalizeEmailAddress("USER@EXAMPLE.COM");
+console.log(result.normalized); // "user@example.com"
+console.log(result.isValid); // true
+console.log(result.domain); // "example.com"
+console.log(result.localPart); // "user"
 ```
 
 ### Advanced Email Options
 
 ```typescript
-import { normalizeEmail, EmailNormalizationOptions } from 'privakit';
+import { normalizeEmail, EmailNormalizationOptions } from "privakit";
 
 const options: EmailNormalizationOptions = {
-  lowercase: true,              // Convert to lowercase
-  removeComments: true,         // Remove RFC comments
-  removeDots: false,           // Keep dots in Gmail addresses
-  removeSubaddressing: false,   // Keep + suffixes
-  validateDomain: true,         // Check domain validity
-  punycodeDomains: true        // Handle international domains
+  lowercase: true, // Convert to lowercase
+  removeComments: true, // Remove RFC comments
+  removeDots: false, // Keep dots in Gmail addresses
+  removeSubaddressing: false, // Keep + suffixes
+  validateDomain: true, // Check domain validity
+  punycodeDomains: true, // Handle international domains
 };
 
-const result = normalizeEmailAddress('User+Tag@Example.COM', options);
-console.log(result.normalized);      // "user+tag@example.com"
-console.log(result.hasSubaddress);   // true
-console.log(result.subaddress);      // "tag"
+const result = normalizeEmailAddress("User+Tag@Example.COM", options);
+console.log(result.normalized); // "user+tag@example.com"
+console.log(result.hasSubaddress); // true
+console.log(result.subaddress); // "tag"
 ```
 
 ### Gmail-Specific Normalization
@@ -89,23 +89,23 @@ console.log(result.subaddress);      // "tag"
 // Handle Gmail's special rules
 function normalizeGmail(email: string) {
   const result = normalizeEmailAddress(email, {
-    removeDots: true,           // Gmail ignores dots
-    removeSubaddressing: true,  // Remove everything after +
-    lowercase: true
+    removeDots: true, // Gmail ignores dots
+    removeSubaddressing: true, // Remove everything after +
+    lowercase: true,
   });
-  
-  if (result.domain === 'gmail.com' || result.domain === 'googlemail.com') {
+
+  if (result.domain === "gmail.com" || result.domain === "googlemail.com") {
     return {
       ...result,
-      canonical: result.localPart.replace(/\./g, '') + '@gmail.com',
-      isGmail: true
+      canonical: result.localPart.replace(/\./g, "") + "@gmail.com",
+      isGmail: true,
     };
   }
-  
+
   return result;
 }
 
-console.log(normalizeGmail('User.Name+label@gmail.com'));
+console.log(normalizeGmail("User.Name+label@gmail.com"));
 // Output: canonical: "username@gmail.com"
 ```
 
@@ -115,22 +115,22 @@ console.log(normalizeGmail('User.Name+label@gmail.com'));
 // Handle corporate email policies
 function normalizeCorporateEmail(email: string, domain: string) {
   const result = normalizeEmailAddress(email);
-  
+
   if (result.domain === domain) {
     return {
       ...result,
       isCorporate: true,
       department: extractDepartment(result.localPart),
-      employeeId: extractEmployeeId(result.localPart)
+      employeeId: extractEmployeeId(result.localPart),
     };
   }
-  
+
   return result;
 }
 
 function extractDepartment(localPart: string): string | null {
   // Handle formats like: firstname.lastname.dept@company.com
-  const parts = localPart.split('.');
+  const parts = localPart.split(".");
   if (parts.length > 2) {
     return parts[parts.length - 1]; // Last part is department
   }
@@ -143,18 +143,18 @@ function extractDepartment(localPart: string): string | null {
 ```typescript
 // Handle international domains and characters
 const internationalEmails = [
-  'user@日本.jp',           // Japanese domain
-  'müller@example.de',      // German umlaut
-  'josé@empresa.es',        // Spanish accent
-  'пример@почта.рф'         // Cyrillic
+  "user@日本.jp", // Japanese domain
+  "müller@example.de", // German umlaut
+  "josé@empresa.es", // Spanish accent
+  "пример@почта.рф", // Cyrillic
 ];
 
-internationalEmails.forEach(email => {
+internationalEmails.forEach((email) => {
   const result = normalizeEmailAddress(email, {
-    punycodeDomains: true,    // Convert to ASCII
-    unicodeNormalization: true // Normalize Unicode characters
+    punycodeDomains: true, // Convert to ASCII
+    unicodeNormalization: true, // Normalize Unicode characters
   });
-  
+
   console.log(`Original: ${email}`);
   console.log(`Normalized: ${result.normalized}`);
   console.log(`Punycode: ${result.punycodeForm}`);
@@ -166,16 +166,16 @@ internationalEmails.forEach(email => {
 ### Basic Phone Normalization
 
 ```typescript
-import { normalizePhoneNumber } from 'privakit';
+import { normalizePhoneNumber } from "privakit";
 
 // US phone number
-const result = normalizePhoneNumber('(555) 123-4567', 'US');
-console.log(result.e164);           // "+15551234567"
-console.log(result.national);       // "(555) 123-4567"
-console.log(result.international);  // "+1 555 123 4567"
-console.log(result.isValid);        // true
-console.log(result.country);        // "US"
-console.log(result.type);           // "FIXED_LINE_OR_MOBILE"
+const result = normalizePhoneNumber("(555) 123-4567", "US");
+console.log(result.e164); // "+15551234567"
+console.log(result.national); // "(555) 123-4567"
+console.log(result.international); // "+1 555 123 4567"
+console.log(result.isValid); // true
+console.log(result.country); // "US"
+console.log(result.type); // "FIXED_LINE_OR_MOBILE"
 ```
 
 ### International Phone Support
@@ -183,11 +183,11 @@ console.log(result.type);           // "FIXED_LINE_OR_MOBILE"
 ```typescript
 // Different country formats
 const phoneNumbers = [
-  { number: '+44 20 7946 0958', country: 'GB' },    // UK
-  { number: '+33 1 42 86 83 26', country: 'FR' },   // France  
-  { number: '+49 30 12345678', country: 'DE' },     // Germany
-  { number: '+81 3 1234 5678', country: 'JP' },     // Japan
-  { number: '+55 11 99999-9999', country: 'BR' }    // Brazil
+  { number: "+44 20 7946 0958", country: "GB" }, // UK
+  { number: "+33 1 42 86 83 26", country: "FR" }, // France
+  { number: "+49 30 12345678", country: "DE" }, // Germany
+  { number: "+81 3 1234 5678", country: "JP" }, // Japan
+  { number: "+55 11 99999-9999", country: "BR" }, // Brazil
 ];
 
 phoneNumbers.forEach(({ number, country }) => {
@@ -202,28 +202,28 @@ phoneNumbers.forEach(({ number, country }) => {
 // Detect and normalize by phone type
 function normalizeByType(phone: string, country: string) {
   const result = normalizePhoneNumber(phone, country);
-  
+
   return {
     ...result,
     category: categorizePhone(result.type),
     businessHours: getBusinessHours(result.type),
-    preferred: getPreferredFormat(result.type)
+    preferred: getPreferredFormat(result.type),
   };
 }
 
 function categorizePhone(type: string): string {
   switch (type) {
-    case 'MOBILE':
-    case 'FIXED_LINE_OR_MOBILE':
-      return 'mobile';
-    case 'FIXED_LINE':
-      return 'landline';
-    case 'TOLL_FREE':
-      return 'support';
-    case 'PREMIUM_RATE':
-      return 'premium';
+    case "MOBILE":
+    case "FIXED_LINE_OR_MOBILE":
+      return "mobile";
+    case "FIXED_LINE":
+      return "landline";
+    case "TOLL_FREE":
+      return "support";
+    case "PREMIUM_RATE":
+      return "premium";
     default:
-      return 'unknown';
+      return "unknown";
   }
 }
 ```
@@ -232,29 +232,34 @@ function categorizePhone(type: string): string {
 
 ```typescript
 // Different normalization strategies for mobile vs landline
-function normalizePhoneByUsage(phone: string, country: string, usage: 'sms' | 'voice' | 'both') {
+function normalizePhoneByUsage(
+  phone: string,
+  country: string,
+  usage: "sms" | "voice" | "both",
+) {
   const result = normalizePhoneNumber(phone, country);
-  
-  if (usage === 'sms' && result.type !== 'MOBILE') {
+
+  if (usage === "sms" && result.type !== "MOBILE") {
     return {
       ...result,
       smsCapable: false,
-      warning: 'SMS not supported on this number type'
+      warning: "SMS not supported on this number type",
     };
   }
-  
-  if (usage === 'voice' && result.type === 'PREMIUM_RATE') {
+
+  if (usage === "voice" && result.type === "PREMIUM_RATE") {
     return {
       ...result,
       costWarning: true,
-      warning: 'Premium rate number - charges may apply'
+      warning: "Premium rate number - charges may apply",
     };
   }
-  
+
   return {
     ...result,
-    smsCapable: result.type === 'MOBILE' || result.type === 'FIXED_LINE_OR_MOBILE',
-    voiceCapable: true
+    smsCapable:
+      result.type === "MOBILE" || result.type === "FIXED_LINE_OR_MOBILE",
+    voiceCapable: true,
   };
 }
 ```
@@ -263,29 +268,33 @@ function normalizePhoneByUsage(phone: string, country: string, usage: 'sms' | 'v
 
 ```typescript
 // Format phones according to regional preferences
-function formatForRegion(phone: string, inputCountry: string, displayCountry: string) {
+function formatForRegion(
+  phone: string,
+  inputCountry: string,
+  displayCountry: string,
+) {
   const normalized = normalizePhoneNumber(phone, inputCountry);
-  
+
   if (inputCountry === displayCountry) {
     // Same country - use national format
     return {
       display: normalized.national,
-      format: 'national'
+      format: "national",
     };
   } else {
     // Different country - use international format
     return {
       display: normalized.international,
-      format: 'international'
+      format: "international",
     };
   }
 }
 
 // Examples
-console.log(formatForRegion('555-123-4567', 'US', 'US'));
+console.log(formatForRegion("555-123-4567", "US", "US"));
 // Output: { display: "(555) 123-4567", format: "national" }
 
-console.log(formatForRegion('555-123-4567', 'US', 'GB'));
+console.log(formatForRegion("555-123-4567", "US", "GB"));
 // Output: { display: "+1 555 123 4567", format: "international" }
 ```
 
@@ -294,74 +303,77 @@ console.log(formatForRegion('555-123-4567', 'US', 'GB'));
 ### Basic Name Normalization
 
 ```typescript
-import { normalizePersonName } from 'privakit';
+import { normalizePersonName } from "privakit";
 
 // Standard name normalization
-const result = normalizePersonName('  JOHN   DOE  ');
-console.log(result.normalized);     // "John Doe"
-console.log(result.firstName);      // "John"
-console.log(result.lastName);       // "Doe"
-console.log(result.fullName);       // "John Doe"
+const result = normalizePersonName("  JOHN   DOE  ");
+console.log(result.normalized); // "John Doe"
+console.log(result.firstName); // "John"
+console.log(result.lastName); // "Doe"
+console.log(result.fullName); // "John Doe"
 ```
 
 ### Complex Name Handling
 
 ```typescript
-import { normalizeName, NameNormalizationOptions } from 'privakit';
+import { normalizeName, NameNormalizationOptions } from "privakit";
 
 const options: NameNormalizationOptions = {
-  titleCase: true,              // Proper case conversion
-  removeExtraSpaces: true,      // Clean up spacing
-  handlePrefixes: true,         // Process titles (Dr., Mr., etc.)
-  handleSuffixes: true,         // Process suffixes (Jr., III, etc.)
-  preserveHyphens: true,        // Keep hyphenated names intact
-  culturalNames: 'western'      // Name format style
+  titleCase: true, // Proper case conversion
+  removeExtraSpaces: true, // Clean up spacing
+  handlePrefixes: true, // Process titles (Dr., Mr., etc.)
+  handleSuffixes: true, // Process suffixes (Jr., III, etc.)
+  preserveHyphens: true, // Keep hyphenated names intact
+  culturalNames: "western", // Name format style
 };
 
-const result = normalizePersonName('DR. JEAN-PIERRE VAN DER BERG III', options);
-console.log(result.title);          // "Dr."
-console.log(result.firstName);      // "Jean-Pierre"  
-console.log(result.middleName);     // "Van Der"
-console.log(result.lastName);       // "Berg"
-console.log(result.suffix);         // "III"
-console.log(result.fullName);       // "Dr. Jean-Pierre Van Der Berg III"
+const result = normalizePersonName("DR. JEAN-PIERRE VAN DER BERG III", options);
+console.log(result.title); // "Dr."
+console.log(result.firstName); // "Jean-Pierre"
+console.log(result.middleName); // "Van Der"
+console.log(result.lastName); // "Berg"
+console.log(result.suffix); // "III"
+console.log(result.fullName); // "Dr. Jean-Pierre Van Der Berg III"
 ```
 
 ### Cultural Name Patterns
 
 ```typescript
 // Handle different cultural naming conventions
-function normalizeByCulture(name: string, culture: 'western' | 'eastern' | 'spanish' | 'arabic') {
+function normalizeByCulture(
+  name: string,
+  culture: "western" | "eastern" | "spanish" | "arabic",
+) {
   switch (culture) {
-    case 'western':
+    case "western":
       return normalizePersonName(name, {
         titleCase: true,
-        order: 'first-last',
-        handleMiddleNames: true
+        order: "first-last",
+        handleMiddleNames: true,
       });
-    
-    case 'eastern':
+
+    case "eastern":
       // Many Asian cultures: Family name first
       return normalizePersonName(name, {
         titleCase: true,
-        order: 'family-given',
-        preserveOrder: true
+        order: "family-given",
+        preserveOrder: true,
       });
-    
-    case 'spanish':
+
+    case "spanish":
       // Spanish: Two surnames common
       return normalizePersonName(name, {
         titleCase: true,
         multipleSurnames: true,
-        maternalSurname: true
+        maternalSurname: true,
       });
-    
-    case 'arabic':
+
+    case "arabic":
       // Arabic: Patronymic naming
       return normalizePersonName(name, {
         titleCase: true,
         handlePatronymic: true,
-        preserveArabicScript: true
+        preserveArabicScript: true,
       });
   }
 }
@@ -371,38 +383,38 @@ function normalizeByCulture(name: string, culture: 'western' | 'eastern' | 'span
 
 ```typescript
 // Distinguish between personal and business names
-function normalizeNameByType(name: string, type: 'personal' | 'business') {
-  if (type === 'business') {
+function normalizeNameByType(name: string, type: "personal" | "business") {
+  if (type === "business") {
     return {
       normalized: name.trim(),
-      type: 'business',
+      type: "business",
       isPersonal: false,
-      businessIndicators: detectBusinessIndicators(name)
+      businessIndicators: detectBusinessIndicators(name),
     };
   }
-  
+
   const result = normalizePersonName(name, {
     titleCase: true,
-    removeExtraSpaces: true
+    removeExtraSpaces: true,
   });
-  
+
   return {
     ...result,
-    type: 'personal',
-    isPersonal: true
+    type: "personal",
+    isPersonal: true,
   };
 }
 
 function detectBusinessIndicators(name: string): string[] {
   const indicators = [];
-  const businessSuffixes = ['LLC', 'Inc', 'Corp', 'Ltd', 'Co', 'Company'];
-  
-  businessSuffixes.forEach(suffix => {
+  const businessSuffixes = ["LLC", "Inc", "Corp", "Ltd", "Co", "Company"];
+
+  businessSuffixes.forEach((suffix) => {
     if (name.toUpperCase().includes(suffix.toUpperCase())) {
       indicators.push(suffix);
     }
   });
-  
+
   return indicators;
 }
 ```
@@ -413,17 +425,17 @@ function detectBusinessIndicators(name: string): string[] {
 // Normalize names for comparison and deduplication
 function normalizeForMatching(name: string) {
   const result = normalizePersonName(name, {
-    titleCase: false,         // Lowercase for comparison
+    titleCase: false, // Lowercase for comparison
     removeExtraSpaces: true,
-    removePunctuation: true,  // Remove apostrophes, hyphens
-    handleNicknames: true     // Convert nicknames to full names
+    removePunctuation: true, // Remove apostrophes, hyphens
+    handleNicknames: true, // Convert nicknames to full names
   });
-  
+
   return {
     ...result,
-    searchableForm: result.normalized.toLowerCase().replace(/[^a-z\s]/g, ''),
+    searchableForm: result.normalized.toLowerCase().replace(/[^a-z\s]/g, ""),
     phoneticForm: generatePhoneticForm(result.normalized),
-    metaphone: generateMetaphone(result.normalized)
+    metaphone: generateMetaphone(result.normalized),
   };
 }
 
@@ -431,10 +443,10 @@ function generatePhoneticForm(name: string): string {
   // Simplified phonetic algorithm (use library like metaphone in production)
   return name
     .toLowerCase()
-    .replace(/ph/g, 'f')
-    .replace(/ck/g, 'k')
-    .replace(/[aeiou]/g, '')  // Remove vowels for consonant matching
-    .replace(/[^a-z]/g, '');
+    .replace(/ph/g, "f")
+    .replace(/ck/g, "k")
+    .replace(/[aeiou]/g, "") // Remove vowels for consonant matching
+    .replace(/[^a-z]/g, "");
 }
 ```
 
@@ -443,17 +455,17 @@ function generatePhoneticForm(name: string): string {
 ### Basic Address Normalization
 
 ```typescript
-import { normalizeAddress } from 'privakit';
+import { normalizeAddress } from "privakit";
 
 // US address normalization
-const result = normalizeAddress('123 main st apt 4b anytown st 12345');
+const result = normalizeAddress("123 main st apt 4b anytown st 12345");
 console.log(result.normalized);
 // Output: "123 Main Street Apt 4B, Anytown, ST 12345"
 
 console.log(result.components);
 // Output: {
 //   streetNumber: "123",
-//   streetName: "Main Street", 
+//   streetName: "Main Street",
 //   apartment: "Apt 4B",
 //   city: "Anytown",
 //   state: "ST",
@@ -468,29 +480,29 @@ console.log(result.components);
 // Handle different international formats
 const addresses = [
   {
-    address: '1-2-3 Shibuya, Shibuya-ku, Tokyo 150-0002',
-    country: 'JP',
-    format: 'japanese'
+    address: "1-2-3 Shibuya, Shibuya-ku, Tokyo 150-0002",
+    country: "JP",
+    format: "japanese",
   },
   {
-    address: '123 High Street, London SW1A 1AA',
-    country: 'GB', 
-    format: 'uk'
+    address: "123 High Street, London SW1A 1AA",
+    country: "GB",
+    format: "uk",
   },
   {
-    address: 'Musterstraße 123, 12345 Berlin',
-    country: 'DE',
-    format: 'german'
-  }
+    address: "Musterstraße 123, 12345 Berlin",
+    country: "DE",
+    format: "german",
+  },
 ];
 
 addresses.forEach(({ address, country, format }) => {
   const result = normalizeAddress(address, {
     country,
     format,
-    validatePostalCode: true
+    validatePostalCode: true,
   });
-  
+
   console.log(`${country}: ${result.normalized}`);
   console.log(`Valid: ${result.isValid}`);
 });
@@ -502,21 +514,21 @@ addresses.forEach(({ address, country, format }) => {
 // Extract and standardize address components
 function standardizeAddressComponents(address: string, country: string) {
   const result = normalizeAddress(address, { country });
-  
+
   return {
     ...result.components,
     // Standardized formats
     streetAddress: `${result.components.streetNumber} ${result.components.streetName}`,
     cityStateZip: `${result.components.city}, ${result.components.state} ${result.components.postalCode}`,
     fullAddress: result.normalized,
-    
+
     // Validation flags
     hasApartment: !!result.components.apartment,
-    isPoBox: result.components.streetName?.toLowerCase().includes('po box'),
+    isPoBox: result.components.streetName?.toLowerCase().includes("po box"),
     isValid: result.isValid,
-    
+
     // Geocoding readiness
-    geocodingFormat: formatForGeocoding(result.components)
+    geocodingFormat: formatForGeocoding(result.components),
   };
 }
 
@@ -528,10 +540,10 @@ function formatForGeocoding(components: any): string {
     components.city,
     components.state,
     components.postalCode,
-    components.country
+    components.country,
   ].filter(Boolean);
-  
-  return parts.join(', ');
+
+  return parts.join(", ");
 }
 ```
 
@@ -542,45 +554,48 @@ function formatForGeocoding(components: any): string {
 function classifyAddress(address: string) {
   const result = normalizeAddress(address);
   const classification = {
-    type: 'unknown',
+    type: "unknown",
     confidence: 0,
-    indicators: []
+    indicators: [],
   };
-  
+
   // Check for business indicators
-  const businessIndicators = ['suite', 'floor', 'building', 'office', 'ste'];
-  const hasBusinessIndicators = businessIndicators.some(indicator => 
-    address.toLowerCase().includes(indicator)
+  const businessIndicators = ["suite", "floor", "building", "office", "ste"];
+  const hasBusinessIndicators = businessIndicators.some((indicator) =>
+    address.toLowerCase().includes(indicator),
   );
-  
+
   if (hasBusinessIndicators) {
-    classification.type = 'business';
+    classification.type = "business";
     classification.confidence = 0.8;
-    classification.indicators.push('business_keywords');
+    classification.indicators.push("business_keywords");
   }
-  
+
   // Check for residential indicators
-  const residentialIndicators = ['apt', 'apartment', 'unit', '#'];
-  const hasResidentialIndicators = residentialIndicators.some(indicator => 
-    address.toLowerCase().includes(indicator)
+  const residentialIndicators = ["apt", "apartment", "unit", "#"];
+  const hasResidentialIndicators = residentialIndicators.some((indicator) =>
+    address.toLowerCase().includes(indicator),
   );
-  
+
   if (hasResidentialIndicators) {
-    classification.type = 'residential';
+    classification.type = "residential";
     classification.confidence = 0.7;
-    classification.indicators.push('residential_keywords');
+    classification.indicators.push("residential_keywords");
   }
-  
+
   // Check for PO Box
-  if (address.toLowerCase().includes('po box') || address.toLowerCase().includes('p.o. box')) {
-    classification.type = 'pobox';
+  if (
+    address.toLowerCase().includes("po box") ||
+    address.toLowerCase().includes("p.o. box")
+  ) {
+    classification.type = "pobox";
     classification.confidence = 0.9;
-    classification.indicators.push('po_box');
+    classification.indicators.push("po_box");
   }
-  
+
   return {
     ...result,
-    classification
+    classification,
   };
 }
 ```
@@ -590,18 +605,18 @@ function classifyAddress(address: string) {
 ### Bulk Processing
 
 ```typescript
-import { normalizeMultiple } from 'privakit';
+import { normalizeMultiple } from "privakit";
 
 // Normalize multiple emails at once
 const emails = [
-  'USER@EXAMPLE.COM',
-  '  admin@test.org  ',
-  'Support+Help@Company.Co.UK'
+  "USER@EXAMPLE.COM",
+  "  admin@test.org  ",
+  "Support+Help@Company.Co.UK",
 ];
 
-const results = normalizeMultiple(emails, 'email', {
+const results = normalizeMultiple(emails, "email", {
   lowercase: true,
-  removeSubaddressing: false
+  removeSubaddressing: false,
 });
 
 results.forEach((result, index) => {
@@ -615,39 +630,42 @@ results.forEach((result, index) => {
 ```typescript
 // Helper for normalizing existing database records
 async function normalizeUserData(userTable: string) {
-  const users = await database.query(`SELECT id, email, phone, name FROM ${userTable}`);
+  const users = await database.query(
+    `SELECT id, email, phone, name FROM ${userTable}`,
+  );
   const updates = [];
-  
+
   for (const user of users) {
     const normalizedEmail = normalizeEmailAddress(user.email);
-    const normalizedPhone = normalizePhoneNumber(user.phone, 'US');
+    const normalizedPhone = normalizePhoneNumber(user.phone, "US");
     const normalizedName = normalizePersonName(user.name);
-    
+
     // Only update if normalization changed the data
-    if (normalizedEmail.normalized !== user.email ||
-        normalizedPhone.e164 !== user.phone ||
-        normalizedName.normalized !== user.name) {
-      
+    if (
+      normalizedEmail.normalized !== user.email ||
+      normalizedPhone.e164 !== user.phone ||
+      normalizedName.normalized !== user.name
+    ) {
       updates.push({
         id: user.id,
         email: normalizedEmail.normalized,
         phone: normalizedPhone.e164,
         name: normalizedName.normalized,
-        migration_date: new Date()
+        migration_date: new Date(),
       });
     }
   }
-  
+
   // Batch update
   if (updates.length > 0) {
     await database.batchUpdate(userTable, updates);
     console.log(`Normalized ${updates.length} user records`);
   }
-  
+
   return {
     totalRecords: users.length,
     normalizedRecords: updates.length,
-    migrationCompleted: true
+    migrationCompleted: true,
   };
 }
 ```
@@ -657,35 +675,35 @@ async function normalizeUserData(userTable: string) {
 ```typescript
 // Use normalization to find and merge duplicates
 async function deduplicateUsers() {
-  const users = await database.query('SELECT * FROM users');
+  const users = await database.query("SELECT * FROM users");
   const normalizedUsers = new Map();
   const duplicates = [];
-  
-  users.forEach(user => {
+
+  users.forEach((user) => {
     // Create a composite key from normalized data
     const normalizedEmail = normalizeEmailAddress(user.email).normalized;
-    const normalizedPhone = normalizePhoneNumber(user.phone, 'US').e164;
+    const normalizedPhone = normalizePhoneNumber(user.phone, "US").e164;
     const normalizedName = normalizePersonName(user.name).normalized;
-    
+
     const key = `${normalizedEmail}|${normalizedPhone}|${normalizedName}`;
-    
+
     if (normalizedUsers.has(key)) {
       // Duplicate found
       const existing = normalizedUsers.get(key);
       duplicates.push({
         originalUser: existing,
         duplicateUser: user,
-        matchKey: key
+        matchKey: key,
       });
     } else {
       normalizedUsers.set(key, user);
     }
   });
-  
+
   return {
     uniqueUsers: Array.from(normalizedUsers.values()),
     duplicates,
-    deduplicationRate: duplicates.length / users.length
+    deduplicationRate: duplicates.length / users.length,
   };
 }
 ```
@@ -697,40 +715,40 @@ async function deduplicateUsers() {
 ```typescript
 // Adapt normalization to regional preferences
 function normalizeForLocale(data: any, locale: string) {
-  const [language, country] = locale.split('-');
-  
+  const [language, country] = locale.split("-");
+
   return {
     email: normalizeEmailAddress(data.email, {
       lowercase: true,
-      validateDomain: true
+      validateDomain: true,
     }),
-    
+
     phone: normalizePhoneNumber(data.phone, country, {
-      format: getPreferredPhoneFormat(country)
+      format: getPreferredPhoneFormat(country),
     }),
-    
+
     name: normalizePersonName(data.name, {
       titleCase: true,
-      culturalNames: getCulturalNameStyle(country)
+      culturalNames: getCulturalNameStyle(country),
     }),
-    
+
     address: normalizeAddress(data.address, {
       country,
       format: getAddressFormat(country),
-      validatePostalCode: true
-    })
+      validatePostalCode: true,
+    }),
   };
 }
 
 function getPreferredPhoneFormat(country: string): string {
   const formats = {
-    'US': 'national',
-    'GB': 'national', 
-    'DE': 'international',
-    'JP': 'national'
+    US: "national",
+    GB: "national",
+    DE: "international",
+    JP: "national",
   };
-  
-  return formats[country] || 'international';
+
+  return formats[country] || "international";
 }
 ```
 
@@ -738,19 +756,23 @@ function getPreferredPhoneFormat(country: string): string {
 
 ```typescript
 // Handle multilingual data normalization
-function normalizeMultilingual(text: string, sourceLanguage: string, targetLanguage: string) {
+function normalizeMultilingual(
+  text: string,
+  sourceLanguage: string,
+  targetLanguage: string,
+) {
   // Transliterate if needed (e.g., Cyrillic to Latin)
   if (needsTransliteration(sourceLanguage, targetLanguage)) {
     text = transliterate(text, sourceLanguage, targetLanguage);
   }
-  
+
   // Apply language-specific normalization rules
   switch (targetLanguage) {
-    case 'en':
+    case "en":
       return normalizeEnglish(text);
-    case 'es':
+    case "es":
       return normalizeSpanish(text);
-    case 'de':
+    case "de":
       return normalizeGerman(text);
     default:
       return normalizeGeneric(text);
@@ -760,10 +782,10 @@ function normalizeMultilingual(text: string, sourceLanguage: string, targetLangu
 function normalizeGerman(text: string): string {
   // Handle German umlauts and special characters
   return text
-    .replace(/ä/g, 'ae')
-    .replace(/ö/g, 'oe')
-    .replace(/ü/g, 'ue')
-    .replace(/ß/g, 'ss')
+    .replace(/ä/g, "ae")
+    .replace(/ö/g, "oe")
+    .replace(/ü/g, "ue")
+    .replace(/ß/g, "ss")
     .toLowerCase();
 }
 ```
@@ -776,17 +798,17 @@ function normalizeGerman(text: string): string {
 // Define custom normalization rules for specific domains
 class CustomNormalizer {
   private rules: Map<string, Function> = new Map();
-  
+
   addRule(name: string, rule: Function) {
     this.rules.set(name, rule);
   }
-  
+
   normalize(data: any, ruleName: string) {
     const rule = this.rules.get(ruleName);
     if (!rule) {
       throw new Error(`Normalization rule '${ruleName}' not found`);
     }
-    
+
     return rule(data);
   }
 }
@@ -795,12 +817,12 @@ class CustomNormalizer {
 const normalizer = new CustomNormalizer();
 
 // Add custom email rule for specific domain
-normalizer.addRule('corporate_email', (email: string) => {
+normalizer.addRule("corporate_email", (email: string) => {
   const result = normalizeEmailAddress(email, {
     lowercase: true,
-    removeSubaddressing: true  // Company policy: no subaddressing
+    removeSubaddressing: true, // Company policy: no subaddressing
   });
-  
+
   // Add employee ID extraction
   const match = result.localPart.match(/(\w+)\.(\w+)/);
   if (match) {
@@ -808,7 +830,7 @@ normalizer.addRule('corporate_email', (email: string) => {
     result.lastName = match[2];
     result.employeeFormat = true;
   }
-  
+
   return result;
 });
 ```
@@ -819,12 +841,12 @@ normalizer.addRule('corporate_email', (email: string) => {
 // Chain multiple normalization steps
 class NormalizationPipeline {
   private steps: Array<(data: any) => any> = [];
-  
+
   addStep(step: (data: any) => any) {
     this.steps.push(step);
     return this; // Enable chaining
   }
-  
+
   process(data: any) {
     return this.steps.reduce((current, step) => step(current), data);
   }
@@ -832,15 +854,24 @@ class NormalizationPipeline {
 
 // Usage
 const pipeline = new NormalizationPipeline()
-  .addStep(data => ({ ...data, email: normalizeEmailAddress(data.email).normalized }))
-  .addStep(data => ({ ...data, phone: normalizePhoneNumber(data.phone, 'US').e164 }))
-  .addStep(data => ({ ...data, name: normalizePersonName(data.name).normalized }))
-  .addStep(data => validateNormalizedData(data));
+  .addStep((data) => ({
+    ...data,
+    email: normalizeEmailAddress(data.email).normalized,
+  }))
+  .addStep((data) => ({
+    ...data,
+    phone: normalizePhoneNumber(data.phone, "US").e164,
+  }))
+  .addStep((data) => ({
+    ...data,
+    name: normalizePersonName(data.name).normalized,
+  }))
+  .addStep((data) => validateNormalizedData(data));
 
 const result = pipeline.process({
-  email: 'USER@EXAMPLE.COM',
-  phone: '(555) 123-4567',
-  name: 'john doe'
+  email: "USER@EXAMPLE.COM",
+  phone: "(555) 123-4567",
+  name: "john doe",
 });
 ```
 
@@ -850,34 +881,40 @@ const result = pipeline.process({
 // Apply different normalization based on data characteristics
 function smartNormalize(userData: any, context: string) {
   const result = { ...userData };
-  
+
   // Email normalization
   if (userData.email) {
-    const emailDomain = userData.email.split('@')[1]?.toLowerCase();
-    
-    if (emailDomain === 'gmail.com') {
+    const emailDomain = userData.email.split("@")[1]?.toLowerCase();
+
+    if (emailDomain === "gmail.com") {
       // Gmail-specific normalization
       result.email = normalizeGmail(userData.email).canonical;
     } else if (isBusinessDomain(emailDomain)) {
       // Business email normalization
       result.email = normalizeEmailAddress(userData.email, {
-        removeSubaddressing: false  // Keep business subaddressing
+        removeSubaddressing: false, // Keep business subaddressing
       }).normalized;
     } else {
       // Standard normalization
       result.email = normalizeEmailAddress(userData.email).normalized;
     }
   }
-  
+
   // Context-specific phone normalization
   if (userData.phone) {
-    if (context === 'international') {
-      result.phone = normalizePhoneNumber(userData.phone, userData.country || 'US').international;
+    if (context === "international") {
+      result.phone = normalizePhoneNumber(
+        userData.phone,
+        userData.country || "US",
+      ).international;
     } else {
-      result.phone = normalizePhoneNumber(userData.phone, userData.country || 'US').national;
+      result.phone = normalizePhoneNumber(
+        userData.phone,
+        userData.country || "US",
+      ).national;
     }
   }
-  
+
   return result;
 }
 ```
@@ -892,7 +929,7 @@ async function normalizeCRMContacts() {
   const contacts = await crmDatabase.getAllContacts();
   const normalizedContacts = [];
   const errors = [];
-  
+
   for (const contact of contacts) {
     try {
       const normalized = {
@@ -900,29 +937,31 @@ async function normalizeCRMContacts() {
         firstName: normalizePersonName(contact.firstName).firstName,
         lastName: normalizePersonName(contact.lastName).lastName,
         email: normalizeEmailAddress(contact.email).normalized,
-        phone: normalizePhoneNumber(contact.phone, contact.country || 'US').e164,
-        address: normalizeAddress(contact.address, { country: contact.country }).normalized,
-        
+        phone: normalizePhoneNumber(contact.phone, contact.country || "US")
+          .e164,
+        address: normalizeAddress(contact.address, { country: contact.country })
+          .normalized,
+
         // Metadata
         normalizedAt: new Date(),
         originalData: contact,
-        country: contact.country || 'US'
+        country: contact.country || "US",
       };
-      
+
       normalizedContacts.push(normalized);
     } catch (error) {
       errors.push({
         contactId: contact.id,
         error: error.message,
-        originalData: contact
+        originalData: contact,
       });
     }
   }
-  
+
   return {
     normalizedContacts,
     errors,
-    successRate: normalizedContacts.length / contacts.length
+    successRate: normalizedContacts.length / contacts.length,
   };
 }
 ```
@@ -934,37 +973,39 @@ async function normalizeCRMContacts() {
 function normalizeCustomerData(customer: any) {
   const billingAddress = normalizeAddress(customer.billingAddress, {
     country: customer.billingCountry,
-    validatePostalCode: true
+    validatePostalCode: true,
   });
-  
-  const shippingAddress = customer.shippingAddress ? 
-    normalizeAddress(customer.shippingAddress, {
-      country: customer.shippingCountry,
-      validatePostalCode: true
-    }) : billingAddress;
-  
+
+  const shippingAddress = customer.shippingAddress
+    ? normalizeAddress(customer.shippingAddress, {
+        country: customer.shippingCountry,
+        validatePostalCode: true,
+      })
+    : billingAddress;
+
   return {
     customerId: customer.id,
-    
+
     // Contact information
     name: normalizePersonName(customer.name).normalized,
     email: normalizeEmailAddress(customer.email).normalized,
     phone: normalizePhoneNumber(customer.phone, customer.country).e164,
-    
+
     // Addresses
     billingAddress: billingAddress.normalized,
     shippingAddress: shippingAddress.normalized,
     sameAddress: billingAddress.normalized === shippingAddress.normalized,
-    
+
     // Validation
-    isValidCustomer: billingAddress.isValid && 
-                    normalizeEmailAddress(customer.email).isValid &&
-                    normalizePhoneNumber(customer.phone, customer.country).isValid,
-    
+    isValidCustomer:
+      billingAddress.isValid &&
+      normalizeEmailAddress(customer.email).isValid &&
+      normalizePhoneNumber(customer.phone, customer.country).isValid,
+
     // Preferences (preserved for targeting)
     country: customer.country,
     language: customer.language,
-    currency: customer.currency
+    currency: customer.currency,
   };
 }
 ```
@@ -977,47 +1018,48 @@ function normalizeMarketingList(subscribers: any[]) {
   const normalized = [];
   const duplicates = new Set();
   const invalid = [];
-  
-  subscribers.forEach(subscriber => {
+
+  subscribers.forEach((subscriber) => {
     try {
       const emailResult = normalizeEmailAddress(subscriber.email);
-      const phoneResult = subscriber.phone ? 
-        normalizePhoneNumber(subscriber.phone, subscriber.country || 'US') : null;
-      
+      const phoneResult = subscriber.phone
+        ? normalizePhoneNumber(subscriber.phone, subscriber.country || "US")
+        : null;
+
       if (!emailResult.isValid) {
-        invalid.push({ ...subscriber, reason: 'invalid_email' });
+        invalid.push({ ...subscriber, reason: "invalid_email" });
         return;
       }
-      
+
       // Create unique key for deduplication
-      const uniqueKey = `${emailResult.normalized}|${phoneResult?.e164 || ''}`;
-      
+      const uniqueKey = `${emailResult.normalized}|${phoneResult?.e164 || ""}`;
+
       if (duplicates.has(uniqueKey)) {
-        invalid.push({ ...subscriber, reason: 'duplicate' });
+        invalid.push({ ...subscriber, reason: "duplicate" });
         return;
       }
-      
+
       duplicates.add(uniqueKey);
-      
+
       normalized.push({
         email: emailResult.normalized,
         phone: phoneResult?.e164,
-        name: normalizePersonName(subscriber.name || '').normalized,
-        country: subscriber.country || 'US',
+        name: normalizePersonName(subscriber.name || "").normalized,
+        country: subscriber.country || "US",
         subscribeDate: subscriber.subscribeDate,
         preferences: subscriber.preferences,
-        
+
         // Compliance tracking
         canEmail: emailResult.isValid,
-        canSMS: phoneResult?.isValid && phoneResult?.type === 'MOBILE',
+        canSMS: phoneResult?.isValid && phoneResult?.type === "MOBILE",
         gdprCompliant: isGDPRCountry(subscriber.country),
-        ccpaApplicable: isCCPAApplicable(subscriber.country, subscriber.state)
+        ccpaApplicable: isCCPAApplicable(subscriber.country, subscriber.state),
       });
     } catch (error) {
       invalid.push({ ...subscriber, reason: error.message });
     }
   });
-  
+
   return {
     normalized,
     invalid,
@@ -1025,8 +1067,8 @@ function normalizeMarketingList(subscribers: any[]) {
       total: subscribers.length,
       valid: normalized.length,
       invalid: invalid.length,
-      duplicates: invalid.filter(i => i.reason === 'duplicate').length
-    }
+      duplicates: invalid.filter((i) => i.reason === "duplicate").length,
+    },
   };
 }
 ```
@@ -1064,6 +1106,7 @@ function normalizeMarketingList(subscribers: any[]) {
 ---
 
 **Next Steps:**
+
 - 🎭 **Learn masking**: [Masking Documentation](./masking.md)
 - 🚫 **Explore redaction**: [Redaction Documentation](./redaction.md)
 - ⚖️ **Understand policies**: [Policy Engine Documentation](./policy-engine.md)

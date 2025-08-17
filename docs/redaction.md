@@ -7,18 +7,18 @@ The Redaction module provides complete removal of PII from text, making it safe 
 ### Redaction vs Masking
 
 ```typescript
-import { redactText, maskPII } from 'privakit';
+import { redactText, maskPII } from "privakit";
 
 const text = "Contact John Doe at john@example.com or call (555) 123-4567";
 
 // Redaction: Complete removal for logs
 const redacted = redactText(text);
-console.log(redacted.redacted); 
+console.log(redacted.redacted);
 // Output: "Contact [REDACTED] at [REDACTED] or call [REDACTED]"
 
 // Masking: Preserves structure for display
-const masked = maskPII('john@example.com', 'email');
-console.log(masked.masked); 
+const masked = maskPII("john@example.com", "email");
+console.log(masked.masked);
 // Output: "j***@example.com"
 ```
 
@@ -36,7 +36,7 @@ console.log(masked.masked);
 ### Basic Text Redaction
 
 ```typescript
-import { redactText } from 'privakit';
+import { redactText } from "privakit";
 
 // Simple redaction with default settings
 const text = "User john@example.com logged in from IP 192.168.1.100";
@@ -52,16 +52,16 @@ console.log(result.detectedTypes); // ['email', 'ip']
 ### Custom Redaction Markers
 
 ```typescript
-import { redactText, RedactionOptions } from 'privakit';
+import { redactText, RedactionOptions } from "privakit";
 
 const options: RedactionOptions = {
-  replacement: '***REMOVED***',
+  replacement: "***REMOVED***",
   preserveLength: false,
-  strictMode: true
+  strictMode: true,
 };
 
 const result = redactText("Contact john@example.com", options);
-console.log(result.redacted); 
+console.log(result.redacted);
 // Output: "Contact ***REMOVED***"
 ```
 
@@ -71,10 +71,10 @@ console.log(result.redacted);
 // Preserve original text length for format consistency
 const result = redactText("Email: user@domain.com", {
   preserveLength: true,
-  replacement: 'X'
+  replacement: "X",
 });
 
-console.log(result.redacted); 
+console.log(result.redacted);
 // Output: "Email: XXXXXXXXXXXXXXX" (same character count)
 ```
 
@@ -85,13 +85,13 @@ console.log(result.redacted);
 const text = "John Doe's email is john@example.com, phone: 555-123-4567";
 
 const emailOnly = redactText(text, {
-  includeTypes: ['email']  // Only redact emails
+  includeTypes: ["email"], // Only redact emails
 });
 console.log(emailOnly.redacted);
 // Output: "John Doe's email is [REDACTED], phone: 555-123-4567"
 
 const excludeNames = redactText(text, {
-  excludeTypes: ['name']  // Redact everything except names
+  excludeTypes: ["name"], // Redact everything except names
 });
 console.log(excludeNames.redacted);
 // Output: "John Doe's email is [REDACTED], phone: [REDACTED]"
@@ -104,28 +104,29 @@ console.log(excludeNames.redacted);
 The `redactText` function automatically detects and redacts all types of PII:
 
 ```typescript
-import { redactText } from 'privakit';
+import { redactText } from "privakit";
 
 // Redacts emails, phones, names, addresses, credit cards, etc.
-const text = "Contact John Doe at john@example.com, call 555-123-4567, or mail to 123 Main St";
+const text =
+  "Contact John Doe at john@example.com, call 555-123-4567, or mail to 123 Main St";
 const result = redactText(text);
 
 console.log(result.redacted);
 // Output: "Contact [REDACTED] at [REDACTED], call [REDACTED], or mail to [REDACTED]"
 
 console.log(result.redactionCount); // Number of items redacted
-console.log(result.redactedSpans);  // Details of what was redacted
+console.log(result.redactedSpans); // Details of what was redacted
 ```
 
 ### Custom Replacement Text
 
 ```typescript
-import { redactText } from 'privakit';
+import { redactText } from "privakit";
 
 // Custom replacement for different PII types
 const text = "Call 555-123-4567 or email user@example.com";
 const result = redactText(text, {
-  replacement: '[REMOVED]'
+  replacement: "[REMOVED]",
 });
 
 console.log(result.redacted);
@@ -135,13 +136,13 @@ console.log(result.redacted);
 ### Detection-Based Redaction
 
 ```typescript
-import { detectPII, redactFromDetection } from 'privakit';
+import { detectPII, redactFromDetection } from "privakit";
 
 // First detect, then redact with custom options
 const text = "Payment failed for card 4111-1111-1111-1111";
 const detection = detectPII(text);
 const result = redactFromDetection(text, detection, {
-  replacement: '[CARD_REDACTED]'
+  replacement: "[CARD_REDACTED]",
 });
 
 console.log(result.redacted);
@@ -153,16 +154,16 @@ console.log(result.redacted);
 ### Batch Document Processing
 
 ```typescript
-import { redactMultiple } from 'privakit';
+import { redactMultiple } from "privakit";
 
 const documents = [
   "Invoice for john@company.com - $1,234.56",
   "Support ticket from jane@example.com",
-  "Meeting notes: call Mary at 555-987-6543"
+  "Meeting notes: call Mary at 555-987-6543",
 ];
 
 const results = redactMultiple(documents, {
-  replacement: '[REDACTED]'
+  replacement: "[REDACTED]",
 });
 
 results.forEach((result, index) => {
@@ -176,22 +177,24 @@ results.forEach((result, index) => {
 ```typescript
 // Safe database result processing
 async function getRedactedUserData(userId: string) {
-  const rawData = await database.query('SELECT * FROM users WHERE id = ?', [userId]);
-  
+  const rawData = await database.query("SELECT * FROM users WHERE id = ?", [
+    userId,
+  ]);
+
   // Convert to JSON string for processing
   const jsonString = JSON.stringify(rawData);
-  
+
   // Redact any PII that might be in the data
   const redacted = redactText(jsonString, {
     strictMode: true,
-    includeTypes: ['email', 'phone', 'address', 'creditcard']
+    includeTypes: ["email", "phone", "address", "creditcard"],
   });
-  
+
   // Return safe data for logging/analysis
   return {
     safeData: redacted.redacted,
     piiRemoved: redacted.redactionCount,
-    dataTypes: redacted.detectedTypes
+    dataTypes: redacted.detectedTypes,
   };
 }
 ```
@@ -199,14 +202,14 @@ async function getRedactedUserData(userId: string) {
 ### API Response Sanitization
 
 ```typescript
-import { createRedactionMiddleware } from 'privakit';
+import { createRedactionMiddleware } from "privakit";
 
 // Express.js middleware for automatic API response redaction
 const redactionMiddleware = createRedactionMiddleware({
   redactRequestLogs: true,
   redactResponseLogs: true,
   redactErrorLogs: true,
-  replacement: '[SANITIZED]'
+  replacement: "[SANITIZED]",
 });
 
 app.use(redactionMiddleware);
@@ -221,20 +224,20 @@ app.use(redactionMiddleware);
 ### Logger Integration
 
 ```typescript
-import { createSafeLogger } from 'privakit';
+import { createSafeLogger } from "privakit";
 
 // Create PII-safe logger
 const logger = createSafeLogger({
-  replacement: '[REDACTED]',
-  logLevel: 'info',
-  auditRedactions: true  // Track what was redacted
+  replacement: "[REDACTED]",
+  logLevel: "info",
+  auditRedactions: true, // Track what was redacted
 });
 
 // All log calls automatically redacted
-logger.info('User john@example.com completed purchase');
+logger.info("User john@example.com completed purchase");
 // Logged: "User [REDACTED] completed purchase"
 
-logger.error('Failed login for IP 192.168.1.100');
+logger.error("Failed login for IP 192.168.1.100");
 // Logged: "Failed login for IP [REDACTED]"
 
 logger.debug('Processing data: {"email":"user@test.com","phone":"555-1234"}');
@@ -245,41 +248,36 @@ logger.debug('Processing data: {"email":"user@test.com","phone":"555-1234"}');
 
 ```typescript
 // Winston logger integration
-import winston from 'winston';
-import { redactText } from 'privakit';
+import winston from "winston";
+import { redactText } from "privakit";
 
 const redactionFormat = winston.format((info) => {
   // Redact message content
   if (info.message) {
     const redacted = redactText(info.message, {
-      replacement: '[REDACTED]',
-      strictMode: true
+      replacement: "[REDACTED]",
+      strictMode: true,
     });
     info.message = redacted.redacted;
     info.piiRedacted = redacted.redactionCount;
   }
-  
+
   // Redact any object properties
-  Object.keys(info).forEach(key => {
-    if (typeof info[key] === 'string') {
+  Object.keys(info).forEach((key) => {
+    if (typeof info[key] === "string") {
       const redacted = redactText(info[key]);
       if (redacted.redactionCount > 0) {
         info[key] = redacted.redacted;
       }
     }
   });
-  
+
   return info;
 });
 
 const logger = winston.createLogger({
-  format: winston.format.combine(
-    redactionFormat(),
-    winston.format.json()
-  ),
-  transports: [
-    new winston.transports.File({ filename: 'safe-app.log' })
-  ]
+  format: winston.format.combine(redactionFormat(), winston.format.json()),
+  transports: [new winston.transports.File({ filename: "safe-app.log" })],
 });
 ```
 
@@ -290,24 +288,26 @@ const logger = winston.createLogger({
 function logError(error: Error, context: any) {
   // Redact error message
   const redactedMessage = redactText(error.message, {
-    replacement: '[SENSITIVE_DATA]'
+    replacement: "[SENSITIVE_DATA]",
   });
-  
+
   // Redact stack trace
-  const redactedStack = error.stack ? redactText(error.stack, {
-    replacement: '[SENSITIVE_DATA]'
-  }).redacted : undefined;
-  
+  const redactedStack = error.stack
+    ? redactText(error.stack, {
+        replacement: "[SENSITIVE_DATA]",
+      }).redacted
+    : undefined;
+
   // Redact context data
   const redactedContext = redactText(JSON.stringify(context), {
-    replacement: '[SENSITIVE_DATA]'
+    replacement: "[SENSITIVE_DATA]",
   });
-  
+
   console.error({
     error: redactedMessage.redacted,
     stack: redactedStack,
     context: JSON.parse(redactedContext.redacted),
-    piiRemoved: redactedMessage.redactionCount + redactedContext.redactionCount
+    piiRemoved: redactedMessage.redactionCount + redactedContext.redactionCount,
   });
 }
 ```
@@ -321,24 +321,26 @@ function logError(error: Error, context: any) {
 function trackUserEvent(event: string, properties: any) {
   // Redact the entire properties object
   const safeProperties = redactText(JSON.stringify(properties), {
-    replacement: '[REDACTED]',
-    preserveStructure: true  // Keep JSON structure intact
+    replacement: "[REDACTED]",
+    preserveStructure: true, // Keep JSON structure intact
   });
-  
+
   // Send to analytics (no PII included)
   analytics.track(event, JSON.parse(safeProperties.redacted));
-  
+
   // Log redaction for audit
   if (safeProperties.redactionCount > 0) {
-    console.log(`Redacted ${safeProperties.redactionCount} PII instances from analytics event`);
+    console.log(
+      `Redacted ${safeProperties.redactionCount} PII instances from analytics event`,
+    );
   }
 }
 
 // Usage
-trackUserEvent('user_registered', {
-  email: 'user@example.com',  // Will be redacted
-  plan: 'premium',           // Safe to track
-  phone: '555-123-4567'      // Will be redacted
+trackUserEvent("user_registered", {
+  email: "user@example.com", // Will be redacted
+  plan: "premium", // Safe to track
+  phone: "555-123-4567", // Will be redacted
 });
 ```
 
@@ -348,20 +350,20 @@ trackUserEvent('user_registered', {
 // Clean search queries before storing for analysis
 function logSearchQuery(query: string, userId: string) {
   const redactedQuery = redactText(query, {
-    replacement: '[QUERY_REDACTED]',
-    includeTypes: ['email', 'phone', 'name', 'creditcard']
+    replacement: "[QUERY_REDACTED]",
+    includeTypes: ["email", "phone", "name", "creditcard"],
   });
-  
+
   const redactedUserId = redactText(userId, {
-    replacement: '[USER_REDACTED]'
+    replacement: "[USER_REDACTED]",
   });
-  
+
   // Safe to store for search analytics
   searchAnalytics.log({
     query: redactedQuery.redacted,
     user: redactedUserId.redacted,
     timestamp: Date.now(),
-    hadPII: redactedQuery.redactionCount > 0
+    hadPII: redactedQuery.redactionCount > 0,
   });
 }
 ```
@@ -375,16 +377,16 @@ function logSearchQuery(query: string, userId: string) {
 const customRedaction = redactText(text, {
   customPatterns: [
     {
-      name: 'employee_id',
+      name: "employee_id",
       pattern: /EMP-\d{6}/g,
-      replacement: '[EMPLOYEE_ID]'
+      replacement: "[EMPLOYEE_ID]",
     },
     {
-      name: 'project_code',
+      name: "project_code",
       pattern: /PROJ-[A-Z]{3}-\d{4}/g,
-      replacement: '[PROJECT_CODE]'
-    }
-  ]
+      replacement: "[PROJECT_CODE]",
+    },
+  ],
 });
 ```
 
@@ -392,28 +394,39 @@ const customRedaction = redactText(text, {
 
 ```typescript
 // Redact differently based on context
-function contextualRedaction(text: string, context: 'public' | 'internal' | 'restricted') {
+function contextualRedaction(
+  text: string,
+  context: "public" | "internal" | "restricted",
+) {
   switch (context) {
-    case 'public':
+    case "public":
       // Aggressive redaction for public data
       return redactText(text, {
         strictMode: true,
-        replacement: '[REMOVED]',
-        includeTypes: ['email', 'phone', 'name', 'address', 'creditcard', 'ssn', 'ip']
+        replacement: "[REMOVED]",
+        includeTypes: [
+          "email",
+          "phone",
+          "name",
+          "address",
+          "creditcard",
+          "ssn",
+          "ip",
+        ],
       });
-    
-    case 'internal':
+
+    case "internal":
       // Moderate redaction for internal use
       return redactText(text, {
-        replacement: '[INTERNAL_REDACTED]',
-        includeTypes: ['creditcard', 'ssn', 'phone']
+        replacement: "[INTERNAL_REDACTED]",
+        includeTypes: ["creditcard", "ssn", "phone"],
       });
-    
-    case 'restricted':
+
+    case "restricted":
       // Minimal redaction for restricted access
       return redactText(text, {
-        replacement: '[CLASSIFIED]',
-        includeTypes: ['creditcard', 'ssn']
+        replacement: "[CLASSIFIED]",
+        includeTypes: ["creditcard", "ssn"],
       });
   }
 }
@@ -423,54 +436,56 @@ function contextualRedaction(text: string, context: 'public' | 'internal' | 'res
 
 ```typescript
 // Redaction with encrypted storage for authorized recovery
-import { encrypt, decrypt } from './encryption'; // Your encryption module
+import { encrypt, decrypt } from "./encryption"; // Your encryption module
 
 class ReversibleRedaction {
   private encryptionKey: string;
-  
+
   constructor(encryptionKey: string) {
     this.encryptionKey = encryptionKey;
   }
-  
+
   redactWithRecovery(text: string) {
     const detection = detectPII(text);
     let redacted = text;
     const recoveryMap: any[] = [];
-    
+
     detection.spans.forEach((span, index) => {
       const placeholder = `[REDACTED_${index}]`;
-      
+
       // Encrypt original value
       const encrypted = encrypt(span.text, this.encryptionKey);
-      
+
       // Store recovery information
       recoveryMap.push({
         placeholder,
         encrypted,
         type: span.type,
-        position: span.start
+        position: span.start,
       });
-      
+
       // Replace with placeholder
       redacted = redacted.replace(span.text, placeholder);
     });
-    
+
     return {
       redacted,
       recoveryMap: encrypt(JSON.stringify(recoveryMap), this.encryptionKey),
-      redactionCount: recoveryMap.length
+      redactionCount: recoveryMap.length,
     };
   }
-  
+
   recover(redactedText: string, encryptedRecoveryMap: string) {
-    const recoveryMap = JSON.parse(decrypt(encryptedRecoveryMap, this.encryptionKey));
+    const recoveryMap = JSON.parse(
+      decrypt(encryptedRecoveryMap, this.encryptionKey),
+    );
     let recovered = redactedText;
-    
+
     recoveryMap.forEach((entry: any) => {
       const originalValue = decrypt(entry.encrypted, this.encryptionKey);
       recovered = recovered.replace(entry.placeholder, originalValue);
     });
-    
+
     return recovered;
   }
 }
@@ -485,21 +500,21 @@ class ReversibleRedaction {
 function gdprCompliantRedaction(personalData: string) {
   const result = redactText(personalData, {
     strictMode: true,
-    replacement: '[GDPR_REDACTED]',
+    replacement: "[GDPR_REDACTED]",
     auditTrail: true,
-    includeTypes: ['email', 'phone', 'name', 'address', 'ip', 'device_id']
+    includeTypes: ["email", "phone", "name", "address", "ip", "device_id"],
   });
-  
+
   // Log for GDPR compliance audit
   console.log({
-    event: 'gdpr_data_redaction',
+    event: "gdpr_data_redaction",
     timestamp: new Date().toISOString(),
     piiTypesRedacted: result.detectedTypes,
     redactionCount: result.redactionCount,
-    dataSubject: '[REDACTED]',  // Don't log who the data belonged to
-    legalBasis: 'data_minimization_article_5'
+    dataSubject: "[REDACTED]", // Don't log who the data belonged to
+    legalBasis: "data_minimization_article_5",
   });
-  
+
   return result;
 }
 ```
@@ -510,22 +525,22 @@ function gdprCompliantRedaction(personalData: string) {
 // Credit card data redaction for PCI DSS compliance
 function pciCompliantRedaction(text: string) {
   return redactText(text, {
-    includeTypes: ['creditcard', 'cvv', 'bank_account'],
-    replacement: '[PCI_REDACTED]',
+    includeTypes: ["creditcard", "cvv", "bank_account"],
+    replacement: "[PCI_REDACTED]",
     strictMode: true,
-    auditRequired: true
+    auditRequired: true,
   });
 }
 
 // Usage in payment processing logs
 function logPaymentEvent(event: string, data: any) {
   const safeData = pciCompliantRedaction(JSON.stringify(data));
-  
+
   paymentLogger.info({
     event,
     data: JSON.parse(safeData.redacted),
     pciCompliant: true,
-    redactionApplied: safeData.redactionCount > 0
+    redactionApplied: safeData.redactionCount > 0,
   });
 }
 ```
@@ -536,13 +551,13 @@ function logPaymentEvent(event: string, data: any) {
 // Comprehensive audit trail for redaction operations
 class RedactionAuditor {
   private auditLog: any[] = [];
-  
+
   redactWithAudit(text: string, purpose: string, user: string) {
     const result = redactText(text, {
-      replacement: '[AUDITED_REDACTION]',
-      strictMode: true
+      replacement: "[AUDITED_REDACTION]",
+      strictMode: true,
     });
-    
+
     // Create audit entry
     const auditEntry = {
       timestamp: new Date().toISOString(),
@@ -552,25 +567,25 @@ class RedactionAuditor {
       redactedLength: result.redacted.length,
       piiTypesFound: result.detectedTypes,
       redactionCount: result.redactionCount,
-      hash: this.hashText(text),  // For integrity verification
-      compliant: true
+      hash: this.hashText(text), // For integrity verification
+      compliant: true,
     };
-    
+
     this.auditLog.push(auditEntry);
-    
+
     return {
       ...result,
-      auditId: auditEntry.timestamp + '_' + auditEntry.user
+      auditId: auditEntry.timestamp + "_" + auditEntry.user,
     };
   }
-  
+
   private hashText(text: string): string {
     // Simple hash for integrity (use proper crypto in production)
-    return Buffer.from(text).toString('base64').substring(0, 10);
+    return Buffer.from(text).toString("base64").substring(0, 10);
   }
-  
+
   getAuditReport(dateFrom: Date, dateTo: Date) {
-    return this.auditLog.filter(entry => {
+    return this.auditLog.filter((entry) => {
       const entryDate = new Date(entry.timestamp);
       return entryDate >= dateFrom && entryDate <= dateTo;
     });
@@ -588,28 +603,28 @@ class SafeContentManager {
   async saveContent(content: string, authorId: string) {
     // Check for PII in content
     const detection = detectPII(content);
-    
+
     if (detection.hasPII) {
       // Redact for public display
       const redacted = redactText(content, {
-        replacement: '[CONTENT_MODERATED]'
+        replacement: "[CONTENT_MODERATED]",
       });
-      
+
       // Store both versions (original encrypted, redacted public)
       await this.storage.save({
         id: generateId(),
         authorId,
         publicContent: redacted.redacted,
-        privateContent: this.encrypt(content),  // Encrypted original
+        privateContent: this.encrypt(content), // Encrypted original
         containsPII: true,
         piiTypes: detection.detectedTypes,
-        moderationRequired: true
+        moderationRequired: true,
       });
-      
+
       return {
         success: true,
-        message: 'Content saved with privacy protection applied',
-        requiresReview: true
+        message: "Content saved with privacy protection applied",
+        requiresReview: true,
       };
     } else {
       // No PII, safe to store as-is
@@ -618,12 +633,12 @@ class SafeContentManager {
         authorId,
         publicContent: content,
         containsPII: false,
-        moderationRequired: false
+        moderationRequired: false,
       });
-      
+
       return {
         success: true,
-        message: 'Content saved successfully'
+        message: "Content saved successfully",
       };
     }
   }
@@ -638,61 +653,74 @@ class SupportTicketSystem {
   async createTicket(customerEmail: string, subject: string, message: string) {
     // Redact customer message for support agent view
     const redactedMessage = redactText(message, {
-      replacement: '[CUSTOMER_INFO_REDACTED]',
-      includeTypes: ['phone', 'address', 'creditcard', 'ssn']
+      replacement: "[CUSTOMER_INFO_REDACTED]",
+      includeTypes: ["phone", "address", "creditcard", "ssn"],
     });
-    
+
     // Create ticket with redacted content
     const ticket = await this.database.tickets.create({
-      customerEmail: this.hashEmail(customerEmail),  // Hash for lookup
+      customerEmail: this.hashEmail(customerEmail), // Hash for lookup
       subject,
       publicMessage: redactedMessage.redacted,
-      privateMessage: this.encrypt(message),  // Encrypted original
+      privateMessage: this.encrypt(message), // Encrypted original
       piiRedacted: redactedMessage.redactionCount > 0,
-      createdAt: new Date()
+      createdAt: new Date(),
     });
-    
+
     // Notify support team with safe content
     await this.notifySupport({
       ticketId: ticket.id,
       subject,
       message: redactedMessage.redacted,
-      priority: this.calculatePriority(subject)
+      priority: this.calculatePriority(subject),
     });
-    
+
     return ticket;
   }
-  
+
   // Support agents see redacted version by default
   async getTicketForAgent(ticketId: string, agentId: string) {
     const ticket = await this.database.tickets.findById(ticketId);
-    
+
     return {
       ...ticket,
-      message: ticket.publicMessage,  // Redacted version
-      hasRedactedContent: ticket.piiRedacted
+      message: ticket.publicMessage, // Redacted version
+      hasRedactedContent: ticket.piiRedacted,
     };
   }
-  
+
   // Managers can access original with approval
-  async getFullTicketForManager(ticketId: string, managerId: string, justification: string) {
-    const approval = await this.requestAccess(managerId, ticketId, justification);
-    
+  async getFullTicketForManager(
+    ticketId: string,
+    managerId: string,
+    justification: string,
+  ) {
+    const approval = await this.requestAccess(
+      managerId,
+      ticketId,
+      justification,
+    );
+
     if (approval.granted) {
       const ticket = await this.database.tickets.findById(ticketId);
-      
+
       // Log access for audit
-      this.auditAccess(managerId, ticketId, 'full_content_access', justification);
-      
+      this.auditAccess(
+        managerId,
+        ticketId,
+        "full_content_access",
+        justification,
+      );
+
       return {
         ...ticket,
-        message: this.decrypt(ticket.privateMessage),  // Original content
+        message: this.decrypt(ticket.privateMessage), // Original content
         accessGranted: true,
-        accessReason: justification
+        accessReason: justification,
       };
     }
-    
-    throw new Error('Access denied - insufficient privileges');
+
+    throw new Error("Access denied - insufficient privileges");
   }
 }
 ```
@@ -706,9 +734,9 @@ class SupportTicketSystem {
 function secureRedact(sensitiveText: string) {
   try {
     const result = redactText(sensitiveText, {
-      replacement: '[SECURE_REDACTED]'
+      replacement: "[SECURE_REDACTED]",
     });
-    
+
     return result;
   } finally {
     // Clear sensitive data from memory (Node.js specific)
@@ -725,16 +753,16 @@ function secureRedact(sensitiveText: string) {
 // ✅ Ensure redacted data doesn't leak information
 function paranoidRedaction(text: string) {
   const result = redactText(text, {
-    replacement: '[REDACTED]',
-    preserveLength: false,     // Don't preserve length
-    preserveCase: false,       // Don't preserve case patterns
-    preservePunctuation: false // Don't preserve punctuation
+    replacement: "[REDACTED]",
+    preserveLength: false, // Don't preserve length
+    preserveCase: false, // Don't preserve case patterns
+    preservePunctuation: false, // Don't preserve punctuation
   });
-  
+
   // Don't include metadata that might leak information
   return {
     redacted: result.redacted,
-    hasRedactions: result.redactionCount > 0
+    hasRedactions: result.redactionCount > 0,
     // Don't include: original length, PII types, positions, etc.
   };
 }
@@ -747,28 +775,32 @@ function paranoidRedaction(text: string) {
 function verifyRedaction(originalText: string, redactedText: string) {
   // Re-scan redacted text to ensure no PII remains
   const remainingPII = detectPII(redactedText);
-  
+
   if (remainingPII.hasPII) {
-    throw new Error(`Redaction incomplete: ${remainingPII.detectedTypes.join(', ')} still present`);
+    throw new Error(
+      `Redaction incomplete: ${remainingPII.detectedTypes.join(", ")} still present`,
+    );
   }
-  
+
   // Verify no obvious patterns leaked through
   const suspiciousPatterns = [
-    /@\w+\./,           // Email patterns
-    /\(\d{3}\)/,        // Phone patterns
-    /\d{4}-\d{4}-\d{4}/ // Card-like patterns
+    /@\w+\./, // Email patterns
+    /\(\d{3}\)/, // Phone patterns
+    /\d{4}-\d{4}-\d{4}/, // Card-like patterns
   ];
-  
-  suspiciousPatterns.forEach(pattern => {
+
+  suspiciousPatterns.forEach((pattern) => {
     if (pattern.test(redactedText)) {
-      throw new Error(`Suspicious pattern detected in redacted text: ${pattern}`);
+      throw new Error(
+        `Suspicious pattern detected in redacted text: ${pattern}`,
+      );
     }
   });
-  
+
   return {
     verified: true,
     safe: true,
-    redactionComplete: true
+    redactionComplete: true,
   };
 }
 ```
@@ -799,6 +831,7 @@ function verifyRedaction(originalText: string, redactedText: string) {
 ---
 
 **Next Steps:**
+
 - 🎭 **Learn masking**: [Masking Documentation](./masking.md)
 - 🔧 **Explore normalization**: [Normalization Documentation](./normalization.md)
 - ⚖️ **Understand policies**: [Policy Engine Documentation](./policy-engine.md)

@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [Unreleased]
 
 ### Added
+
 - 🇧🇷 **LGPD Support**: Complete Brazilian data protection law compliance
   - LGPD policy engine with all 10 fundamental principles (Art. 6)
   - All 10 legal bases for data processing (Art. 7)
@@ -37,6 +38,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Security best practices and guidelines
 
 ### Enhanced
+
 - 🔍 **Detection Module**: Expanded PII type support with confidence scoring
 - 🎭 **Masking Module**: Advanced masking patterns with role-based visibility
 - 🚫 **Redaction Module**: Enterprise-grade redaction with audit trails
@@ -45,6 +47,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - ✅ **Validation Module**: Robust international validation with NLP
 
 ### Security
+
 - 🛡️ **Privacy by Design**: Zero external network calls
 - 🔒 **Local Processing**: All PII processing happens locally
 - 📋 **Audit Trails**: Comprehensive logging for compliance
@@ -53,6 +56,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [1.0.0] - 2024-01-15
 
 ### Added
+
 - 🎉 **Initial Release**: Complete PII handling library
 - 🔍 **PII Detection**: Automatic detection of 17+ PII types using NLP
 - ✅ **Data Validation**: Email, phone, name, and address validation
@@ -65,20 +69,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - 🚀 **Zero Dependencies**: No external API calls, completely local processing
 
 ### Core Modules
+
 - **Detection**: Pattern matching + NLP-powered PII identification
 - **Validation**: International email, phone, name, address validation
 - **Masking**: Configurable display-safe PII concealment
 - **Redaction**: Secure PII removal for logs and analytics
-- **Normalization**: Data standardization across formats and locales  
+- **Normalization**: Data standardization across formats and locales
 - **Policy Engine**: Automated compliance decision-making
 
 ### Privacy Features
+
 - 🛡️ **Privacy First**: No telemetry, tracking, or data collection
 - 🔒 **Local Only**: All processing happens on your infrastructure
 - 📋 **Compliance Ready**: Built-in GDPR and CCPA support
 - 🔐 **Secure**: Memory-safe with automatic cleanup
 
 ### Developer Experience
+
 - 📚 **Comprehensive Docs**: Detailed guides and API reference
 - 🚀 **Quick Start**: Get running in under 5 minutes
 - 🎯 **Real Examples**: Production-ready code samples
@@ -104,12 +111,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## How to Read This Changelog
 
 ### Version Format
+
 We use [Semantic Versioning](https://semver.org/):
+
 - **MAJOR** version when you make incompatible API changes
-- **MINOR** version when you add functionality in a backwards compatible manner  
+- **MINOR** version when you add functionality in a backwards compatible manner
 - **PATCH** version when you make backwards compatible bug fixes
 
 ### Categories
+
 - **Added** for new features
 - **Changed** for changes in existing functionality
 - **Deprecated** for soon-to-be removed features
@@ -118,6 +128,7 @@ We use [Semantic Versioning](https://semver.org/):
 - **Security** for vulnerability fixes
 
 ### Links
+
 - [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - [Privakit Documentation](./docs/README.md)

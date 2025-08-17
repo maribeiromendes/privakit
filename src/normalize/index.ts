@@ -2,25 +2,29 @@
  * Normalization module for standardizing PII formats
  */
 
-import { normalizeEmail } from '../validate/email.js';
-import { normalizePhone } from '../validate/phone.js';
-import { normalizeNameCapitalization } from '../validate/name.js';
-import { formatAddress, normalizeCountry } from '../validate/address.js';
-import type { NormalizationOptions, NormalizationResult, LocaleContext } from '../core/types.js';
-import { PIIType } from '../core/types.js';
-import { PIINormalizationError, ErrorCodes } from '../core/errors.js';
-import type { CountryCode } from 'libphonenumber-js';
+import { normalizeEmail } from "../validate/email.js";
+import { normalizePhone } from "../validate/phone.js";
+import { normalizeNameCapitalization } from "../validate/name.js";
+import { formatAddress, normalizeCountry } from "../validate/address.js";
+import type {
+  NormalizationOptions,
+  NormalizationResult,
+  LocaleContext,
+} from "../core/types.js";
+import { PIIType } from "../core/types.js";
+import { PIINormalizationError, ErrorCodes } from "../core/errors.js";
+import type { CountryCode } from "libphonenumber-js";
 
 export interface EmailNormalizationOptions extends NormalizationOptions {
   lowercase?: boolean;
   removeDots?: boolean;
   removeSubaddress?: boolean;
-  provider?: 'gmail' | 'outlook' | 'yahoo' | 'icloud' | 'generic';
+  provider?: "gmail" | "outlook" | "yahoo" | "icloud" | "generic";
 }
 
 export interface PhoneNormalizationOptions extends NormalizationOptions {
   defaultCountry?: CountryCode;
-  outputFormat?: 'E.164' | 'INTERNATIONAL' | 'NATIONAL' | 'RFC3966';
+  outputFormat?: "E.164" | "INTERNATIONAL" | "NATIONAL" | "RFC3966";
 }
 
 export interface NameNormalizationOptions extends NormalizationOptions {
@@ -34,7 +38,7 @@ export interface AddressNormalizationOptions extends NormalizationOptions {
   standardizeStreetTypes?: boolean;
   standardizeDirections?: boolean;
   removeExtraSpaces?: boolean;
-  formatStyle?: 'single-line' | 'multi-line' | 'compact';
+  formatStyle?: "single-line" | "multi-line" | "compact";
 }
 
 /**
@@ -42,47 +46,47 @@ export interface AddressNormalizationOptions extends NormalizationOptions {
  */
 export function normalizeEmailAddress(
   email: string,
-  options: EmailNormalizationOptions = {}
+  options: EmailNormalizationOptions = {},
 ): NormalizationResult<string> {
   const original = email;
   const applied: string[] = [];
 
   try {
     let normalized = normalizeEmail(email);
-    applied.push('basic-normalization');
+    applied.push("basic-normalization");
 
     if (options.lowercase !== false) {
       normalized = normalized.toLowerCase();
-      applied.push('lowercase');
+      applied.push("lowercase");
     }
 
     // Provider-specific normalization
-    if (options.provider || normalized.includes('@')) {
-      const domain = normalized.split('@')[1];
+    if (options.provider || normalized.includes("@")) {
+      const domain = normalized.split("@")[1];
       const provider = options.provider || detectEmailProvider(domain);
-      
+
       switch (provider) {
-        case 'gmail':
+        case "gmail":
           if (options.removeDots) {
-            const [local, domainPart] = normalized.split('@');
-            normalized = local.replace(/\./g, '') + '@' + domainPart;
-            applied.push('remove-dots');
+            const [local, domainPart] = normalized.split("@");
+            normalized = local.replace(/\./g, "") + "@" + domainPart;
+            applied.push("remove-dots");
           }
           if (options.removeSubaddress) {
-            const [local, domainPart] = normalized.split('@');
-            const cleanLocal = local.split('+')[0];
-            normalized = cleanLocal + '@' + domainPart;
-            applied.push('remove-subaddress');
+            const [local, domainPart] = normalized.split("@");
+            const cleanLocal = local.split("+")[0];
+            normalized = cleanLocal + "@" + domainPart;
+            applied.push("remove-subaddress");
           }
           break;
-        case 'outlook':
-        case 'yahoo':
-        case 'icloud':
+        case "outlook":
+        case "yahoo":
+        case "icloud":
           if (options.removeSubaddress) {
-            const [local, domainPart] = normalized.split('@');
-            const cleanLocal = local.split('+')[0];
-            normalized = cleanLocal + '@' + domainPart;
-            applied.push('remove-subaddress');
+            const [local, domainPart] = normalized.split("@");
+            const cleanLocal = local.split("+")[0];
+            normalized = cleanLocal + "@" + domainPart;
+            applied.push("remove-subaddress");
           }
           break;
       }
@@ -96,16 +100,15 @@ export function normalizeEmailAddress(
         type: PIIType.Email,
         provider: options.provider,
         normalizedLength: normalized.length,
-        originalLength: original.length
-      }
+        originalLength: original.length,
+      },
     };
-
   } catch (error) {
     throw new PIINormalizationError(
-      `Failed to normalize email: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      `Failed to normalize email: ${error instanceof Error ? error.message : "Unknown error"}`,
       PIIType.Email,
       original,
-      'canonical'
+      "canonical",
     );
   }
 }
@@ -115,13 +118,13 @@ export function normalizeEmailAddress(
  */
 export function normalizePhoneNumber(
   phone: string,
-  options: PhoneNormalizationOptions = {}
+  options: PhoneNormalizationOptions = {},
 ): NormalizationResult<string> {
   const original = phone;
   const applied: string[] = [];
 
   try {
-    const format = options.outputFormat || 'E.164';
+    const format = options.outputFormat || "E.164";
     let normalized = normalizePhone(phone, options.defaultCountry);
     applied.push(`format-${format.toLowerCase()}`);
 
@@ -139,16 +142,15 @@ export function normalizePhoneNumber(
         format,
         defaultCountry: options.defaultCountry,
         normalizedLength: normalized.length,
-        originalLength: original.length
-      }
+        originalLength: original.length,
+      },
     };
-
   } catch (error) {
     throw new PIINormalizationError(
-      `Failed to normalize phone: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      `Failed to normalize phone: ${error instanceof Error ? error.message : "Unknown error"}`,
       PIIType.Phone,
       original,
-      options.outputFormat || 'E.164'
+      options.outputFormat || "E.164",
     );
   }
 }
@@ -158,7 +160,7 @@ export function normalizePhoneNumber(
  */
 export function normalizePersonName(
   name: string,
-  options: NameNormalizationOptions = {}
+  options: NameNormalizationOptions = {},
 ): NormalizationResult<string> {
   const original = name;
   const applied: string[] = [];
@@ -168,25 +170,28 @@ export function normalizePersonName(
 
     // Remove extra spaces
     if (options.removeExtraSpaces !== false) {
-      normalized = normalized.replace(/\s+/g, ' ');
-      applied.push('remove-extra-spaces');
+      normalized = normalized.replace(/\s+/g, " ");
+      applied.push("remove-extra-spaces");
     }
 
     // Title case normalization
     if (options.titleCase !== false) {
       normalized = normalizeNameCapitalization(normalized);
-      applied.push('title-case');
+      applied.push("title-case");
     }
 
     // Handle diacritics if specified
     if (options.removeDiacritics) {
       normalized = removeDiacritics(normalized);
-      applied.push('remove-diacritics');
+      applied.push("remove-diacritics");
     }
 
     // Locale-specific normalization
     if (options.locale) {
-      normalized = applyLocaleSpecificNameNormalization(normalized, options.locale);
+      normalized = applyLocaleSpecificNameNormalization(
+        normalized,
+        options.locale,
+      );
       applied.push(`locale-${options.locale}`);
     }
 
@@ -198,16 +203,15 @@ export function normalizePersonName(
         type: PIIType.Name,
         wordCount: normalized.split(/\s+/).length,
         normalizedLength: normalized.length,
-        originalLength: original.length
-      }
+        originalLength: original.length,
+      },
     };
-
   } catch (error) {
     throw new PIINormalizationError(
-      `Failed to normalize name: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      `Failed to normalize name: ${error instanceof Error ? error.message : "Unknown error"}`,
       PIIType.Name,
       original,
-      'standard'
+      "standard",
     );
   }
 }
@@ -217,7 +221,7 @@ export function normalizePersonName(
  */
 export function normalizeAddress(
   address: string,
-  options: AddressNormalizationOptions = {}
+  options: AddressNormalizationOptions = {},
 ): NormalizationResult<string> {
   const original = address;
   const applied: string[] = [];
@@ -227,20 +231,20 @@ export function normalizeAddress(
 
     // Remove extra spaces
     if (options.removeExtraSpaces !== false) {
-      normalized = normalized.replace(/\s+/g, ' ').replace(/\n\s*\n/g, '\n');
-      applied.push('remove-extra-spaces');
+      normalized = normalized.replace(/\s+/g, " ").replace(/\n\s*\n/g, "\n");
+      applied.push("remove-extra-spaces");
     }
 
     // Standardize street types
     if (options.standardizeStreetTypes) {
       normalized = standardizeStreetTypes(normalized);
-      applied.push('standardize-street-types');
+      applied.push("standardize-street-types");
     }
 
     // Standardize directions
     if (options.standardizeDirections) {
       normalized = standardizeDirections(normalized);
-      applied.push('standardize-directions');
+      applied.push("standardize-directions");
     }
 
     // Format style
@@ -251,7 +255,10 @@ export function normalizeAddress(
 
     // Locale-specific normalization
     if (options.locale) {
-      normalized = applyLocaleSpecificAddressNormalization(normalized, options.locale);
+      normalized = applyLocaleSpecificAddressNormalization(
+        normalized,
+        options.locale,
+      );
       applied.push(`locale-${options.locale}`);
     }
 
@@ -263,16 +270,15 @@ export function normalizeAddress(
         type: PIIType.Address,
         formatStyle: options.formatStyle,
         normalizedLength: normalized.length,
-        originalLength: original.length
-      }
+        originalLength: original.length,
+      },
     };
-
   } catch (error) {
     throw new PIINormalizationError(
-      `Failed to normalize address: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      `Failed to normalize address: ${error instanceof Error ? error.message : "Unknown error"}`,
       PIIType.Address,
       original,
-      options.formatStyle || 'standard'
+      options.formatStyle || "standard",
     );
   }
 }
@@ -283,7 +289,7 @@ export function normalizeAddress(
 export function normalizePII(
   value: string,
   type: PIIType,
-  options: NormalizationOptions = {}
+  options: NormalizationOptions = {},
 ): NormalizationResult<string> {
   switch (type) {
     case PIIType.Email:
@@ -299,7 +305,7 @@ export function normalizePII(
         `Normalization not supported for PII type: ${type}`,
         type,
         value,
-        'unknown'
+        "unknown",
       );
   }
 }
@@ -310,9 +316,11 @@ export function normalizePII(
 export function normalizeMultiple<T extends string>(
   values: T[],
   type: PIIType,
-  options: NormalizationOptions = {}
+  options: NormalizationOptions = {},
 ): NormalizationResult<T>[] {
-  return values.map(value => normalizePII(value, type, options) as NormalizationResult<T>);
+  return values.map(
+    (value) => normalizePII(value, type, options) as NormalizationResult<T>,
+  );
 }
 
 // Helper functions
@@ -320,22 +328,30 @@ export function normalizeMultiple<T extends string>(
 /**
  * Detects email provider from domain
  */
-function detectEmailProvider(domain: string): 'gmail' | 'outlook' | 'yahoo' | 'icloud' | 'generic' {
+function detectEmailProvider(
+  domain: string,
+): "gmail" | "outlook" | "yahoo" | "icloud" | "generic" {
   const lowerDomain = domain.toLowerCase();
-  
-  if (lowerDomain.includes('gmail')) return 'gmail';
-  if (lowerDomain.includes('outlook') || lowerDomain.includes('hotmail') || lowerDomain.includes('live')) return 'outlook';
-  if (lowerDomain.includes('yahoo')) return 'yahoo';
-  if (lowerDomain.includes('icloud') || lowerDomain.includes('me.com')) return 'icloud';
-  
-  return 'generic';
+
+  if (lowerDomain.includes("gmail")) return "gmail";
+  if (
+    lowerDomain.includes("outlook") ||
+    lowerDomain.includes("hotmail") ||
+    lowerDomain.includes("live")
+  )
+    return "outlook";
+  if (lowerDomain.includes("yahoo")) return "yahoo";
+  if (lowerDomain.includes("icloud") || lowerDomain.includes("me.com"))
+    return "icloud";
+
+  return "generic";
 }
 
 /**
  * Removes diacritics from text
  */
 function removeDiacritics(text: string): string {
-  return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 
 /**
@@ -343,32 +359,32 @@ function removeDiacritics(text: string): string {
  */
 function standardizeStreetTypes(address: string): string {
   const streetTypeMap: Record<string, string> = {
-    'street': 'St',
-    'st': 'St',
-    'avenue': 'Ave',
-    'ave': 'Ave',
-    'road': 'Rd',
-    'rd': 'Rd',
-    'boulevard': 'Blvd',
-    'blvd': 'Blvd',
-    'lane': 'Ln',
-    'ln': 'Ln',
-    'drive': 'Dr',
-    'dr': 'Dr',
-    'court': 'Ct',
-    'ct': 'Ct',
-    'place': 'Pl',
-    'pl': 'Pl',
-    'way': 'Way',
-    'circle': 'Cir',
-    'cir': 'Cir',
-    'parkway': 'Pkwy',
-    'pkwy': 'Pkwy'
+    street: "St",
+    st: "St",
+    avenue: "Ave",
+    ave: "Ave",
+    road: "Rd",
+    rd: "Rd",
+    boulevard: "Blvd",
+    blvd: "Blvd",
+    lane: "Ln",
+    ln: "Ln",
+    drive: "Dr",
+    dr: "Dr",
+    court: "Ct",
+    ct: "Ct",
+    place: "Pl",
+    pl: "Pl",
+    way: "Way",
+    circle: "Cir",
+    cir: "Cir",
+    parkway: "Pkwy",
+    pkwy: "Pkwy",
   };
 
   let normalized = address;
   for (const [original, standard] of Object.entries(streetTypeMap)) {
-    const regex = new RegExp(`\\b${original}\\b`, 'gi');
+    const regex = new RegExp(`\\b${original}\\b`, "gi");
     normalized = normalized.replace(regex, standard);
   }
 
@@ -380,19 +396,19 @@ function standardizeStreetTypes(address: string): string {
  */
 function standardizeDirections(address: string): string {
   const directionMap: Record<string, string> = {
-    'north': 'N',
-    'south': 'S',
-    'east': 'E',
-    'west': 'W',
-    'northeast': 'NE',
-    'northwest': 'NW',
-    'southeast': 'SE',
-    'southwest': 'SW'
+    north: "N",
+    south: "S",
+    east: "E",
+    west: "W",
+    northeast: "NE",
+    northwest: "NW",
+    southeast: "SE",
+    southwest: "SW",
   };
 
   let normalized = address;
   for (const [original, standard] of Object.entries(directionMap)) {
-    const regex = new RegExp(`\\b${original}\\b`, 'gi');
+    const regex = new RegExp(`\\b${original}\\b`, "gi");
     normalized = normalized.replace(regex, standard);
   }
 
@@ -402,14 +418,17 @@ function standardizeDirections(address: string): string {
 /**
  * Applies address format style
  */
-function applyAddressFormatStyle(address: string, style: 'single-line' | 'multi-line' | 'compact'): string {
+function applyAddressFormatStyle(
+  address: string,
+  style: "single-line" | "multi-line" | "compact",
+): string {
   switch (style) {
-    case 'single-line':
-      return address.replace(/\n/g, ', ');
-    case 'multi-line':
-      return address.replace(/, /g, '\n');
-    case 'compact':
-      return address.replace(/\s+/g, ' ').replace(/,\s*/g, ',');
+    case "single-line":
+      return address.replace(/\n/g, ", ");
+    case "multi-line":
+      return address.replace(/, /g, "\n");
+    case "compact":
+      return address.replace(/\s+/g, " ").replace(/,\s*/g, ",");
     default:
       return address;
   }
@@ -418,7 +437,10 @@ function applyAddressFormatStyle(address: string, style: 'single-line' | 'multi-
 /**
  * Applies locale-specific name normalization
  */
-function applyLocaleSpecificNameNormalization(name: string, locale: string): string {
+function applyLocaleSpecificNameNormalization(
+  name: string,
+  locale: string,
+): string {
   // Placeholder for locale-specific rules
   // Could be expanded with country-specific naming conventions
   return name;
@@ -427,7 +449,10 @@ function applyLocaleSpecificNameNormalization(name: string, locale: string): str
 /**
  * Applies locale-specific address normalization
  */
-function applyLocaleSpecificAddressNormalization(address: string, locale: string): string {
+function applyLocaleSpecificAddressNormalization(
+  address: string,
+  locale: string,
+): string {
   // Placeholder for locale-specific rules
   // Could be expanded with country-specific address formats
   return address;
@@ -438,12 +463,12 @@ function applyLocaleSpecificAddressNormalization(address: string, locale: string
  */
 export function createNormalizationOptionsFromLocale(
   type: PIIType,
-  locale: LocaleContext
+  locale: LocaleContext,
 ): NormalizationOptions {
   const baseOptions: NormalizationOptions = {
     locale: locale.country,
     preserveCase: false,
-    removeDiacritics: false
+    removeDiacritics: false,
   };
 
   switch (type) {
@@ -451,31 +476,31 @@ export function createNormalizationOptionsFromLocale(
       return {
         ...baseOptions,
         defaultCountry: locale.country.toUpperCase() as CountryCode,
-        outputFormat: 'E.164'
+        outputFormat: "E.164",
       } as PhoneNormalizationOptions;
-    
+
     case PIIType.Email:
       return {
         ...baseOptions,
         lowercase: true,
         removeDots: false,
-        removeSubaddress: false
+        removeSubaddress: false,
       } as EmailNormalizationOptions;
-    
+
     case PIIType.Name:
       return {
         ...baseOptions,
         titleCase: true,
-        removeExtraSpaces: true
+        removeExtraSpaces: true,
       } as NameNormalizationOptions;
-    
+
     case PIIType.Address:
       return {
         ...baseOptions,
         standardizeStreetTypes: true,
-        formatStyle: 'multi-line'
+        formatStyle: "multi-line",
       } as AddressNormalizationOptions;
-    
+
     default:
       return baseOptions;
   }
