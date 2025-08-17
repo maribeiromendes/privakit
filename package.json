@@ -23,6 +23,7 @@
     "test:simple": "node test-simple.js",
     "lint": "eslint src --ext .ts,.tsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "lint:sarif": "eslint src --ext .ts,.tsx --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif",
     "format": "prettier --write src/**/*.ts docs/**/*.md *.md",
     "format:check": "prettier --check src/**/*.ts docs/**/*.md *.md",
     "typecheck": "tsc --noEmit",
@@ -54,22 +55,23 @@
     "brazil",
     "compliance"
   ],
-  "author": "Your Name",
+  "author": "maribeiromendes",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/privakit.git"
+    "url": "https://github.com/maribeiromendes/privakit.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/privakit/issues"
+    "url": "https://github.com/maribeiromendes/privakit/issues"
   },
-  "homepage": "https://github.com/yourusername/privakit#readme",
+  "homepage": "https://github.com/maribeiromendes/privakit#readme",
   "dependencies": {
     "compromise": "^14.14.4",
     "libphonenumber-js": "^1.11.19",
     "validator": "^13.12.0"
   },
   "devDependencies": {
+    "@microsoft/eslint-formatter-sarif": "^3.1.0",
     "@types/node": "^20.11.17",
     "@types/validator": "^13.11.9",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
