@@ -133,10 +133,13 @@ jobs:
 
       - name: Verify build output
         run: |
-          echo "Checking dist directory..."
+          echo "Listing contents of dist directory..."
           ls -la dist/
-          echo "Checking package.json exports..."
-          node -e "console.log(Object.keys(require('./package.json')))"
+          echo "Checking for dist/index.js..."
+          if [ ! -f dist/index.js ]; then
+            echo "Error: dist/index.js not found!";
+            exit 1;
+          fi
 
       - name: Create package tarball
         run: npm pack

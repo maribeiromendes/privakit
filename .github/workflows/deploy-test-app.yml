@@ -55,6 +55,18 @@ jobs:
           echo "Verifying tarball integrity for $PACKAGE_FILE..."
           tar -tzf "$PACKAGE_FILE" || (echo "Tarball integrity check failed!" && exit 1)
 
+      - name: Check tarball checksum
+        run: |
+          PACKAGE_FILE=$(ls privakit-*.tgz | head -1)
+          echo "Calculating checksum for $PACKAGE_FILE..."
+          CHECKSUM=$(sha512sum "$PACKAGE_FILE" | awk '{print $1}')
+          echo "Checksum: $CHECKSUM"
+          EXPECTED_CHECKSUM="sha512-+DUyelg9+8pUGq0wEX1c+f55fDckyzkFrwzvWSwgpMNyVVuQYWPGicnzqyZqRokI6AuKcC7tZto7+aCrryzRpQ=="
+          if [ "$CHECKSUM" != "$EXPECTED_CHECKSUM" ]; then
+            echo "Error: Checksum mismatch! Expected $EXPECTED_CHECKSUM but got $CHECKSUM.";
+            exit 1;
+          fi
+
       - name: Setup test app dependencies
         run: |
           cd dev-scripts/test-app
