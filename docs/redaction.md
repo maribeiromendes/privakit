@@ -97,66 +97,55 @@ console.log(excludeNames.redacted);
 // Output: "John Doe's email is [REDACTED], phone: [REDACTED]"
 ```
 
-## 🔍 Targeted Redaction by Type
+## 🔍 Comprehensive PII Redaction
 
-### Email Redaction
+### Universal Redaction with `redactText`
+
+The `redactText` function automatically detects and redacts all types of PII:
 
 ```typescript
-import { redactEmails } from 'privakit';
+import { redactText } from 'privakit';
 
-const text = "Send reports to admin@company.com and backup@company.com";
-const result = redactEmails(text);
+// Redacts emails, phones, names, addresses, credit cards, etc.
+const text = "Contact John Doe at john@example.com, call 555-123-4567, or mail to 123 Main St";
+const result = redactText(text);
 
 console.log(result.redacted);
-// Output: "Send reports to [REDACTED] and [REDACTED]"
+// Output: "Contact [REDACTED] at [REDACTED], call [REDACTED], or mail to [REDACTED]"
 
-console.log(result.redactedEmails);
-// Output: ["admin@company.com", "backup@company.com"]
+console.log(result.redactionCount); // Number of items redacted
+console.log(result.redactedSpans);  // Details of what was redacted
 ```
 
-### Phone Number Redaction
+### Custom Replacement Text
 
 ```typescript
-import { redactPhones } from 'privakit';
+import { redactText } from 'privakit';
 
-const text = "Call 555-123-4567 or international +44 20 7946 0958";
-const result = redactPhones(text, {
-  replacement: '[PHONE_REMOVED]'
+// Custom replacement for different PII types
+const text = "Call 555-123-4567 or email user@example.com";
+const result = redactText(text, {
+  replacement: '[REMOVED]'
 });
 
 console.log(result.redacted);
-// Output: "Call [PHONE_REMOVED] or international [PHONE_REMOVED]"
+// Output: "Call [REMOVED] or email [REMOVED]"
 ```
 
-### Credit Card Redaction
+### Detection-Based Redaction
 
 ```typescript
-import { redactCreditCards } from 'privakit';
+import { detectPII, redactFromDetection } from 'privakit';
 
-// Complete removal for PCI compliance
+// First detect, then redact with custom options
 const text = "Payment failed for card 4111-1111-1111-1111";
-const result = redactCreditCards(text, {
-  replacement: '[CARD_REDACTED]',
-  strict: true  // Remove all card-like patterns
+const detection = detectPII(text);
+const result = redactFromDetection(text, detection, {
+  replacement: '[CARD_REDACTED]'
 });
 
 console.log(result.redacted);
 // Output: "Payment failed for card [CARD_REDACTED]"
-```
-
-### Address Redaction
-
-```typescript
-import { redactAddresses } from 'privakit';
-
-const text = "Ship to 123 Main Street, Anytown, ST 12345";
-const result = redactAddresses(text, {
-  partial: true,  // Allow partial redaction
-  preserveCity: true  // Keep city names
-});
-
-console.log(result.redacted);
-// Output: "Ship to [REDACTED], Anytown, [REDACTED]"
 ```
 
 ## 🏢 Enterprise-Grade Redaction
@@ -164,7 +153,7 @@ console.log(result.redacted);
 ### Batch Document Processing
 
 ```typescript
-import { redactDocuments } from 'privakit';
+import { redactMultiple } from 'privakit';
 
 const documents = [
   "Invoice for john@company.com - $1,234.56",
@@ -172,14 +161,13 @@ const documents = [
   "Meeting notes: call Mary at 555-987-6543"
 ];
 
-const results = redactDocuments(documents, {
-  replacement: '[REDACTED]',
-  includeMetadata: true
+const results = redactMultiple(documents, {
+  replacement: '[REDACTED]'
 });
 
 results.forEach((result, index) => {
   console.log(`Document ${index + 1}: ${result.redacted}`);
-  console.log(`PII found: ${result.metadata.piiCount}`);
+  console.log(`PII found: ${result.redactionCount}`);
 });
 ```
 

@@ -65,8 +65,8 @@ Privakit is designed with **privacy by design** principles:
 ## 📞 Support
 
 - 📖 **Documentation**: You're reading it!
-- 🐛 **Issues**: [GitHub Issues](https://github.com/yourusername/privakit/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/yourusername/privakit/discussions)
+- 🐛 **Issues**: [GitHub Issues](https://github.com/maribeiromendes/privakit/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/maribeiromendes/privakit/discussions)
 - 📧 **Email**: For sensitive security issues
 
 ---

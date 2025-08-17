@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "TypeScript/JavaScript library for handling Personally Identifiable Information (PII) with validation, normalization, masking, redaction, and anonymization capabilities",
   "main": "dist/index.js",
-  "module": "dist/index.esm.js",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "files": [
     "dist",
@@ -28,7 +28,8 @@
     "typecheck": "tsc --noEmit",
     "verify-package": "node scripts/verify-package.js",
     "prepack": "npm run build",
-    "prepublishOnly": "npm run test:run && npm run verify-package && npm audit --audit-level=moderate"
+    "prepublishOnly": "npm run test:run && npm run verify-package && npm audit --audit-level=moderate",
+    "dev:test-app": "node dev-scripts/package-and-install.js && cd dev-scripts/test-app && npm run dev"
   },
   "keywords": [
     "pii",
@@ -94,19 +95,19 @@
   "sideEffects": false,
   "exports": {
     ".": {
-      "import": "./dist/index.esm.js",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
     },
     "./locales/*": {
+      "types": "./dist/locales/*.d.ts",
       "import": "./dist/locales/*.esm.js",
-      "require": "./dist/locales/*.js",
-      "types": "./dist/locales/*.d.ts"
+      "require": "./dist/locales/*.js"
     },
     "./adapters/*": {
+      "types": "./dist/adapters/*.d.ts",
       "import": "./dist/adapters/*.esm.js",
-      "require": "./dist/adapters/*.js",
-      "types": "./dist/adapters/*.d.ts"
+      "require": "./dist/adapters/*.js"
     }
   }
 }

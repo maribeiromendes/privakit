@@ -363,4 +363,4 @@ Now that Privakit is installed and configured:
 
 ---
 
-**Having issues?** Check our [troubleshooting guide](./troubleshooting.md) or [open an issue](https://github.com/yourusername/privakit/issues).
+**Having issues?** Please [open an issue](https://github.com/maribeiromendes/privakit/issues) for support.

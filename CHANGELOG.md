@@ -121,8 +121,8 @@ We use [Semantic Versioning](https://semver.org/):
 - [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - [Privakit Documentation](./docs/README.md)
-- [Contributing Guidelines](./CONTRIBUTING.md)
+- [GitHub Repository](https://github.com/maribeiromendes/privakit)
 
 ---
 
-**Note**: This changelog is automatically updated through our CI/CD pipeline and manual curation. For the most up-to-date changes, check the [GitHub releases](https://github.com/yourusername/privakit/releases) page.
+**Note**: This changelog is automatically updated through our CI/CD pipeline and manual curation. For the most up-to-date changes, check the [GitHub releases](https://github.com/maribeiromendes/privakit/releases) page.

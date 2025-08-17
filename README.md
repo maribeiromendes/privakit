@@ -30,7 +30,22 @@ Privakit provides enterprise-grade tools for **detecting**, **validating**, **ma
 ### Basic Usage
 
 ```typescript
-import { detectPII, maskPII, createPolicyEngine } from 'privakit';// Detect PII in textconst text = "Contact John Doe at john@example.com or call (555) 123-4567";const detection = detectPII(text);console.log(detection.hasPII);           // trueconsole.log(detection.detectedTypes);    // ['name', 'email', 'phone']// Apply safe masking for displayconst maskedEmail = maskPII('john@example.com', 'email');console.log(maskedEmail.masked);         // "j***@example.com"// GDPR-compliant policy enforcementconst gdprEngine = createPolicyEngine('gdpr');const decision = gdprEngine.evaluate('email', 'log');console.log(decision.allowed);           // false (protects by default)
+import { detectPII, maskPII, createPolicyEngine } from 'privakit';
+
+// Detect PII in text
+const text = "Contact John Doe at john@example.com or call (555) 123-4567";
+const detection = detectPII(text);
+console.log(detection.hasPII);           // true
+console.log(detection.detectedTypes);    // ['name', 'email', 'phone']
+
+// Apply safe masking for display
+const maskedEmail = maskPII('john@example.com', 'email');
+console.log(maskedEmail.masked);         // "j***@example.com"
+
+// GDPR-compliant policy enforcement
+const gdprEngine = createPolicyEngine('gdpr');
+const decision = gdprEngine.evaluate('email', 'log');
+console.log(decision.allowed);           // false (protects by default)
 ```
 
 ## 🏗️ What is PII and Why It Matters
@@ -257,17 +272,114 @@ import { createRedactionMiddleware } from 'privakit';app.use(createRedactionMidd
 -   **Fast processing**: Optimized regex and NLP pipelines
 
 ```typescript
-// Minimal import for bundle optimizationimport { validateEmail } from 'privakit/validate/email';import { maskEmail } from 'privakit/mask';// Only email validation and masking included in bundle
+// Minimal import for bundle optimization
+import { validateEmail } from 'privakit/validate/email';
+import { maskEmail } from 'privakit/mask';
+// Only email validation and masking included in bundle
+```
+
+## 🧪 Interactive Test App
+
+Experience privakit in action with our comprehensive test application! The test app provides a visual interface to explore all privakit features.
+
+### 🌐 Try It Online
+**[Live Demo →](https://maribeiromendes.github.io/privakit/)** *(Auto-deployed from main branch)*
+
+### 🚀 Run Locally
+```bash
+# Clone the repository
+git clone https://github.com/maribeiromendes/privakit.git
+cd privakit
+
+# Install dependencies
+npm install
+
+# Start the test app (builds and runs privakit + Vue test interface)
+npm run dev:test-app
+```
+
+The test app will be available at `http://localhost:5175`
+
+### ✨ Test App Features
+
+**🧪 Interactive Testing Sections:**
+- **📧 Validation & Normalization** - Test email, phone, name validation with real-time feedback
+- **🔍 PII Detection** - Analyze text for personal information with confidence scoring
+- **🎭 Masking & Redaction** - Compare display-safe masking vs secure redaction
+- **⚖️ Policy Engine** - Test GDPR/CCPA compliance with strict/permissive modes
+- **🌍 Locales** - International validation testing (phone validation via libphonenumber-js)
+- **⚖️ Compliance Engines** - Test against 6 major privacy regulations with official law links
+- **🔄 Complete Pipeline** - End-to-end PII processing demonstration
+- **💡 Examples** - Real-world use case scenarios
+
+**📖 Built-in Documentation:**
+- Step-by-step usage guides for each feature
+- Live links to official privacy regulation texts
+- Implementation status transparency
+- Pro tips and examples
+
+### 🛠️ Current Implementation Status
+
+**✅ Fully Implemented:**
+- **PII Detection** - 17+ PII types with NLP and pattern matching
+- **Phone Validation** - International support via libphonenumber-js (US, BR, CA, GB, DE, and more)
+- **Email Validation** - Comprehensive validation with domain analysis
+- **Name Validation** - Person name detection and normalization
+- **Address Validation** - Basic address parsing and validation
+- **Masking & Redaction** - Display-safe masking vs secure redaction
+- **Policy Engine** - GDPR/CCPA compliance automation
+- **Compliance Testing** - Multi-regulation validation (GDPR, LGPD, HIPAA, CCPA, PIPEDA, Privacy Act)
+
+**🚧 In Development:**
+- **Full Locale Support** - Country-specific validation rules (currently `/src/locales/` folders are placeholders)
+- **Advanced Address Validation** - Region-specific address formats
+- **Cultural Name Patterns** - Locale-aware name validation beyond basic patterns
+
+**📋 Planned:**
+- **Biometric Data Detection** - Advanced pattern recognition
+- **Real-time Streaming** - Processing live data streams
+- **Advanced Anonymization** - k-anonymity and differential privacy
+
+### 🤝 Help Us Improve
+
+**🌟 We need your help to make privakit better!**
+
+**📱 Test the App:**
+- Try the test app and report any issues
+- Test with real-world data from your use cases
+- Suggest new features or improvements
+
+**🌍 Deploy the Demo:**
+- Help us deploy the test app to Vercel, Netlify, or other platforms
+- Share the live demo with your team
+- Contribute deployment configurations
+
+**💻 Contribute Code:**
+- Implement locale-specific validation rules
+- Add new PII detection patterns
+- Improve compliance engine accuracy
+- Enhance documentation
+
+**🔗 Get Started Contributing:**
+```bash
+# Run the test app locally
+npm run dev:test-app
+
+# Run the test suite
+npm test
+
+# Check specific functionality
+node dev-scripts/validation/test-privacy.js
 ```
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](./CONTRIBUTING.md) for details.
+We welcome contributions! Please [open an issue](https://github.com/maribeiromendes/privakit/issues) or submit a pull request.
 
 ### Development
 
 ```bash
-git clone https://github.com/yourusername/privakit.git
+git clone https://github.com/maribeiromendes/privakit.git
 cd privakit
 npm install
 npm run dev     # Start development mode
@@ -304,33 +416,13 @@ MIT License - see [LICENSE](./LICENSE) file for details.
 
 ## 🔒 Security
 
-For security issues, please report them privately via the [GitHub security tab](https://github.com/yourusername/privakit/security/advisories).
+For security issues, please report them privately via the [GitHub security tab](https://github.com/maribeiromendes/privakit/security/advisories).
 
-## SonarCloud Badges
+## 📊 Code Quality & Metrics
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=maribeiromendes_privakit&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=maribeiromendes_privakit)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=maribeiromendes_privakit&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=maribeiromendes_privakit) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=maribeiromendes_privakit&metric=coverage)](https://sonarcloud.io/summary/new_code?id=maribeiromendes_privakit) [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=maribeiromendes_privakit&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=maribeiromendes_privakit) [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=maribeiromendes_privakit&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=maribeiromendes_privakit)
 
-[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=maribeiromendes_privakit&metric=bugs)](https://sonarcloud.io/summary/new_code?id=maribeiromendes_privakit)
-
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=maribeiromendes_privakit&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=maribeiromendes_privakit)
-
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=maribeiromendes_privakit&metric=coverage)](https://sonarcloud.io/summary/new_code?id=maribeiromendes_privakit)
-
-[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=maribeiromendes_privakit&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=maribeiromendes_privakit)
-
-[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=maribeiromendes_privakit&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=maribeiromendes_privakit)
-
-[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=maribeiromendes_privakit&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=maribeiromendes_privakit)
-
-[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=maribeiromendes_privakit&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=maribeiromendes_privakit)
-
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=maribeiromendes_privakit&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=maribeiromendes_privakit)
-
-## 🌟 Sponsors
-
-Privakit development is supported by organizations who prioritize privacy:
-
--   [Your Company Here] - Supporting privacy-first development
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=maribeiromendes_privakit&metric=bugs)](https://sonarcloud.io/summary/new_code?id=maribeiromendes_privakit) [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=maribeiromendes_privakit&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=maribeiromendes_privakit) [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=maribeiromendes_privakit&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=maribeiromendes_privakit) [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=maribeiromendes_privakit&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=maribeiromendes_privakit)
 
 ---
 

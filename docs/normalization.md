@@ -7,7 +7,7 @@ The Normalization module standardizes PII data formats across different locales,
 ### Why Normalize PII?
 
 ```typescript
-import { normalizeEmail, normalizePhone } from 'privakit';
+import { normalizeEmailAddress, normalizePhoneNumber } from 'privakit';
 
 // Different input formats for the same data
 const emailVariations = [
@@ -19,7 +19,7 @@ const emailVariations = [
 
 // All normalize to the same format
 emailVariations.forEach(email => {
-  console.log(normalizeEmail(email).normalized);
+  console.log(normalizeEmailAddress(email).normalized);
   // All output: "user@example.com"
 });
 
@@ -34,7 +34,7 @@ const phoneVariations = [
 
 // All normalize to E.164 format
 phoneVariations.forEach(phone => {
-  console.log(normalizePhone(phone, 'US').e164);
+  console.log(normalizePhoneNumber(phone, 'US').e164);
   // All output: "+15551234567"
 });
 ```
@@ -53,10 +53,10 @@ phoneVariations.forEach(phone => {
 ### Basic Email Normalization
 
 ```typescript
-import { normalizeEmail } from 'privakit';
+import { normalizeEmailAddress } from 'privakit';
 
 // Standard normalization
-const result = normalizeEmail('USER@EXAMPLE.COM');
+const result = normalizeEmailAddress('USER@EXAMPLE.COM');
 console.log(result.normalized);     // "user@example.com"
 console.log(result.isValid);        // true
 console.log(result.domain);         // "example.com"
@@ -77,7 +77,7 @@ const options: EmailNormalizationOptions = {
   punycodeDomains: true        // Handle international domains
 };
 
-const result = normalizeEmail('User+Tag@Example.COM', options);
+const result = normalizeEmailAddress('User+Tag@Example.COM', options);
 console.log(result.normalized);      // "user+tag@example.com"
 console.log(result.hasSubaddress);   // true
 console.log(result.subaddress);      // "tag"
@@ -88,7 +88,7 @@ console.log(result.subaddress);      // "tag"
 ```typescript
 // Handle Gmail's special rules
 function normalizeGmail(email: string) {
-  const result = normalizeEmail(email, {
+  const result = normalizeEmailAddress(email, {
     removeDots: true,           // Gmail ignores dots
     removeSubaddressing: true,  // Remove everything after +
     lowercase: true
@@ -114,7 +114,7 @@ console.log(normalizeGmail('User.Name+label@gmail.com'));
 ```typescript
 // Handle corporate email policies
 function normalizeCorporateEmail(email: string, domain: string) {
-  const result = normalizeEmail(email);
+  const result = normalizeEmailAddress(email);
   
   if (result.domain === domain) {
     return {
@@ -150,7 +150,7 @@ const internationalEmails = [
 ];
 
 internationalEmails.forEach(email => {
-  const result = normalizeEmail(email, {
+  const result = normalizeEmailAddress(email, {
     punycodeDomains: true,    // Convert to ASCII
     unicodeNormalization: true // Normalize Unicode characters
   });
@@ -166,10 +166,10 @@ internationalEmails.forEach(email => {
 ### Basic Phone Normalization
 
 ```typescript
-import { normalizePhone } from 'privakit';
+import { normalizePhoneNumber } from 'privakit';
 
 // US phone number
-const result = normalizePhone('(555) 123-4567', 'US');
+const result = normalizePhoneNumber('(555) 123-4567', 'US');
 console.log(result.e164);           // "+15551234567"
 console.log(result.national);       // "(555) 123-4567"
 console.log(result.international);  // "+1 555 123 4567"
@@ -191,7 +191,7 @@ const phoneNumbers = [
 ];
 
 phoneNumbers.forEach(({ number, country }) => {
-  const result = normalizePhone(number, country);
+  const result = normalizePhoneNumber(number, country);
   console.log(`${country}: ${result.e164} (${result.type})`);
 });
 ```
@@ -201,7 +201,7 @@ phoneNumbers.forEach(({ number, country }) => {
 ```typescript
 // Detect and normalize by phone type
 function normalizeByType(phone: string, country: string) {
-  const result = normalizePhone(phone, country);
+  const result = normalizePhoneNumber(phone, country);
   
   return {
     ...result,
@@ -233,7 +233,7 @@ function categorizePhone(type: string): string {
 ```typescript
 // Different normalization strategies for mobile vs landline
 function normalizePhoneByUsage(phone: string, country: string, usage: 'sms' | 'voice' | 'both') {
-  const result = normalizePhone(phone, country);
+  const result = normalizePhoneNumber(phone, country);
   
   if (usage === 'sms' && result.type !== 'MOBILE') {
     return {
@@ -264,7 +264,7 @@ function normalizePhoneByUsage(phone: string, country: string, usage: 'sms' | 'v
 ```typescript
 // Format phones according to regional preferences
 function formatForRegion(phone: string, inputCountry: string, displayCountry: string) {
-  const normalized = normalizePhone(phone, inputCountry);
+  const normalized = normalizePhoneNumber(phone, inputCountry);
   
   if (inputCountry === displayCountry) {
     // Same country - use national format
@@ -294,10 +294,10 @@ console.log(formatForRegion('555-123-4567', 'US', 'GB'));
 ### Basic Name Normalization
 
 ```typescript
-import { normalizeName } from 'privakit';
+import { normalizePersonName } from 'privakit';
 
 // Standard name normalization
-const result = normalizeName('  JOHN   DOE  ');
+const result = normalizePersonName('  JOHN   DOE  ');
 console.log(result.normalized);     // "John Doe"
 console.log(result.firstName);      // "John"
 console.log(result.lastName);       // "Doe"
@@ -318,7 +318,7 @@ const options: NameNormalizationOptions = {
   culturalNames: 'western'      // Name format style
 };
 
-const result = normalizeName('DR. JEAN-PIERRE VAN DER BERG III', options);
+const result = normalizePersonName('DR. JEAN-PIERRE VAN DER BERG III', options);
 console.log(result.title);          // "Dr."
 console.log(result.firstName);      // "Jean-Pierre"  
 console.log(result.middleName);     // "Van Der"
@@ -334,7 +334,7 @@ console.log(result.fullName);       // "Dr. Jean-Pierre Van Der Berg III"
 function normalizeByCulture(name: string, culture: 'western' | 'eastern' | 'spanish' | 'arabic') {
   switch (culture) {
     case 'western':
-      return normalizeName(name, {
+      return normalizePersonName(name, {
         titleCase: true,
         order: 'first-last',
         handleMiddleNames: true
@@ -342,7 +342,7 @@ function normalizeByCulture(name: string, culture: 'western' | 'eastern' | 'span
     
     case 'eastern':
       // Many Asian cultures: Family name first
-      return normalizeName(name, {
+      return normalizePersonName(name, {
         titleCase: true,
         order: 'family-given',
         preserveOrder: true
@@ -350,7 +350,7 @@ function normalizeByCulture(name: string, culture: 'western' | 'eastern' | 'span
     
     case 'spanish':
       // Spanish: Two surnames common
-      return normalizeName(name, {
+      return normalizePersonName(name, {
         titleCase: true,
         multipleSurnames: true,
         maternalSurname: true
@@ -358,7 +358,7 @@ function normalizeByCulture(name: string, culture: 'western' | 'eastern' | 'span
     
     case 'arabic':
       // Arabic: Patronymic naming
-      return normalizeName(name, {
+      return normalizePersonName(name, {
         titleCase: true,
         handlePatronymic: true,
         preserveArabicScript: true
@@ -381,7 +381,7 @@ function normalizeNameByType(name: string, type: 'personal' | 'business') {
     };
   }
   
-  const result = normalizeName(name, {
+  const result = normalizePersonName(name, {
     titleCase: true,
     removeExtraSpaces: true
   });
@@ -412,7 +412,7 @@ function detectBusinessIndicators(name: string): string[] {
 ```typescript
 // Normalize names for comparison and deduplication
 function normalizeForMatching(name: string) {
-  const result = normalizeName(name, {
+  const result = normalizePersonName(name, {
     titleCase: false,         // Lowercase for comparison
     removeExtraSpaces: true,
     removePunctuation: true,  // Remove apostrophes, hyphens
@@ -619,9 +619,9 @@ async function normalizeUserData(userTable: string) {
   const updates = [];
   
   for (const user of users) {
-    const normalizedEmail = normalizeEmail(user.email);
-    const normalizedPhone = normalizePhone(user.phone, 'US');
-    const normalizedName = normalizeName(user.name);
+    const normalizedEmail = normalizeEmailAddress(user.email);
+    const normalizedPhone = normalizePhoneNumber(user.phone, 'US');
+    const normalizedName = normalizePersonName(user.name);
     
     // Only update if normalization changed the data
     if (normalizedEmail.normalized !== user.email ||
@@ -663,9 +663,9 @@ async function deduplicateUsers() {
   
   users.forEach(user => {
     // Create a composite key from normalized data
-    const normalizedEmail = normalizeEmail(user.email).normalized;
-    const normalizedPhone = normalizePhone(user.phone, 'US').e164;
-    const normalizedName = normalizeName(user.name).normalized;
+    const normalizedEmail = normalizeEmailAddress(user.email).normalized;
+    const normalizedPhone = normalizePhoneNumber(user.phone, 'US').e164;
+    const normalizedName = normalizePersonName(user.name).normalized;
     
     const key = `${normalizedEmail}|${normalizedPhone}|${normalizedName}`;
     
@@ -700,16 +700,16 @@ function normalizeForLocale(data: any, locale: string) {
   const [language, country] = locale.split('-');
   
   return {
-    email: normalizeEmail(data.email, {
+    email: normalizeEmailAddress(data.email, {
       lowercase: true,
       validateDomain: true
     }),
     
-    phone: normalizePhone(data.phone, country, {
+    phone: normalizePhoneNumber(data.phone, country, {
       format: getPreferredPhoneFormat(country)
     }),
     
-    name: normalizeName(data.name, {
+    name: normalizePersonName(data.name, {
       titleCase: true,
       culturalNames: getCulturalNameStyle(country)
     }),
@@ -796,7 +796,7 @@ const normalizer = new CustomNormalizer();
 
 // Add custom email rule for specific domain
 normalizer.addRule('corporate_email', (email: string) => {
-  const result = normalizeEmail(email, {
+  const result = normalizeEmailAddress(email, {
     lowercase: true,
     removeSubaddressing: true  // Company policy: no subaddressing
   });
@@ -832,9 +832,9 @@ class NormalizationPipeline {
 
 // Usage
 const pipeline = new NormalizationPipeline()
-  .addStep(data => ({ ...data, email: normalizeEmail(data.email).normalized }))
-  .addStep(data => ({ ...data, phone: normalizePhone(data.phone, 'US').e164 }))
-  .addStep(data => ({ ...data, name: normalizeName(data.name).normalized }))
+  .addStep(data => ({ ...data, email: normalizeEmailAddress(data.email).normalized }))
+  .addStep(data => ({ ...data, phone: normalizePhoneNumber(data.phone, 'US').e164 }))
+  .addStep(data => ({ ...data, name: normalizePersonName(data.name).normalized }))
   .addStep(data => validateNormalizedData(data));
 
 const result = pipeline.process({
@@ -860,21 +860,21 @@ function smartNormalize(userData: any, context: string) {
       result.email = normalizeGmail(userData.email).canonical;
     } else if (isBusinessDomain(emailDomain)) {
       // Business email normalization
-      result.email = normalizeEmail(userData.email, {
+      result.email = normalizeEmailAddress(userData.email, {
         removeSubaddressing: false  // Keep business subaddressing
       }).normalized;
     } else {
       // Standard normalization
-      result.email = normalizeEmail(userData.email).normalized;
+      result.email = normalizeEmailAddress(userData.email).normalized;
     }
   }
   
   // Context-specific phone normalization
   if (userData.phone) {
     if (context === 'international') {
-      result.phone = normalizePhone(userData.phone, userData.country || 'US').international;
+      result.phone = normalizePhoneNumber(userData.phone, userData.country || 'US').international;
     } else {
-      result.phone = normalizePhone(userData.phone, userData.country || 'US').national;
+      result.phone = normalizePhoneNumber(userData.phone, userData.country || 'US').national;
     }
   }
   
@@ -897,10 +897,10 @@ async function normalizeCRMContacts() {
     try {
       const normalized = {
         id: contact.id,
-        firstName: normalizeName(contact.firstName).firstName,
-        lastName: normalizeName(contact.lastName).lastName,
-        email: normalizeEmail(contact.email).normalized,
-        phone: normalizePhone(contact.phone, contact.country || 'US').e164,
+        firstName: normalizePersonName(contact.firstName).firstName,
+        lastName: normalizePersonName(contact.lastName).lastName,
+        email: normalizeEmailAddress(contact.email).normalized,
+        phone: normalizePhoneNumber(contact.phone, contact.country || 'US').e164,
         address: normalizeAddress(contact.address, { country: contact.country }).normalized,
         
         // Metadata
@@ -947,9 +947,9 @@ function normalizeCustomerData(customer: any) {
     customerId: customer.id,
     
     // Contact information
-    name: normalizeName(customer.name).normalized,
-    email: normalizeEmail(customer.email).normalized,
-    phone: normalizePhone(customer.phone, customer.country).e164,
+    name: normalizePersonName(customer.name).normalized,
+    email: normalizeEmailAddress(customer.email).normalized,
+    phone: normalizePhoneNumber(customer.phone, customer.country).e164,
     
     // Addresses
     billingAddress: billingAddress.normalized,
@@ -958,8 +958,8 @@ function normalizeCustomerData(customer: any) {
     
     // Validation
     isValidCustomer: billingAddress.isValid && 
-                    normalizeEmail(customer.email).isValid &&
-                    normalizePhone(customer.phone, customer.country).isValid,
+                    normalizeEmailAddress(customer.email).isValid &&
+                    normalizePhoneNumber(customer.phone, customer.country).isValid,
     
     // Preferences (preserved for targeting)
     country: customer.country,
@@ -980,9 +980,9 @@ function normalizeMarketingList(subscribers: any[]) {
   
   subscribers.forEach(subscriber => {
     try {
-      const emailResult = normalizeEmail(subscriber.email);
+      const emailResult = normalizeEmailAddress(subscriber.email);
       const phoneResult = subscriber.phone ? 
-        normalizePhone(subscriber.phone, subscriber.country || 'US') : null;
+        normalizePhoneNumber(subscriber.phone, subscriber.country || 'US') : null;
       
       if (!emailResult.isValid) {
         invalid.push({ ...subscriber, reason: 'invalid_email' });
@@ -1002,7 +1002,7 @@ function normalizeMarketingList(subscribers: any[]) {
       normalized.push({
         email: emailResult.normalized,
         phone: phoneResult?.e164,
-        name: normalizeName(subscriber.name || '').normalized,
+        name: normalizePersonName(subscriber.name || '').normalized,
         country: subscriber.country || 'US',
         subscribeDate: subscriber.subscribeDate,
         preferences: subscriber.preferences,

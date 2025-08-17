@@ -50,13 +50,13 @@ console.log(isDisposableEmail('temp@guerrillamail.com')); // true
 ### Email Normalization
 
 ```typescript
-import { normalizeEmail } from 'privakit';
+import { normalizeEmailAddress } from 'privakit';
 
 // Basic normalization (lowercase)
-console.log(normalizeEmail('USER@EXAMPLE.COM')); // "user@example.com"
+console.log(normalizeEmailAddress('USER@EXAMPLE.COM')); // "user@example.com"
 
 // Provider-specific normalization
-console.log(normalizeEmail('user.name+tag@gmail.com'));
+console.log(normalizeEmailAddress('user.name+tag@gmail.com'));
 // Result varies based on provider rules
 ```
 
@@ -158,10 +158,10 @@ console.log(isMobilePhone('+1-555-123-4567')); // true
 ### Phone Normalization
 
 ```typescript
-import { normalizePhone, formatPhone } from 'privakit';
+import { normalizePhoneNumber, formatPhone } from 'privakit';
 
 // Normalize to E.164 format
-console.log(normalizePhone('(555) 123-4567', 'US')); // "+15551234567"
+console.log(normalizePhoneNumber('(555) 123-4567', 'US')); // "+15551234567"
 
 // Format for display
 console.log(formatPhone('+15551234567', 'NATIONAL')); // "(555) 123-4567"
@@ -242,7 +242,7 @@ console.log(isLikelyPersonName('Jane Smith')); // true
 ### Name Normalization
 
 ```typescript
-import { normalizeNameCapitalization, createFullName } from 'privakit';
+import { normalizePersonName, normalizeNameCapitalization, createFullName } from 'privakit';
 
 // Fix capitalization
 console.log(normalizeNameCapitalization('john doe')); // "John Doe"
@@ -556,7 +556,7 @@ if (!formatCheck.isValid) {
 }
 
 // 2. Normalization
-const normalized = normalizeEmail(email);
+const normalized = normalizeEmailAddress(email);
 
 // 3. Business rule validation  
 const businessCheck = validateEmail(normalized, {

@@ -408,7 +408,7 @@ Now that you've got the basics down:
 2. 🔍 **Learn Detection**: Master [PII Detection](./detection.md)
 3. 🎭 **Explore Masking**: Advanced [Masking Techniques](./masking.md)
 4. ⚖️ **Policy Engine**: Set up [Compliance Automation](./policy-engine.md)
-5. 🔧 **Integration**: Check [Framework Examples](./examples/frameworks.md)
+5. 🔧 **Integration**: Check [Framework Integration Guide](./framework-integration.md)
 
 ## 💡 Pro Tips
 

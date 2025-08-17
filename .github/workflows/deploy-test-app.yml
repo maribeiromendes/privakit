@@ -1,0 +1,87 @@
+name: Deploy Test App to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+    paths: 
+      - 'dev-scripts/test-app/**'
+      - 'src/**'
+      - 'package.json'
+      - '.github/workflows/deploy-test-app.yml'
+  workflow_dispatch: # Allow manual trigger
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install privakit dependencies
+        run: npm ci
+
+      - name: Build privakit library
+        run: npm run build
+
+      - name: Package privakit for test app
+        run: |
+          # Create a local package
+          npm pack
+          PACKAGE_FILE=$(ls privakit-*.tgz | head -1)
+          echo "PACKAGE_FILE=$PACKAGE_FILE" >> $GITHUB_ENV
+
+      - name: Setup test app dependencies
+        run: |
+          cd dev-scripts/test-app
+          # Update package.json to use the local package
+          sed -i 's|"privakit": "file:../../privakit-[0-9].*\.tgz"|"privakit": "file:../../'$PACKAGE_FILE'"|' package.json
+          npm ci
+
+      - name: Build test app
+        run: |
+          cd dev-scripts/test-app
+          # Set base path for GitHub Pages
+          echo "import { defineConfig } from 'vite'
+          import vue from '@vitejs/plugin-vue'
+          
+          export default defineConfig({
+            plugins: [vue()],
+            base: '/privakit/',
+            build: {
+              outDir: 'dist',
+              sourcemap: false,
+              minify: 'terser'
+            }
+          })" > vite.config.js
+          npm run build
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'dev-scripts/test-app/dist'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
