@@ -141,13 +141,3 @@ vite.config.ts.timestamp-*
 .claude
 .ai
 .qwen
-
-# Development test files (should go in dev-scripts/ folder)
-test-*.js
-test-*.mjs
-check-*.js
-check-*.mjs
-research-*.js
-research-*.mjs
-debug-*.js
-debug-*.mjs
