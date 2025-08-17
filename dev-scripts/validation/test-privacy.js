@@ -1,3 +1,5 @@
+import { detectPII, validateEmail, maskPII, createPolicyEngine, validatePhone, detectPIIMultiple } from '../../dist/index.js';
+
 /**
  * Privacy validation test - ensures no data is sent externally
  */
@@ -28,7 +30,6 @@ try {
 
   // Test 1: Basic imports (should not trigger network calls)
   console.log('✅ Test 1: Safe imports');
-  const { detectPII, validateEmail, maskPII, createPolicyEngine } = require('../../dist/index.js');
   console.log('   ✓ All modules imported safely\n');
 
   // Test 2: Email validation (uses validator.js - should be local only)
@@ -39,7 +40,6 @@ try {
 
   // Test 3: Phone validation (uses libphonenumber-js - should be local only)
   console.log('✅ Test 3: Phone validation');
-  const { validatePhone } = require('../../dist/index.js');
   const phoneResult = validatePhone('+1-555-123-4567');
   console.log('   ✓ Phone validation:', phoneResult.isValid);
   console.log('   ✓ No network calls detected\n');
@@ -73,7 +73,6 @@ try {
     "Phone: 555-1234",
     "No PII here"
   ];
-  const { detectPIIMultiple } = require('../../dist/index.js');
   const results = detectPIIMultiple(texts);
   console.log('   ✓ Batch results:', results.map(r => r.hasPII));
   console.log('   ✓ No network calls detected\n');
