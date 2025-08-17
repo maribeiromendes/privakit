@@ -33,7 +33,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20.19.0'
           cache: 'npm'
 
       - name: Install privakit dependencies
@@ -48,6 +48,12 @@ jobs:
           npm pack
           PACKAGE_FILE=$(ls privakit-*.tgz | head -1)
           echo "PACKAGE_FILE=$PACKAGE_FILE" >> $GITHUB_ENV
+
+      - name: Verify tarball integrity
+        run: |
+          PACKAGE_FILE=$(ls privakit-*.tgz | head -1)
+          echo "Verifying tarball integrity for $PACKAGE_FILE..."
+          tar -tzf "$PACKAGE_FILE" || (echo "Tarball integrity check failed!" && exit 1)
 
       - name: Setup test app dependencies
         run: |

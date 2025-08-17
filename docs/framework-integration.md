@@ -6,7 +6,7 @@ Privakit is designed to work seamlessly across all major JavaScript frameworks a
 
 Privakit supports:
 
-- ✅ **Node.js** (16+) - Server-side applications
+- ✅ **Node.js** (20.19.0+) - Server-side applications
 - ✅ **React** (16.8+) - Web and React Native apps
 - ✅ **Vue.js** (3.0+) - Progressive web applications
 - ✅ **Angular** (12+) - Enterprise applications
@@ -1379,75 +1379,19 @@ const styles = StyleSheet.create({
 });
 ```
 
-## 🖥️ Electron Integration
+## 🛠️ Updated Workflows
 
-```typescript
-// main.ts (Main Process)
-import { app, BrowserWindow, ipcMain } from "electron";
-import { detectPII, redactText, createPolicyEngine } from "privakit";
+### CI/CD Pipeline
 
-const policyEngine = createPolicyEngine("gdpr");
+- **Node.js Version**: Updated to 20.19.0 for compatibility with dependencies.
+- **Tarball Integrity Check**: Added verification step to ensure package integrity.
 
-// Handle PII processing in main process for security
-ipcMain.handle(
-  "process-pii",
-  async (event, text: string, operation: string) => {
-    try {
-      const detection = detectPII(text);
+### Deployment Workflow
 
-      if (!detection.hasPII) {
-        return { safe: text, hasPII: false };
-      }
+- **Node.js Version**: Updated to 20.19.0.
+- **Base Path Configuration**: Adjusted for GitHub Pages compatibility.
 
-      // Apply policy decisions
-      let processedText = text;
-      for (const span of detection.spans) {
-        const decision = policyEngine.evaluate(span.type, operation);
-
-        if (!decision.allowed) {
-          throw new Error(`Operation not allowed: ${decision.reason}`);
-        }
-
-        if (decision.requiresRedaction) {
-          const redacted = redactText(span.text);
-          processedText = processedText.replace(span.text, redacted.redacted);
-        } else if (decision.requiresMasking) {
-          const masked = maskPII(span.text, span.type);
-          processedText = processedText.replace(span.text, masked.masked);
-        }
-      }
-
-      return {
-        safe: processedText,
-        hasPII: true,
-        detection,
-        operation,
-      };
-    } catch (error) {
-      throw new Error(`PII processing failed: ${error.message}`);
-    }
-  },
-);
-
-// renderer.ts (Renderer Process)
-import { ipcRenderer } from "electron";
-
-export class PIIProcessor {
-  static async processText(text: string, operation: string = "display") {
-    try {
-      return await ipcRenderer.invoke("process-pii", text, operation);
-    } catch (error) {
-      console.error("PII processing error:", error);
-      throw error;
-    }
-  }
-}
-
-// Usage in renderer
-const userInput = "Contact john@example.com for more info";
-const result = await PIIProcessor.processText(userInput, "display");
-console.log("Safe text:", result.safe);
-```
+Refer to `.github/workflows/ci.yml` and `.github/workflows/deploy-test-app.yml` for details.
 
 ## 🎯 Framework-Specific Best Practices
 

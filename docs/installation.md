@@ -64,7 +64,7 @@ const { validateEmail, detectPII } = require("privakit");
 
 ### Runtime Requirements
 
-- **Node.js**: 16.0.0 or higher
+- **Node.js**: 20.19.0 or higher
 - **Browser**: ES2020 support (Chrome 80+, Firefox 72+, Safari 13.1+)
 
 ### TypeScript Support
