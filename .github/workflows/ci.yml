@@ -93,7 +93,7 @@ jobs:
         run: npm test
 
       - name: Run privacy compliance tests
-        run: node validation/test-privacy.js
+        run: node dev-scripts/validation/test-privacy.js
 
       - name: Run integration tests
         run: node test-simple.js
