@@ -55,6 +55,9 @@ jobs:
       - name: Install Prettier
         run: npm install --save-dev prettier
 
+      - name: Fix formatting issues with Prettier
+        run: npm run format:fix --if-present
+
       - name: Run Prettier check
         run: npm run format:check --if-present
 
@@ -90,7 +93,7 @@ jobs:
         run: npm test
 
       - name: Run privacy compliance tests
-        run: node test-privacy.js
+        run: node validation/test-privacy.js
 
       - name: Run integration tests
         run: node test-simple.js

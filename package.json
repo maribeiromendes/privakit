@@ -111,5 +111,6 @@
       "import": "./dist/adapters/*.esm.js",
       "require": "./dist/adapters/*.js"
     }
-  }
+  },
+  "type": "module"
 }
