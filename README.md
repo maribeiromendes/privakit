@@ -4,7 +4,9 @@
 
 Privakit provides enterprise-grade tools for **detecting**, **validating**, **masking**, **redacting**, and **managing** personal data in compliance with GDPR, CCPA, and other privacy regulations.
 
-[![SonarQube Cloud](https://sonarcloud.io/images/project_badges/sonarcloud-light.svg)](https://sonarcloud.io/summary/new_code?id=maribeiromendes_privakit) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=maribeiromendes_privakit&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=maribeiromendes_privakit) [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=maribeiromendes_privakit&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=maribeiromendes_privakit)
+[![SonarQube Cloud](https://sonarcloud.io/images/project_badges/sonarcloud-light.svg)](https://sonarcloud.io/summary/new_code?id=maribeiromendes_privakit) 
+
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=maribeiromendes_privakit&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=maribeiromendes_privakit) [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=maribeiromendes_privakit&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=maribeiromendes_privakit)[![CodeQL](https://github.com/maribeiromendes/privakit/actions/workflows/github-code-scanning/codeql/badge.svg?branch=main)](https://github.com/maribeiromendes/privakit/actions/workflows/github-code-scanning/codeql)
 
   
 

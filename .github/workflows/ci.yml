@@ -52,6 +52,9 @@ jobs:
       - name: Run ESLint
         run: npm run lint --if-present
 
+      - name: Install Prettier
+        run: npm install --save-dev prettier
+
       - name: Run Prettier check
         run: npm run format:check --if-present
 
