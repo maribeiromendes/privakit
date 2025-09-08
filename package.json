@@ -68,7 +68,7 @@
   "homepage": "https://github.com/maribeiromendes/privakit#readme",
   "dependencies": {
     "compromise": "^14.14.4",
-    "libphonenumber-js": "^1.11.19",
+    "libphonenumber-js": "^1.12.15",
     "validator": "^13.12.0"
   },
   "devDependencies": {
